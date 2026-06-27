@@ -13,7 +13,6 @@ theme:
     primary: black
     accent: deep orange
   features:
-    - navigation.tabs
     - navigation.sections
     - navigation.expand
     - search.suggest
@@ -24,6 +23,7 @@ extra_css:
   - stylesheets/extra.css
   
 extra_javascript:
+  - javascripts/mobile-nav.js
   - javascripts/mathjax-config.js
   - https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js
 
