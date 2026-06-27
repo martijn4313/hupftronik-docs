@@ -1,0 +1,104 @@
+# Hüpftronik Documentation — Writing Rules
+
+These rules govern how you write and edit documentation pages (Markdown files under `docs/`)
+for the Hüpftronik project. Follow them whenever you create or modify a docs page.
+
+## Project context
+
+Hüpftronik is an open-hardware automotive ECU platform built on STM32 microcontrollers and the
+rusEFI firmware ecosystem. The docs are an MkDocs site. Readers range from complete beginners
+(first time wiring or flashing a board) to experienced engine tuners and embedded developers.
+Every page must serve both ends of that range.
+
+## Audience rule (highest priority)
+
+- Write each page for one clearly imagined reader. Assume **zero prior knowledge of Hüpftronik**,
+  but assume basic general competence (the reader can use a terminal, a multimeter, a screwdriver).
+- Do not re-explain general concepts (what a car or a computer is). Do explain anything specific
+  to this project, to automotive ECUs, or to the task on the page.
+- Never condescend and never assume. When in doubt, define the term or link to the page that does.
+
+## "What and why before how" — required on every page
+
+Before any steps, procedures, or reference tables, open the page with 2–4 sentences covering, in order:
+1. **What** this page / thing is.
+2. **Why** the reader would do it or needs to know it.
+3. **What is about to happen** (a one-line preview of the procedure), if the page is a procedure.
+
+Only then give the steps. Never open a page by jumping straight into step 1 or a command.
+
+Example of the required pattern (a flashing page):
+> Flashing means copying the engine-control firmware onto the board's microcontroller. You do this
+> once before first use, and again when updating firmware. The board cannot run an engine until it
+> has firmware on it. To flash, you put the board into DFU mode with the BOOT0 button, then send the
+> firmware over USB from your computer.
+>
+> ## Steps
+> 1. ...
+
+## Structure
+
+- Exactly one `# H1` per page — it is the page title.
+- Order content by reader need: what they do first comes first; basics at the top, advanced or
+  optional material at the bottom.
+- Keep the section order **parallel across equivalent pages** (e.g. every product's `wiring.md` uses
+  the same section order). Readers learn the layout once and reuse it.
+- One idea per section. If a heading covers two things, split it.
+- Headings must be skimmable: a reader should understand the page from its headings alone.
+
+## Language
+
+- Short sentences, one idea each. Prefer splitting over joining clauses with "and" or commas.
+- Use active voice and direct instructions: "Connect CANH to pin 3," not "CANH should be connected."
+- Define every acronym or domain term on first use, then use the short form: "DFU (Device Firmware
+  Update) mode...".
+- Link the first mention of a cross-cutting concept (CAN, lambda, VE table, etc.) to its explainer page
+  instead of re-explaining it inline.
+- Be concrete: give the actual value, pin, command, or filename — never "the relevant setting."
+- Delete filler and minimizing words: "just," "simply," "basically," "obviously." They make a stuck
+  reader feel stupid.
+
+## Formatting conventions
+
+- Numbered lists for ordered procedures; bullet lists for unordered options.
+- Tables for all reference data (pinouts, specifications, symptom→cause→fix). Never bury a pinout in prose.
+- Code blocks (fenced) for every command, filename, path, or literal value the reader types or looks for.
+- MkDocs admonitions for callouts: `!!! danger` (safety / irreversible), `!!! warning` (caution),
+  `!!! tip` (helpful aside), `!!! note` (status / context). Requires the `admonition` extension.
+- Bold the single key term in a line, not whole sentences.
+- Add one image where words struggle (connector photos, wiring diagrams, button locations) with a caption.
+
+## Safety and honesty
+
+- Place safety callouts **above** the step they apply to, never after.
+- Warn about the irreversible or expensive action (reverse polarity, wrong flash, engine load) exactly
+  where it happens.
+- State feature status honestly. Mark anything experimental, untested, or planned. Never imply something
+  works if it does not.
+
+## Help the reader move
+
+- End any procedure with a pointer to Troubleshooting or an "If it doesn't work" path.
+- End every page with a "Next steps" link — never leave the reader at a dead end.
+- If a page assumes another page was completed first, link that prerequisite at the top.
+
+## Consistency
+
+- Use one term for one thing throughout (pick "output" or "pin" for a given concept, not both).
+- Spell device names exactly and consistently: Motorsteuergerät, Schildknappe, Schnüffelstück,
+  Schildwache, Schaltkaiser, Gedächtnisgerät, Vermittler, Eingeweide.
+- Match existing terminology and section ordering in sibling pages before inventing new structure.
+
+## Before finishing an edit
+
+- Re-read the page as a first-time reader: could a beginner start at step 1, and could an expert skim
+  to the part they need? Both must be true.
+- Verify every link resolves to a real page and points where the text claims.
+- Confirm the page opens with "what and why before how," not a bare instruction.
+
+## The four rules to keep above all
+
+1. Say what and why before how.
+2. Define or link every piece of jargon.
+3. One idea per sentence, per section.
+4. Always tell the reader where to go next.

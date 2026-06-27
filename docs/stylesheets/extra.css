@@ -1,0 +1,144 @@
+:root [data-md-color-scheme="slate"] {
+  /* Core Backgrounds */
+  --md-default-bg-color: #0F141C;
+  --md-default-bg-color--light: #1A212D;
+  --md-code-bg-color: #1A212D;
+
+  /* Navigation & Sidebars */
+  --md-primary-fg-color: #1A212D;
+  --md-primary-fg-color--dark: #0F141C;
+  --md-primary-bg-color: #EAEFF8;
+
+  /* Accents & Typography */
+  --md-accent-fg-color: #FF5500;
+  --md-accent-fg-color--transparent: rgba(255, 85, 0, 0.1);
+  --md-typeset-color: #EAEFF8;
+  --md-typeset-a-color: #0099FF;
+
+  /* Custom borders and structural lines */
+  --md-footer-bg-color: #0F141C;
+  --md-footer-bg-color--dark: #0A0D14;
+}
+
+/* Custom UI Polish to match the mockup */
+
+/* Active/Hover Sidebar Item highlights - CURRENT PAGE (orange) */
+.md-nav__link--active {
+  color: var(--md-accent-fg-color) !important;
+  font-weight: bold;
+  background: rgba(255, 85, 0, 0.3) !important;
+  border: 1px solid #FF5500 !important;
+  border-left: 4px solid #FF5500 !important;
+  border-radius: 4px;
+  padding: 8px 8px 8px 6px !important;
+  box-shadow: 0 0 12px rgba(255, 85, 0, 0.4), inset 0 0 4px rgba(255, 85, 0, 0.1) !important;
+  margin: 6px 0 !important;
+}
+
+/* Parent items in the navigation path (blue - less prominent) */
+.md-nav__item--active > .md-nav__link:not(.md-nav__link--active) {
+  background: rgba(0, 153, 255, 0.1);
+  border: 1px solid rgba(0, 153, 255, 0.3);
+  border-left: 3px solid rgba(0, 153, 255, 0.6);
+  border-radius: 4px;
+  padding: 6px 8px;
+  padding-left: 7px;
+  box-shadow: 0 0 4px rgba(0, 153, 255, 0.15);
+  margin: 4px 0;
+}
+
+/* Code blocks styling */
+code {
+  color: #0099FF;
+}
+
+pre code {
+  color: #EAEFF8;
+}
+
+/* Scrollbar customization to keep it stealthy */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-thumb {
+  background: #1A212D;
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #0099FF;
+}
+
+/* --- Hüpftronik Header Customization --- */
+
+.md-typeset h1,
+.md-typeset h2,
+.md-typeset h3,
+.md-typeset h4 {
+  color: #0099FF;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+/* Optional: Add a subtle orange underline accent to the main H1 page title */
+.md-typeset h1 {
+  border-bottom: 2px solid #FF5500;
+  padding-bottom: 0.3em;
+  margin-bottom: 1em;
+}
+
+/* Tooltip positioned inline with header - wrapper flex container */
+h1 + .tooltip {
+  display: inline-flex;
+  margin-left: 0.5em;
+}
+
+/* Optional: Keep the hover permalink icon matching the cyber blue theme */
+.md-typeset h1:hover .headerlink,
+.md-typeset h2:hover .headerlink,
+.md-typeset h3:hover .headerlink {
+  color: #FF5500;
+}
+
+.tooltip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: rgba(255, 85, 0, 0.08);
+  border: 1px solid rgba(255, 85, 0, 0.25);
+  border-radius: 4px;
+  padding: 2px 8px;
+  font-size: 1em;
+}
+
+.tooltip img {
+  width: 20px;
+  height: auto;
+  vertical-align: middle;
+}
+
+/* Make expandable sections easier to spot */
+.md-typeset summary {
+  position: relative;
+}
+
+.md-typeset summary:after {
+  width: 1.2rem;
+  height: 1.2rem;
+  top: 0.55em;
+  right: 0.45rem;
+  background-color: #FF5500;
+  box-shadow: 0 0 0 2px rgba(255, 85, 0, 0.15), 0 0 8px rgba(255, 85, 0, 0.25);
+  border-radius: 999px;
+  opacity: 1;
+}
+
+details[open] > summary:after {
+  transform: rotate(90deg);
+}
+
+img[src*="../assets/icons"] {
+  vertical-align: middle;
+  display: inline;
+}
+
