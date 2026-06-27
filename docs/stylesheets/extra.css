@@ -142,3 +142,10 @@ img[src*="../assets/icons"] {
   display: inline;
 }
 
+/* On mobile, show expand arrows in the open state when all sections are force-expanded */
+@media screen and (max-width: 76.1875em) {
+  .md-nav--primary .md-nav__item--nested > label .md-nav__icon {
+    transform: rotate(90deg);
+  }
+}
+
