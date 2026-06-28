@@ -142,33 +142,17 @@ img[src*="../assets/icons"] {
   display: inline;
 }
 
-/* On mobile: dismantle Material's layered nav, render all levels inline */
+/* Force all nested sections visible in mobile drawer (belt-and-suspenders with mobile-nav.js) */
 @media screen and (max-width: 76.1875em) {
-  /* Allow the primary nav to grow and scroll instead of clipping layers */
-  .md-nav--primary {
-    overflow-y: auto !important;
-    height: auto !important;
-  }
-
-  /* Reset all nested sub-navs from absolutely-positioned layers to normal flow */
   .md-nav--primary .md-nav__item--nested > .md-nav {
-    position: static !important;
-    transform: none !important;
-    height: auto !important;
-    max-height: none !important;
     display: block !important;
     opacity: 1 !important;
-    overflow: visible !important;
-    transition: none !important;
-    background: transparent !important;
+    max-height: none !important;
+    clip: auto !important;
+    clip-path: none !important;
+    pointer-events: auto !important;
   }
-
-  /* Hide the "← Section Title" back-navigation label inside each sub-nav */
-  .md-nav--primary .md-nav__item--nested > .md-nav > .md-nav__title {
-    display: none !important;
-  }
-
-  /* Rotate expand arrows to reflect open state */
+  /* Keep expand arrows pointing open */
   .md-nav--primary .md-nav__item--nested > label .md-nav__icon {
     transform: rotate(90deg);
   }
