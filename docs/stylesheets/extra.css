@@ -142,17 +142,8 @@ img[src*="../assets/icons"] {
   display: inline;
 }
 
-/* Force all nested sections visible in mobile drawer (belt-and-suspenders with mobile-nav.js) */
+/* On mobile, show expand arrows in the open state when all sections are force-expanded */
 @media screen and (max-width: 76.1875em) {
-  .md-nav--primary .md-nav__item--nested > .md-nav {
-    display: block !important;
-    opacity: 1 !important;
-    max-height: none !important;
-    clip: auto !important;
-    clip-path: none !important;
-    pointer-events: auto !important;
-  }
-  /* Keep expand arrows pointing open */
   .md-nav--primary .md-nav__item--nested > label .md-nav__icon {
     transform: rotate(90deg);
   }
