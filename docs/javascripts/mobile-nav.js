@@ -5,11 +5,5 @@ function expandMobileNav() {
     });
   }
 }
-
-// document$ is Material's post-initialisation observable (always present in Material 9+)
-if (typeof document$ !== 'undefined') {
-  document$.subscribe(expandMobileNav);
-}
-// window.load fires after ALL deferred scripts including Material's init
-window.addEventListener('load', expandMobileNav);
+document.addEventListener('DOMContentLoaded', expandMobileNav);
 window.addEventListener('resize', expandMobileNav);
