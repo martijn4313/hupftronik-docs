@@ -47,6 +47,19 @@
   margin: 4px 0;
 }
 
+/* Sidebar section/category labels */
+.md-nav__title {
+  color: #0099FF !important;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  opacity: 1 !important;
+  margin-top: 1em;
+  padding-bottom: 0.25em;
+  border-bottom: 1px solid rgba(0, 153, 255, 0.25);
+}
+
 /* Code blocks styling */
 code {
   color: #0099FF;
