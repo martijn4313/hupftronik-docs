@@ -47,8 +47,10 @@
   margin: 4px 0;
 }
 
-/* Sidebar section/category labels */
-.md-nav__title {
+/* Sidebar section/category labels - both the nav title and inactive section headers */
+.md-nav__title,
+.md-nav__item--section > .md-nav__link,
+.md-nav__item--nested > label.md-nav__link {
   color: #0099FF !important;
   font-size: 0.7rem;
   font-weight: 700;
