@@ -62,6 +62,14 @@
   border-bottom: 1px solid rgba(0, 153, 255, 0.25);
 }
 
+.md-nav__item--section > .md-nav__link:hover,
+.md-nav__item--nested > label.md-nav__link:hover,
+.md-nav__title:hover {
+  color: var(--md-accent-fg-color) !important;
+  background: none !important;
+  border-bottom-color: rgba(255, 85, 0, 0.35);
+}
+
 /* Code blocks styling */
 code {
   color: #0099FF;

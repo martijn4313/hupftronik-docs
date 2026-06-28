@@ -1,237 +1,258 @@
 # Volvo B2xx Redblock
+> "Sturdy beast of burden" — A Wise Man
+
+<br>
 
 ![Volvo Turbo Hare](../../../assets/icons/volvo_turbo_hare.png)
 
-The B2xx Redblock is a well-understood inline-four with no exotic cam or crank geometry. Running one on a standalone ECU is straightforward once the trigger situation is sorted — and that is the part that requires attention. The family spans decades and multiple OEM ignition systems, each with a different approach to crank position sensing. This guide maps each variant to a trigger path that is compatible with the Motorsteuergerät 24P V1 and explains what hardware work each path requires.
 
-The 24P V1 has a single differential VR trigger input on the connector. There is no Hall input. Every trigger path described here produces a VR-compatible signal; that is the unifying constraint.
+## Overview
+
+The B2xx Redblock remains a well-understood inline-four with an impressive reputation across multiple disciplines. 
+
+Running one on a standalone ECU is straightforward. 
+
+Since the "LH2.4 era" of the B2xx production spans almost a decade, OEM parts to convert carbureted or K-Jetronic units are often inexpensive and easy to find. Of course, for exotic (turbo) builds, different routes exist, but those are conscious choices left up to you.
 
 ## Variants covered
 
-| Code | Displacement | Valvetrain | Boost | Notes |
-|------|-------------|------------|-------|-------|
-| B21 | 2127 cc | 8v SOHC | — | No factory flywheel cutout or VR location |
-| B23 | 2316 cc | 8v SOHC | — | No factory flywheel cutout or VR location |
-| B230F | 2316 cc | 8v SOHC | — | LH-Jetronic; 60-2 flywheel, stock VR sensor |
-| B230FT | 2316 cc | 8v SOHC | factory | As B230F; verify flywheel variant (see below) |
-| B230ET | 2316 cc | 8v SOHC | factory | Early turbo; early Motronic flywheel — requires swap |
-| B204FT | 1986 cc | 16v DOHC | factory | Flywheel varies with gearbox; confirm before installing |
-| B234F | 2316 cc | 16v DOHC | — | As B204FT |
-| B234FT | 2316 cc | 16v DOHC | factory | As B204FT |
+| Code | Displacement | Valvetrain | Notes |
+|------|-------------|------------|-------|
+| B21 | $2127\,\text{cc}$ | 8v SOHC | No factory flywheel cutout or VR location |
+| B23 | $2316\,\text{cc}$ | 8v SOHC | No factory flywheel cutout or VR location |
+| B230F | $2316\,\text{cc}$ | 8v SOHC | LH-Jetronic; 60-2 flywheel, stock VR sensor |
+| B230FT | $2316\,\text{cc}$ | 8v SOHC | As B230F; verify flywheel variant (see below) |
+| B230ET | $2316\,\text{cc}$ | 8v SOHC | Early turbo; early Motronic flywheel—requires swap |
+| B204FT | $1986\,\text{cc}$ | 16v DOHC | LH-Jetronic; 60-2 flywheel, stock VR sensor |
+| B234F | $2316\,\text{cc}$ | 16v DOHC | As B204FT |
 
-Firing order for all variants: **1–3–4–2**.
+Firing order for all variants: **1–3–4–2**. Cylinder 1 is at the front of the engine (timing cover end).
 
-## Trigger paths
+---
 
-The three viable trigger paths are flywheel VR, crank VR conversion, and locked distributor contacts. Which path applies depends on what the engine came with and what work you are willing to do.
+## Engine position sensor
 
-### Flywheel VR — standard late B230
+!!! standpunkt "Trigger integrity dictates engine survival"
+    The trigger signal is the heartbeat of the ECU. Take this seriously. Chasing trigger or sync problems later on is a major headache, and a fluctuating timing signal causes immediate engine damage under high load.
 
-Late B230 engines (LH-Jetronic 2.2 and 2.4, from roughly 1985 onward) came from the factory with a 60-2 toothed ring on the flywheel and a passive VR sensor mounted in the bellhousing. This is the path that requires no hardware conversion: the sensor plugs directly into the 24P V1 trigger input and rusEFI understands the 60-2 pattern natively.
+### Quick Scan
 
-Verify the tooth count before assuming. Pull the bellhousing inspection cover and count — not all B230 flywheels are the same, and the trigger ring is easy to confuse visually with different patterns.
+| Path | Target | Sensor | rusEFI Type | Hardware Effort |
+|------|--------|--------|-------------|-----------------|
+| Late B230 (LH2.4) | 60-2 Flywheel | VR (Passive) | `60/2` | Plug & play |
+| Early B230 / B230ET | 60-2 Flywheel | VR (Passive) | `60/2` | Flywheel swap |
+| B21 / B23 | 60-2 Crank wheel | VR (Passive) | `60/2` | Fabricate bracket |
+| Distributor | 4 pulses / 2 revs | Contact | `Basic Distributor` | Lock advance weights |
 
-The stock Volvo VR sensor is a two-wire passive sensor. Wire it to pins <!-- TODO: confirm 24P V1 trigger +/− pin assignments --> on the 24P connector. Polarity matters; if the engine cranks but does not trigger, swap the two wires before chasing anything else.
+### Technical Detail
 
-**rusEFI trigger type:** `60/2` — set in TunerStudio under *Trigger Shape*.
+#### Standard late B230
+Late B230 engines (LH-Jetronic 2.4, roughly 1989 onward) come from the factory with a 60-2 toothed ring on the flywheel and a VR sensor mounted in a bracket on the back of the engine. There is a cutout in the bellhousing of the gearbox. Older M4x gearboxes sometimes lack this cutout. 
 
-### Flywheel swap — early Motronic B230 and B230ET
+Verify the flywheel before assuming; Motronic and Renix flywheels look similar but have different tooth counts and use incompatible sensors.
 
-The earliest B230 production and the B230ET use an OEM Bosch Motronic system that relies on a different flywheel pattern — two VR sensors at different positions rather than a single multi-tooth ring. This pattern is not supported by rusEFI without a custom trigger definition, and the effort to define it is not worth it compared to simply swapping the flywheel.
+#### Early Motronic B230 and B230ET
+The early Bosch Motronic system relies on two VR sensors at different positions rather than a single multi-tooth ring. Swap to a late B230 "dog-dish" flywheel with the standard 60-2 ring. Any late M46 or M47 flywheel from an LH2.4 car is a direct fit. Dual-mass M90 flywheels from a post-1995 940 technically work with an M90 gearbox, but they have lower limits for input torque and RPM.
 
-Swap to a late B230 flywheel with the standard 60-2 ring. Any late M46 or M47 flywheel from a LH-Jetronic car is a direct fit. Once swapped, follow the standard flywheel VR path above.
+!!! warning "Flywheel condition"
+    Used parts accumulate significant mileage. When selecting a flywheel, inspect critically for micro-cracking and verify the condition of the damper on dual-mass units.
 
-!!! warning "Clutch balance"
-    Flywheels are balanced as assemblies with the clutch cover. When swapping flywheels, rebalance the assembly or swap the clutch cover from the donor at the same time.
+#### B21 and B23
+The B21 and B23 predate Volvo's move to flywheel-based trigger sensing. Press or key a 60-2 wheel onto the crankshaft snout at the front of the engine, and mount a VR pickup in a fabricated bracket. Target a sensor gap of $0.5 - 1.0\,\text{mm}$. The sensor bracket must be absolutely rigid.
 
-### Crank VR conversion — B21 and B23
+You can swap to a later 60-2 flywheel and modify the bellhousing, but the early engine blocks lack the factory mounting holes for the rear VR sensor bracket.
 
-The B21 and B23 predate Volvo's move to flywheel-based trigger sensing. There is no factory VR sensor mount location and no tooth ring on the flywheel. The practical path here is a crank-mounted trigger wheel: a 60-2 wheel pressed or keyed onto the crankshaft snout at the front of the engine, with a VR pickup in a fabricated bracket.
+#### Distributor contacts
+Although not optimal, you can use the distributor contact points as a trigger source. 
 
-The bracket must locate the sensor at the correct gap to the tooth tips — typically 0.5–1.0 mm, but verify against your sensor's datasheet. The sensor must be rigid; any flex in the mount introduces jitter in the trigger signal.
+> This primarily applies to setups like older B18/B20 pushrod engines or carbureted engines with a good working mechanical distributor. You must build a board that takes the flyback pulse and conditions it for the ECU. 
+> 
+> For engines running L-Jetronic with Renix (Volvo 360 series), we advise using the 36-2-2 flywheel these engines already possess. To keep a stock appearance on a Volvo 360, retain the HT distributor but replace the intelligent Renix coil with a "dumb" coil from a Volvo 4xx series, triggered directly by the Motorsteuergerät.
 
-Once installed, configure as the standard flywheel VR path: 60-2 trigger type, same wiring.
+Weld or pin the mechanical advance weights solid in the fully advanced position. The trigger offset needs to be at least $\sim 40^\circ$ to create a workable solution. If you do not want to lock your distributor, you can run the ECU in "Fuel Only" mode.
 
-!!! note "Trigger offset"
-    With a fabricated bracket you will not know the trigger offset until the engine runs. Set an approximate offset to get it started, then use the timing light procedure to dial in the actual value.
+??? info "Signal conditioning when using distributor contacts"
+    The signal routes to the `T1+` input through a conditioning circuit: a $1\,\text{k}\Omega$ pull-up resistor to $+5\,\text{V}$, a $10\,\text{nF}$ capacitor to ground for debounce, and a $1\,\text{k}\Omega$ series resistor to adapt the square wave for the differential VR stage.
 
-### Locked distributor contacts — all variants
+### Design Rationale
 
-Any Redblock that still has its distributor can use the contact points as a trigger source. This path requires no flywheel work and costs next to nothing. The trade-off is signal quality: points produce a voltage spike on open, not a clean sine wave, and the signal degrades as the points wear. It is a workable solution for a car that is already running on points and needs standalone ECU control without major engine work.
+While alternative trigger options exist (e.g., front-mounted Hall sensors, aftermarket cam triggers), utilizing the factory 60-2 VR setup offers the best balance of high-resolution timing data and mechanical simplicity. The 60-2 wheel provides enough density for highly accurate ignition timing calculation during rapid acceleration transients, outperforming 4-pulse distributor setups entirely.
 
-The mechanical advance weights must be welded or pinned solid. With the ECU controlling ignition timing, mechanical advance is no longer needed — and if the weights can move, the trigger position drifts with RPM, which will cause timing errors and is impossible to calibrate out.
+---
 
-With the weights locked, the points open four times per distributor revolution, which corresponds to four events per two crank revolutions. The signal goes to the 24P V1 trigger input through a pull-up resistor to +5V — the points signal is not a true VR sine wave and requires signal conditioning. <!-- TODO: confirm recommended pull-up / signal conditioning circuit for points input on VR differential stage -->
+## Camshaft position sensor
 
-**rusEFI trigger type:** <!-- TODO: confirm correct trigger type for 4-pulse-per-2-rev distributor contact input -->
+!!! standpunkt "Batch fueling and wasted spark meet the performance mandate"
+    Adding a cam sync for fully sequential operation yields marginal idle emissions improvements but introduces unnecessary mechanical complexity to a B2xx. We optimize for robust performance, not theoretical perfection. The 24P V1 focuses on batch fueling and wasted spark, rendering a camshaft position sensor obsolete.
 
-!!! warning "Wear interval"
-    Check point gap and condition more frequently than on a carbureted car. Trigger signal quality is directly coupled to point condition; worn or pitted points cause misfires that look like tune problems.
+### Quick Scan
 
-## Wiring
+| Component | Status | Target |
+|-----------|--------|--------|
+| Cam Sensor | Omitted | N/A |
 
-With two injector channels and two ignition channels, the 24P V1 runs the Redblock in batch injection and wasted spark. On a four-cylinder this is the natural fit.
+### Technical Detail
 
-**Ignition — wasted spark**
+Do not install or wire a camshaft position sensor. The B2xx engine architecture does not require it for standard performance builds.
 
-| Channel | Cylinders |
-|---------|-----------|
-| IGN1 | 1 and 4 |
-| IGN2 | 2 and 3 |
+### Design Rationale
 
-Use a wasted spark coil pack with two independent primary windings, or two separate coils. Each coil fires both cylinders in its pair simultaneously — one on the compression stroke, one on exhaust.
+The ECU calculates engine phase solely based on the primary crank trigger (60-2). Batch-fire injection and wasted spark ignition provide sufficient resolution, drivability, and power for both naturally aspirated and high-boost applications, completely bypassing the potential failure points of a retrofitted cam sync.
 
-**Injection — batch**
-
-| Channel | Injectors |
-|---------|-----------|
-| INJ1 | 1 and 2 |
-| INJ2 | 3 and 4 |
-
-Wire injectors in parallel on each channel. The 24P V1 injector drivers are discrete MOSFETs, not current-limited smart drivers. Size the injectors so the parallel pair does not exceed the driver's continuous current rating. <!-- TODO: confirm max continuous current per INJ channel from hardware ref -->
-
-Cylinder numbering on the Redblock follows the Volvo convention: cylinder 1 is at the front of the engine (belt/timing cover end).
+---
 
 ## Throttle position sensor
 
-The stock B2xx throttle body has no TPS, or at best an idle contact switch, neither of which gives the ECU the analog position signal it needs for load calculation and accel enrichment. A TPS is required.
+!!! standpunkt "Transient fueling requires intent"
+    A MAP sensor alone cannot predict rapid throttle transients; it only reacts to them after the manifold pressure drops. An analog TPS is mandatory for immediate acceleration enrichment. Relying solely on MAP for acceleration is a lazy configuration that compromises drivability.
 
-The practical solution is the TPS from a Volvo 850 — a three-wire Bosch potentiometer that bolts to the throttle body with a small adapter bracket. It is cheap, widely available on breakers, and the signal range matches what every standalone ECU expects.
+### Quick Scan
 
-**Volvo 850 TPS** — Volvo part <!-- TODO: 850 TPS Volvo part number --> / Bosch <!-- TODO: Bosch OE number -->
+| Component | Part Number | Output | Connector |
+|-----------|-------------|--------|-----------|
+| Volvo 850 TPS | Volvo `1336385` / Bosch `0 280 122 001` | $\sim 0.5\,\text{V}$ (closed) to $4.5\,\text{V}$ (WOT) | 3-pin Bosch |
 
-Wire it to the 24P V1 as follows:
+### Technical Detail
 
-| TPS pin | 24P V1 |
-|---------|--------|
-| Ground | Sensor ground |
-| +5V reference | 5V sensor reference |
-| Signal | Analog input (any free channel) |
+The stock B2xx throttle body lacks an analog TPS, relying only on an idle contact switch. Bolt a Volvo 850 TPS (a three-wire Bosch potentiometer) to the throttle body using a fabricated adapter bracket. 
 
-The 24P V1 provides a 5V sensor reference rail for exactly this purpose. Do not power the TPS from a switched +12V line and divide down — use the dedicated 5V rail so the reference is stable relative to the MCU's ADC.
+Wire it directly to the 24P V1:
+*   **Ground:** Sensor ground
+*   **+5V reference:** 5V sensor reference
+*   **Signal:** Analog input (any free channel)
 
-After wiring, calibrate in TunerStudio using *TPS calibration* (auto-detect with pedal at closed and WOT). Typical values for the 850 TPS are around 0.5V closed and 4.5V wide open, but calibrate against your actual sensor rather than using these as constants.
+Calibrate in TunerStudio using the *TPS calibration* tool. Do not use generic constants; calibrate against your actual sensor limits.
+
+### Design Rationale
+
+The Volvo 850 TPS is cheap, widely available, and its signal range perfectly matches the expectations of modern ADCs. We power the TPS exclusively from the 24P V1's dedicated $+5\,\text{V}$ sensor reference rail. Do not power the TPS from a switched $+12\,\text{V}$ line and divide the voltage down. The dedicated rail ensures the reference voltage remains absolutely stable relative to the MCU's Analog-to-Digital Converter, eliminating sensor drift when system voltage fluctuates under heavy electrical loads.
+
+---
 
 ## Air charge sensing
 
-The LH2.4 system uses a hot-wire air mass meter (AMM) as its primary load signal. rusEFI can accept MAF input, but its default and well-supported operating mode is speed-density: manifold absolute pressure (MAP) plus intake air temperature (IAT). Speed-density is simpler to calibrate, tolerates intake modifications without recalibration, and requires no sensor that is twenty-plus years old and increasingly hard to source.
+!!! standpunkt "Speed-density is the correct operating model"
+    A speed-density tune belongs to the builder, not to the airbox. The OEM hot-wire Air Mass Meter (AMM) restricts airflow and ties fuel delivery to a specific intake geometry; MAP and IAT do not. Switching to speed-density is not a workaround for a missing sensor—it is a conscious engineering choice for a modified engine.
 
-Leave the stock AMM disconnected. It has no role in a rusEFI installation.
+### Quick Scan
 
-!!! standpunkt "Speed-density is the right model for a standalone ECU"
-    A speed-density tune belongs to the builder, not to the airbox. The AMM ties fuel delivery to a specific intake geometry; MAP and IAT do not. Switching to speed-density is not a workaround for a missing sensor — it is the correct operating model for a car that may be modified.
+| Application | Sensor Type | Bosch Part Number | Range (Absolute) |
+|-------------|-------------|-------------------|------------------|
+| Naturally Aspirated | MAP | `0 261 230 004` | $0 - 1.05\,\text{bar}$ |
+| Mild Boost | T-MAP | `0 281 002 437` | $0.2 - 3.0\,\text{bar}$ |
+| High Boost | T-MAP | `0 281 006 059` | $0.5 - 4.0\,\text{bar}$ |
 
-The 24P V1 has five analog input channels. MAP and IAT each consume one. Three configurations cover the common cases.
+### Technical Detail
 
-### Combined T-MAP sensor
+Leave the stock AMM disconnected. It serves no purpose in this installation. The 24P V1 supports Speed-Density natively using MAP and IAT. 
 
-A T-MAP sensor (combined MAP and IAT in one body) gives both signals from a single manifold bung. This is the cleanest install for any fabricated intake or turbo manifold and the recommended approach where possible.
+**Combined T-MAP Sensor**
+A T-MAP sensor packages both MAP and IAT elements into a single body. The Bosch `0 281 002 437` provides a $3.0\,\text{bar}$ absolute range, sufficient for $2.0\,\text{bar}$ of boost. Thread it into an M12 bung in the intake manifold. 
+*   **Pin 1 (GND):** Sensor ground
+*   **Pin 2 (NTC):** IAT analog input
+*   **Pin 3 (VCC):** 5V sensor reference
+*   **Pin 4 (MAP):** MAP analog input
 
-**Bosch `0 281 002 437`** is a widely available T-MAP used across turbodiesel applications and well-suited to boosted Redblock builds.
+**Discrete Sensors**
+If a T-MAP is unavailable, use an Audi `06B905379D` push-in IAT sensor paired with a standalone Bosch MAP sensor sized for your build pressure. Configure the IAT in TunerStudio using the standard Bosch NTC curve.
 
-| Sensor pin | 24P V1 |
-|-----------|--------|
-| VCC | 5V sensor reference |
-| GND | Sensor ground |
-| MAP signal | Analog input |
-| IAT signal | Analog input |
+### Design Rationale
 
-<!-- TODO: confirm 0 281 002 437 pinout, pressure range, and NTC curve name in rusEFI -->
+We position the MAP/IAT sensor downstream of the throttle and intercooler, as close to the plenum as practical. Measuring air temperature before the intercooler provides false data to the speed-density algorithm, leaning out the engine under thermal load. The T-MAP is chosen because it minimizes wiring runs and eliminates a potential vacuum leak point by combining two critical sensors into one robust OEM housing.
 
-The sensor threads into an M12 bung in the intake manifold, downstream of the throttle and as close to the plenum as practical. For a turbocharged build, it must be on the pressure side of the throttle (post-intercooler, post-throttle), not in the boost pipe.
+---
 
-### Audi `06B905379D` IAT + separate MAP
+## Fueling
 
-Where a T-MAP is unavailable or a specific pressure range is required, a discrete IAT and MAP sensor produce the same result. The Audi `06B905379D` is a two-wire NTC push-in sensor that fits a 12 mm bore drilled in the intake pipe. It uses the same resistance curve as most Bosch NTC sensors, which rusEFI knows natively — no custom calibration table needed.
+!!! standpunkt "Software cannot fix a dry pump"
+    The fuel system must be mechanically sound before the ECU takes over. We retain high-headroom mechanical setups like twin-pump architectures because physical flow volume and anti-starvation mechanics trump algorithmic fault-tolerance. We do not attempt to patch a failing fuel system with software.
 
-Pair it with a standalone MAP sensor sized for the build:
+### Quick Scan
 
-| Application | Gauge pressure | Suitable sensor range |
-|-------------|----------------|----------------------|
-| Naturally aspirated | 0 bar | 0–1 bar absolute |
-| Mild boost (stock B230FT to ~0.9 bar) | up to ~0.9 bar | 0–2.5 bar absolute |
-| High boost | 0.9 bar+ | 0–4 bar absolute |
+#### Injectors (Bosch EV1, High-Impedance)
 
-<!-- TODO: example Bosch MAP part numbers per pressure range -->
+| Engine | System | Bosch Part | Flow Rate (@ 3 bar) |
+|--------|--------|------------|---------------------|
+| B230F | LH2.2 | `0 280 150 734` | $200\,\text{cc/min}$ |
+| B230F | LH2.4 | `0 280 150 762` | $214\,\text{cc/min}$ |
+| B230FT | LH2.4 | `0 280 150 804` | $337\,\text{cc/min}$ |
+| B234F | LH2.4 | `0 280 150 749` | $214\,\text{cc/min}$ |
 
-The IAT sensor wires to any free analog input. Configure it in TunerStudio using the standard Bosch NTC curve.
+#### Fuel Pumps
 
-## Fuel system
+| Setup | Pump Type | Part Number | Flow Rate |
+|-------|-----------|-------------|-----------|
+| Volvo 240 Main | Inline | Bosch `0 580 464 126` | $\sim 130\,\text{L/hr}$ |
+| 940 Pre-1995 | Inline | Bosch `0 580 464 068` | $\sim 130\,\text{L/hr}$ |
+| 940 Post-1995 | In-tank | Walbro GSS342 / DW200 | $255\,\text{L/hr}$ |
+| K-Jetronic | Inline | Bosch `0 580 254 911` | $\sim 180\,\text{L/hr}$ |
 
-### Fuel injectors
+### Technical Detail
 
-All stock Redblock injectors use the Bosch EV1 connector. They are high-impedance (ballast-resistor free), which is correct for the 24P V1's discrete MOSFET drivers.
+**Injection — Batch**
+Wire the high-impedance EV1 injectors in parallel on each channel. Set the injector flow rate in TunerStudio and use a dead time of $1.1\,\text{ms}$ at $14\,\text{V}$ as a starting point.
+*   **INJ1:** Cylinders 1 and 2
+*   **INJ2:** Cylinders 3 and 4
 
-| Engine | System | Flow rate | Bosch part |
-|--------|--------|-----------|------------|
-| B230F | LH2.2 | <!-- TODO: cc/min @ 3 bar --> | <!-- TODO --> |
-| B230F | LH2.4 | <!-- TODO: cc/min @ 3 bar --> | <!-- TODO --> |
-| B230FT | LH2.4 | <!-- TODO: cc/min @ 3 bar --> | <!-- TODO --> |
-| B234F / B234FT | LH2.4 | <!-- TODO: cc/min @ 3 bar --> | <!-- TODO --> |
+**Fuel Pump Logic**
+The ECU does not replicate OEM relay logic directly. Route the ECU fuel pump output to drive an external relay coil; do not run main pump current directly through the low-side driver. 
+*   **240 Setups:** Wire both the transfer pre-pump and the inline main pump to run simultaneously from the relay. 
+*   **940 Post-1995:** The fuel hanger easily accepts a modern $255\,\text{L/hr}$ upgrade pump (e.g., Walbro GSS342).
+*   **K-Jetronic Conversions:** Utilize a conventional return-line regulator (e.g., $3.0\,\text{bar}$). Do not use a returnless setup, as the massive flow volume of a vane pump will overwhelm it.
 
-Enter the correct injector flow rate and dead time in TunerStudio under *Injector > Flow rate* and *Dead time*. Dead time varies with supply voltage — use the injector datasheet curve if available, or use <!-- TODO: typical dead time at 14V for these Bosch EV1 units --> as a starting point at 14V and adjust during tune.
+### Design Rationale
 
-!!! note "Batch pairing current draw"
-    Two injectors fire simultaneously per channel in batch mode. Verify that the combined peak current of both injectors does not exceed the INJ driver rating. Stock Redblock injectors are well within limits, but upgraded high-flow injectors may not be.
+The 24P V1 injector drivers are discrete, un-limited MOSFETs rated for a $14\,\text{A}$ continuous load. Two high-impedance EV1 injectors wired in parallel draw approximately $2\,\text{A}$, operating well within the thermal limits of the board.
 
-### Fuel pumps
+We retain K-Jetronic vane pumps on converted cars because their extreme flow headroom is highly beneficial for forced induction. The twin-pump architecture of the 240 prevents cavitation during high-G cornering—a physical reality that no software logic can correct. 
 
-The standalone ECU does not replicate the OEM fuel relay logic. You will need to wire the fuel pump to a low-side driver channel on the 24P V1 (or an external relay driven by one), controlled by the ECU's fuel pump output. rusEFI runs the pump for a prime pulse on key-on, then continuously while the engine is running.
+---
 
-#### Volvo 240 twin pump
+## Ignition
 
-The 240 LH-Jetronic fuel system uses two pumps: a small in-tank pre-pump that lifts fuel to the main pump, and an external inline main pump. This setup works well on modified cars because the pre-pump keeps the main pump primed regardless of fuel level or cornering load, preventing cavitation.
+!!! standpunkt "High cylinder pressures demand high spark energy"
+    Relying on a 30-year-old distributor cap and rotor for forced induction is a liability. Wasted spark removes physical wear items and delivers consistent ignition energy at high RPM.
 
-Both pumps run together. Wire both to the fuel pump output — the pre-pump draws low current and can share the same switched feed as the main pump through a relay. Use the ECU fuel pump output to drive the relay coil; do not run pump current through the low-side driver directly.
+### Quick Scan
 
-| Pump | Location | Volvo part | Bosch part |
-|------|----------|-----------|------------|
-| Pre-pump (transfer) | In-tank | <!-- TODO --> | <!-- TODO --> |
-| Main pump | Inline, under car | <!-- TODO --> | <!-- TODO --> |
+| Setup | Coil Type | Coil Part Number | Igniter (Power Stage) | Plug Gap |
+|-------|-----------|------------------|-----------------------|----------|
+| Wasted Spark | 2x2 Pack | Bosch `0 221 503 407` | Bosch `0 227 100 200` | $0.6 - 0.7\,\text{mm}$ |
+| OEM Distributor | Single Coil | Stock LH2.4 | Stock Bosch `-124` or `-145` | $0.7 - 0.8\,\text{mm}$ |
 
-#### 940 turbo fuel pump
+### Technical Detail
 
-The 940 turbo uses a single in-tank pump. Pre- and post-1995 cars use different units with different flow capacities.
+**Ignition — Wasted Spark (Recommended)**
+Use a standard 4-cylinder wasted spark coil pack featuring two independent primary windings (the Bosch `0 221 503 407` is the European standard). Pair this with a 2-channel "dumb" external igniter (Bosch `0 227 100 200`). Wire the $+5\,\text{V}$ logic-level outputs from the ECU directly to the igniter inputs.
+*   **IGN1:** Fired by channel 1 (Cylinders 1 and 4)
+*   **IGN2:** Fired by channel 2 (Cylinders 2 and 3)
 
-| Year | Volvo part | Bosch part | Flow (L/hr @ 3 bar) |
-|------|-----------|------------|---------------------|
-| Pre-1995 | <!-- TODO --> | <!-- TODO --> | <!-- TODO --> |
-| Post-1995 | <!-- TODO --> | <!-- TODO --> | <!-- TODO --> |
+**Ignition — HT Distributor (Fallback)**
+If you opt to retain the OEM single coil, high-tension (HT) distributor, and ignition leads, use the factory single-channel power stage. 
+*   **Block-mounted distributors:** Standard on 240 series (and some older 760s). These are driven by the auxiliary shaft and are generally reliable. You cannot swap a block distributor to a 940 block without also swapping the auxiliary shaft.
+*   **Head-mounted distributors:** Standard on 740/940 series. These frequently suffer from leaky shaft seals and mechanical play.
+*   **Wiring Warning:** Verify the condition of the "Radio Suppression Relay" on 940 models, as a failing relay causes intermittent voltage drops to the coil.
 
-The post-95 pump is a direct fit in the pre-95 tank sender unit and is the better choice for any mildly modified B230FT build.
+### Design Rationale
 
-#### K-Jetronic pump
+The 24P V1 uses $+5\,\text{V}$ logic-level ignition outputs rather than internal high-current IGBTs. Driving ignition coils directly generates intense localized heat and introduces severe flyback voltage spikes inside the enclosure. By pushing the high-current switching out to a rugged, inexpensive external Bosch igniter bolted to a heat sink in the engine bay, we optimize the ECU's thermal environment. If a coil shorts and over-currents the system, the external igniter burns out—an acceptable, avoidable failure mode that protects the microcontroller from catastrophic damage.
 
-Cars originally equipped with K-Jetronic mechanical injection (many B21 and early B23 applications) have a Bosch vane pump that flows substantially more than the later LH-Jetronic roller pumps. These pumps are worth keeping when converting to standalone — the flow headroom is useful for modified engines, and the pump is already in the car.
-
-The K-Jet pump is designed to run at high pressure against the mechanical injection system's fuel distributor. When used as a supply pump for a return-style EFI system, it requires a conventional return-line fuel pressure regulator (typically 3 bar for a NA engine, 3 bar + boost for a turbo).
-
-Do not use a returnless regulator configuration with a K-Jet pump. The pump flows far more than any normally-aspirated engine needs; the excess must return to the tank.
-
-| Application | Bosch part | Flow (L/hr) |
-|-------------|------------|-------------|
-| K-Jet vane pump | <!-- TODO: confirm OEM number --> | <!-- TODO --> |
+---
 
 ## rusEFI configuration
 
-<!-- TODO: Base tune file / starting point for B230 8v -->
-
-Key values to set before first start:
+Key values to verify before the first start:
 
 | Parameter | Value |
 |-----------|-------|
-| Engine displacement | 2316 cc (B230/B234) or 1986 cc (B204) |
+| Engine displacement | $2316\,\text{cc}$ (B230/B234) or $1986\,\text{cc}$ (B204) |
 | Cylinder count | 4 |
 | Firing order | 1-3-4-2 |
 | Injection mode | Batch |
 | Ignition mode | Wasted spark |
-| Trigger type | 60/2 (standard VR path) |
-| Trigger offset | Set by timing light after first start |
+| Trigger type | `60/2` |
+| Trigger offset | Set via timing light after first start |
 
 ## Known issues
 
-**B230FT and B234FT with automatic gearbox** — the automatic flywheel may differ from the manual unit in tooth ring pattern or sensor position. Confirm before wiring.
-
-**B21/B23 crank trigger bracket fabrication** — the front crank snout on these engines is shorter than on the B230. Off-the-shelf trigger wheel kits designed for the B230 may not fit without modification.
-
-**Points signal conditioning** — the distributor contact path requires additional circuitry that the 24P V1 does not provide on-board. If you go this route, plan for an external pull-up and potentially a Schmidt trigger to clean the signal before it reaches the ECU.
+*   **B21/B23 Bracket Fabrication:** The front crank snout on early engines is shorter than on the later B230. Off-the-shelf trigger wheel kits designed for the B230 do not fit without significant modification. Design your brackets and spacer hubs intentionally.

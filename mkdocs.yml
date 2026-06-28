@@ -42,12 +42,13 @@ nav:
     - Motorsteuergerät 24P V1:
       - Overview & Specs: products/motorsteuergerat-24p-v1/index.md
       - Hardware & Wiring: products/motorsteuergerat-24p-v1/wiring.md
+      - Design Reference: products/motorsteuergerat-24p-v1/reference.md
       - Setup guide:
         - Setup Overview: products/motorsteuergerat-24p-v1/setup/index.md
         - Flashing the PCB: products/motorsteuergerat-24p-v1/setup/flashing.md
         - rusEFI Guide: products/motorsteuergerat-24p-v1/setup/rusefi.md
         - Speeduino Guide: products/motorsteuergerat-24p-v1/setup/speeduino.md
-      - Hardware Reference: products/motorsteuergerat-24p-v1/reference.md
+      
   - Guides:
      - Planning your build: guides/setup/planning.md
      - Tuning Basics: guides/tuning/basics.md
