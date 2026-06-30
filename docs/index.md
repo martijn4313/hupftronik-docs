@@ -1,6 +1,6 @@
-# Welcome
+![Hüpftronik Welcome Banner](./assets/pictures/hupftronik_lowress.png)
 
-![Hüpftronik Welcome Banner](./assets/icons/info_reading.png)
+# Welcome
 
 This documentation covers the Hüpftronik ECU ecosystem.
 

@@ -1,108 +1,250 @@
 # Hardware Reference
 
-This guide provides a detailed walkthrough of the schematics and PCB designs. All design files are available on GitHub: **[Link]**
+This guide provides a walkthrough of the schematics and PCB designs for the Hüpftronik Engine Control Unit (ECU). 
 
-## Analog Inputs
+**Design Files:** All files are available on GitHub: **[Link]**
 
-### Quick scan
-!!! info "Quick Scan: Analog Inputs"
-    | Parameter | Specification |
-    | :--- | :--- |
-    | **Input Voltage Range** | $0\text{--}5\ \mathrm{V}$ $\rightarrow$ $0\text{--}3.24\ \mathrm{V}$ |
-    | **Filtering** | RC Low-pass filter ($\approx 1.37\ \mathrm{kHz}$) |
-    | **Protection** | Point-of-entry TVS for ESD/EMI mitigation |
-    | **Philosophy** | Prioritizes signal purity over abuse-protection ($12\ \mathrm{V}$ faults are an acceptable failure mode) |
+This document covers how the ECU is built, how it stays cool, and how the electrical circuits handle signals and power.
 
-### Circuit Topology
-Each channel passes through two stages before reaching the MCU:
+---
 
-1. **At the Connector (ESD Protection):** A `USBLC6-2SC6` bidirectional TVS diode clamps ESD and transient events immediately at the point of entry.
-2. **At the MCU (Scaling & Filtering):** A passive RC network handles signal conditioning:
-    * **$R_{series}$ (1.8 k$\Omega$):** Sets the scaling and filter corner.
-    * **$R_{shunt}$ (3.3 k$\Omega$):** Pulls the downstream node to ground.
-    * **$C_{shunt}$ (100 nF):** Sits in parallel with $R_{shunt}$ to filter high-frequency noise.
+## Enclosure Options
 
-#### Technical Specifications
+Choosing the right case is important for protecting the electronics and keeping the unit from overheating.
 
-| Parameter | Description |
-| :--- | :--- |
-| **Scaling** | $R_{series}$ and $R_{shunt}$ form a resistive divider that scales the $0\text{--}5\ \mathrm{V}$ input down to $0\text{--}3.24\ \mathrm{V}$, fitting within the STM32F405's $3.3\ \mathrm{V}$ ADC reference. |
-| **Filtering** | The combination of the series resistance and $C_{shunt}$ creates a low-pass filter with a corner frequency of approximately $1.37\ \mathrm{kHz}$. |
+### Quick Selection Guide
+| Case Choice | Cooling Performance | Effort to Build | Best For... |
+| :--- | :--- | :--- | :--- |
+| **AliExpress 24-Pin Aluminum** | **Excellent** | **Low** (Plug-and-play) | Standard builds, high-performance engines, and harsh environments. |
+| **Custom / 3D-Printed** | **Poor** | **High** (Requires custom design) | Test benches or very tight spaces. |
 
-### Design Rationale
+### Recommended: AliExpress 24-Pin Aluminum Enclosure
+The PCB is designed specifically to fit the standard 24-pin cast aluminum waterproof enclosure. The connector on the board matches the one provided with these cases perfectly.
 
-**Protection Placement & EMI Mitigation:** The TVS diode is placed immediately at the connector rather than the MCU for two reasons. First, clamping at the entry point ensures the protection is where the threat arrives; a TVS placed further down the trace protects the pin, but leaves the trace itself vulnerable. Second, by shunting transients to ground at the point of entry, we prevent the analog traces from acting as antennas that could radiate electromagnetic interference (EMI) into other sensitive areas of the PCB.
+Using this aluminum case provides two major benefits:
+* **Heat Sinking:** The metal case pulls heat away from the components, preventing them from burning out.
+* **Electrical Shielding:** The metal shell acts as a shield, stopping electrical noise from the engine from interfering with the ECU's "brain."
 
-**Impedance Management:** The RC filter is positioned at the MCU to keep the analog trace low-impedance from end to end. Placing a high-value resistor at the connector would reduce noise but effectively turn the entire trace into an antenna. The chosen values balance ADC input requirements against sensor loading to maximize noise immunity.
+![PCB in Case](./hupftronik_motorsteurgerat_24p_v1_in_case.jpg)
 
-**Fault Tolerance:** If 12 V is accidentally applied to an analog input, the `USBLC6-2SC6` will conduct heavily and may be destroyed. This is an acceptable failure mode. We distinguish between **invisible threats** (ESD) and **active errors** (incorrect wiring). Designing for the latter with the same weight as the former would compromise signal quality for 99.9% of normal operation to guard against a scenario already outside the operating specification.
+!!! tip "Sourcing"
+    [Insert specific AliExpress product/search link here]
 
-## Low-side driver outputs
+### Custom / DIY Solutions
+If you prefer your own housing, you can do so, but you must handle two things carefully:
+1. **The Connector:** You will need to source the 24-pin automotive header separately, as it is not a standard part.
+2. **The Heat:** Plastic (3D printed) cases trap heat. If you use plastic, you **must** design a flat aluminum base plate and use a thermal pad to connect the PCB to that metal plate.
 
-The board provides six low-side switched outputs across two MOSFET topologies. All channels are driven from a SN74ACT244PWR buffer with 5 V supply and protected by a common active clamp scheme; the IAC channel adds a freewheeling diode for reasons described below.
+---
 
-### Why discrete MOSFETs and not smart high-side drivers
+## Keeping it Cool (Thermal Management)
 
-The obvious alternative to this design is a smart power IC — an Infineon BTS, ST VND, or similar integrated high-side switch with built-in current limiting, thermal shutdown, and fault reporting.
+The "injector drivers" (the parts that fire your fuel injectors) generate heat. If they get too hot, they will fail.
 
-!!! standpunkt "Standpunkt"
-    Smart high-side drivers are genuinely useful parts. They are not useful here. The loads on this board are relays, solenoids, and injectors — well-understood, current-limited loads that do not need a chip to babysit them. What they need is low Rds(on) and a gate drive circuit that can actually switch them hard. Discrete MOSFETs deliver both for a fraction of the cost. The protection that matters — transient suppression — is handled externally with passive components that are cheaper, faster, and more transparent than an integrated protection FSM. The tradeoff is that we own the gate drive design. That turns out to be a one-resistor and one-buffer job.
+If you use the aluminum enclosure, you can significantly improve cooling by placing a **Thermal Interface Material (TIM) pad** (a squishy, non-conductive heat pad) between the bottom of the PCB and the inside floor of the case.
 
-### Gate drive: SN74ACT244PWR buffer
+| Setup | Heat Level | Cooling Requirement |
+| :--- | :--- | :--- |
+| **2 Cylinders per Driver** (Standard) | Low | Standard PCB cooling is usually enough. A thermal pad is a good "extra" safety measure. |
+| **4 Cylinders per Driver** (High Stress) | High | **Mandatory:** You must use a thermal pad to bridge the heat directly to the aluminum case. |
 
-The STM32F405 GPIOs operate at 3.3 V with limited drive current. Driving MOSFETs directly from a 3.3 V GPIO has two problems: first, 3.3 V Vgs is above threshold but below the Vgs values at which both parts reach their datasheet Rds(on) spec (typically characterised at 4.5 V or 10 V). Second, 3.3 V logic leaves meaningful margin on the table in terms of switching speed — a lower drive voltage means slower charging of Ciss.
+*(For the math behind these requirements, see the **Thermal Analysis** section in the Technical Appendix)*
 
-A SN74ACT244PWR octal buffer solves both. The ACT family accepts TTL-level inputs (VIH = 2.0 V), so the 3.3 V STM32 outputs drive it cleanly. The buffer switches its outputs rail-to-rail to 5 V, and can source or sink up to 24 mA per channel. All six output channels run through this buffer before reaching their gate resistors.
+---
 
-### Protection topology
+## Sensor Inputs (Analog Inputs)
 
-**Active clamp** — All channels use a BZT52C36S 36 V zener in series with a 1N4148WS signal diode from drain to ground. When the driver switches off an inductive load, the resulting voltage spike is clamped at approximately 36 V, and the inductive energy is dissipated in the zener. The signal diode blocks reverse conduction during normal operation.
+Analog inputs are used to read sensors (like temperature or pressure). Because engine bays are "electrically noisy," the signals are cleaned up before they reach the processor.
 
-**Freewheeling diode** — The IAC channel adds an SS210 Schottky diode from drain to VIN_KL30. During the off-phase of each PWM cycle, this provides a low-impedance recirculation path for the solenoid current, bypassing the active clamp entirely.
+### Quick Specs
+* **Input Voltage:** Accepts 0–5 V (scales it down to 0–3.24 V for the processor).
+* **Filtering:** Removes high-frequency electrical noise.
+* **Protection:** Includes a "TVS diode" to protect against static electricity (ESD).
 
-!!! standpunkt "Standpunkt"
-    The SS210 on IAC is the only freewheeling diode on the board, and it earns its place. IAC is the only output running continuous PWM at meaningful frequencies — every other channel is effectively on/off. Without the freewheeling path, every switching edge dumps the solenoid's inductive energy into the zener. That is acceptable occasionally; it becomes a sustained thermal load at PWM frequencies. The other channels do not have this problem, so they do not get the diode.
+### How it Works
+1. **Protection:** As soon as the signal enters the board, a diode blocks static shocks from hitting the processor.
+2. **Cleaning:** A small network of resistors and a capacitor (an RC filter) smooths out the signal.
+3. **Scaling:** The processor can only handle up to 3.3 V. The circuit scales the standard 5 V sensor signal down so it fits safely.
 
-### NCE8005AS — relay and solenoid drivers
+*(For a detailed circuit breakdown, see **Analog Input Topology** in the Technical Appendix)*
 
-Four channels use the NCE8005AS, a dual logic-level N-channel MOSFET in SOP-8. Two ICs cover the four outputs. Gate drive is through a 1 kΩ series resistor.
+---
 
-| Channel | Function | Protection |
-|---|---|---|
-| IAC | PWM idle air control solenoid | Active clamp + SS210 freewheeling to VIN_KL30 |
-| FAN_RELAY | Cooling fan relay | Active clamp |
-| BOOST | Boost control solenoid | Active clamp |
-| FP_RELAY | Fuel pump relay | Active clamp |
+## Outputs (Low-Side Drivers)
 
-**Switching characteristics** — Using Ciss ≈ 979 pF (verify against your NCE8005AS datasheet; NCE6005AS reference value used here):
+The ECU uses "Low-Side Drivers" to act as electronic switches for relays, solenoids, and injectors.
 
-| Parameter | Value |
-|---|---|
-| Gate resistor | 1 kΩ |
-| Peak gate current (t=0) | 5.0 mA |
-| RC time constant τ | 979 ns |
-| Gate reaches Vth (~2.5 V) | ~679 ns |
-| Rise time 10–90% | ~2.15 µs |
+### Why use discrete MOSFETs?
+You might see "Smart Drivers" in other ECUs. We use discrete MOSFETs because they are cheaper, can handle more current, and switch faster. Since we know exactly what we are powering (relays and injectors), we don't need a "smart" chip to monitor them; we just need a strong, fast switch.
 
-These are on/off channels (IAC excepted), so the ~2 µs rise time is inconsequential. The 1 kΩ gate resistor is a conservative choice that keeps gate current well within the buffer's drive capability.
+### The "Translator" (Gate Drive)
+The processor's brain (STM32) speaks in 3.3 V, but the power switches (MOSFETs) work better with 5 V. We use a **Buffer chip (SN74ACT244PWR)** to translate the 3.3 V signal into a strong 5 V signal to ensure the switches open and close as fast as possible.
 
-### IRLR2905 — injector drivers
+### 🛡️ Safety & Protection
 
-Both injector channels use a discrete IRLR2905 (55 V, 42 A, logic-level gate). Gate drive is through a 220 Ω series resistor — significantly lower than the solenoid channels — to prioritise fast switching. Injector closing time is directly determined by how quickly Vgs collapses after the drive signal goes low; slower switching means later-than-commanded closure and a real fuel delivery error. No freewheeling diode is fitted; the active clamp handles the inductive spike and the faster collapse is intentional.
+#### Active Clamping (Injectors & Solenoids)
+To protect the switching MOSFETs from the high-voltage inductive "kickback" generated when a solenoid or injector coil turns off, this board utilizes **active clamping** (a feedback path between the Drain and Gate).
 
-| Channel | Function | Protection |
-|---|---|---|
-| INJ1 | Injector 1 | Active clamp |
-| INJ2 | Injector 2 | Active clamp |
+*   ⚡ **How it Works:** When the driver turns off, the magnetic field in the injector coil collapses, generating a high-voltage spike. Once this voltage exceeds the Zener diode threshold, current flows back into the MOSFET's Gate. This turns the MOSFET slightly back on (into its linear region) to dissipate the inductive energy safely across its silicon channel.
+*   🕒 **Fast Injector Closing:** By clamping the inductive spike at a relatively high voltage (typically $50\text{--}60\ \text{V}$), the magnetic field is forced to collapse rapidly. This results in fast and repeatable injector closing times, minimizing injector lag.
+*   🌡️ **Thermal Distribution:** The robust MOSFET silicon absorbs the bulk of the thermal energy spike, preventing small, discrete diodes on the board from overheating.
 
-**Switching characteristics** — Ciss = 1562 pF (datasheet typ, Vds = 25 V):
+#### The IAC Diode (Freewheeling)
+Unlike the injectors, the Idle Air Control (`IAC`) channel operates under continuous high-frequency Pulse-Width Modulation (PWM).
 
-| Parameter | Value |
-|---|---|
-| Gate resistor | 220 Ω |
-| Peak gate current (t=0) | 22.7 mA |
-| RC time constant τ | 344 ns |
-| Gate reaches Vth (~2.0 V) | ~176 ns |
-| Rise time 10–90% | ~756 ns |
+*   🔄 **The Continuous Duty Challenge:** Because the `IAC` switch cycle repeats thousands of times per minute, using active clamping would dump continuous thermal energy into the MOSFET, leading to rapid overheating.
+*   🟢 **The Solution:** The `IAC` channel features a dedicated **Freewheeling Diode** routed to $+12\ \text{V}$. When the channel switches off, the inductive current recirculates through this diode at a low voltage drop ($\approx 0.7\ \text{V}$). This shifts the thermal dissipation away from the MOSFET, keeping the driver cool during sustained PWM operation.
 
-The 220 Ω gate resistor is close to the lower limit given the ACT244's 24 mA output rating — peak gate current at turn-on is 22.7 mA. Going lower would risk exceeding the buffer's continuous output current limit. Going higher is the right move if EMI becomes a concern on a future board revision.
+---
+
+### 📊 Output Summary Table
+
+All low-side channels are rated for automotive voltage levels. Due to heat dissipation constraints on the PCB, the practical on-board continuous current limits are lower than the standalone silicon ratings.
+
+| Channel | Controls | MOSFET Used | Datasheet Max ($I_D$ @ 25°C) | Board Design Limit |
+| :--- | :--- | :--- | :--- | :--- |
+| `INJ1` & `INJ2` | Fuel Injectors | `IRLR2905` (D-PAK) | `42 A` | **Thermally Limited** <br> Recommended **`< 5 A`** peak |
+| `IAC` | Idle Air Control (PWM) | `NCE6005AS` (SOIC-8) | `5 A` | **`< 2.0 A`** peak |
+| `BOOST` | Boost Solenoid | `NCE6005AS` (SOIC-8) | `5 A` | **`< 2.0 A`** peak |
+| `FAN_RELAY` | Cooling Fan Relay | `NCE6005AS` (SOIC-8) | `5 A` | **`< 2.0 A`** peak |
+| `FP_RELAY` | Fuel Pump Relay | `NCE6005AS` (SOIC-8) | `5 A` | **`< 2.0 A`** peak |
+
+<small>\* *Note: The IRLR2905's silicon capability is high, but thermal performance on the PCB restricts actual continuous current. Refer to the thermal calculations in Section 1 for multi-injector bank limit details.*</small>
+
+---
+# 🛠️ Technical Appendix
+
+This section contains the mathematical proofs and detailed component specifications for engineers and advanced users.
+
+### 1. Thermal Analysis
+
+!!! warning "The 4-Injector Single-Driver Constraint"
+    If a 4-cylinder engine reuses an original wiring loom (or you have an 8- or 6-cylinder with 2 injector banks) that connects all injectors of a bank to one channel, the heat increases drastically. 
+
+    Without heatsinking, the IRLR2905 MOSFET (with an ambient air resistance of $R_{\theta\mathrm{JA}} = 50\ \text{°C/W}$) would experience a junction temperature rise of:
+
+    $$\Delta T_{\mathrm{JA}} = 3.88\ \text{W} \cdot 50\ \text{°C/W} = 194\ \text{°C}$$
+
+    Adding a 50°C engine bay ambient temperature results in **244°C**, far exceeding the 175°C silicon limit.
+
+#### Loss Calculations
+
+*   **Conduction Losses ($P_{\mathrm{cond}}$)**
+    Parallel resistance for 4 injectors is $3\ \Omega$; Peak current at 14V is $4.67\ \text{A}$.
+    
+    $$P_{\mathrm{cond}} = I_{\mathrm{peak}}^2 \cdot R_{\mathrm{DS(on)}} \cdot D = (4.67\ \text{A})^2 \cdot 0.035\ \Omega \cdot 0.80 \approx 0.61\ \text{W}$$
+
+*   **Inductive Losses ($P_{\mathrm{clamp}}$)**
+    At 6000 RPM (100 Hz switching), the energy dumped into the Zener clamp is:
+    
+    $$P_{\mathrm{clamp}} = E_{\mathrm{clamp}} \cdot f = 0.0327\ \text{J} \cdot 100\ \text{Hz} \approx 3.27\ \text{W}$$
+
+*   **Total Thermal Load**
+    
+    $$P_{\mathrm{total}} = 0.61\ \text{W} + 3.27\ \text{W} = 3.88\ \text{W}$$
+
+---
+
+### 2. Analog Input Topology
+
+ESD Protection
+:   `USBLC6-2SC6` bidirectional TVS diode placed at the connector to prevent traces from acting as antennas for EMI.
+
+RC Network
+:   $R_{\mathrm{series}}$ ($1.8\ \text{k}\Omega$), $R_{\mathrm{shunt}}$ ($3.3\ \text{k}\Omega$), and $C_{\mathrm{shunt}}$ ($100\ \text{nF}$).
+
+Corner Frequency
+:   $f_c \approx 1.37\ \text{kHz}$
+
+!!! info "Fault Tolerance"
+    The TVS diode is designed to sacrifice itself if 12 V is accidentally applied to an input, maintaining signal purity for normal 0–5V operation.
+
+---
+
+### 3. Output Characteristics
+
+All channels are driven by the `SN74ACT244PWR` buffer (rail-to-rail `5 V`, `24 mA` source/sink).
+
+| Specification | NCE8005AS (Relays/Solenoids) | IRLR2905 (Injectors) |
+| :--- | :--- | :--- |
+| **Gate Resistor** | `1 kΩ` | `220 Ω` *(chosen to maximize switching speed)* |
+| **Rise Time (10–90%)** | `~2.15 µs` | `~756 ns` |
+| **EMI Corner Frequency ($f_c$)** <br><small>Transition to $-40\text{ dB/dec}$ roll-off</small> | `~148 kHz` <br><small>$f_c = \frac{1}{\pi \cdot t_r}$</small> | `~421 kHz` <br><small>$f_c = \frac{1}{\pi \cdot t_r}$</small> |
+| **Design Goal** | Conservative current draw; speed is not critical for slower inductive loads. | Optimized to **minimize switching losses** (reducing time spent in the linear region) and minimize injector dead-time. |
+
+!!! note "Wiring, Noise, & Troubleshooting Guide"
+    The injector drivers are optimized for rapid switching to keep thermal losses and injector lag as low as possible. In a typical vehicle installation, this high-speed switching behaves as follows:
+
+    *   🔌 **Natural Harness Filtering**  
+        The physical length and parasitic inductance of the engine wiring harness tend to act as a natural low-pass filter, which typically attenuates high-frequency EMI emissions before they can radiate significantly.
+
+    *   🌀 **Wire Twisting (Highly Recommended)**  
+        When constructing or modifying the wiring loom, twist each injector's switched ground (low-side) wire together with its corresponding `+12V` supply wire. This minimizes the physical loop area of the circuit, leveraging field cancellation to reduce radiated electromagnetic interference (EMI) at the source.
+
+    *   🛠️ **Interference Troubleshooting**  
+        If electrical noise couples into highly sensitive sensor signals (such as variable reluctance crank or cam sensors) through the wiring loom, the `220 Ω` gate resistor on the injector channel can be replaced with a higher value (e.g., `470 Ω` or `1 kΩ`) as a last resort. This slows down the switching transition and reduces high-frequency emissions, though it will slightly increase the driver's thermal output.
+
+
+        Here is a new section that perfectly maps out how to achieve a 4-channel sequential injection setup while respecting the board's hardware and thermal constraints.
+
+***
+
+### 🚀 4-Channel Sequential Injection Routing
+
+To run a 4-cylinder engine in fully sequential mode, you need four independent injector drivers. The board natively provides two dedicated high-current channels (`INJ1` and `INJ2`). To get the remaining two channels, you must repurpose outputs from the two `NCE6005AS` dual-MOSFET chips (`Q3` and `Q4`).
+
+#### The Hardware Constraints
+When mapping the final two injector channels, three strict rules apply:
+
+1.  **The Thermal Rule:** As established, you can only drive **one injector per `NCE6005AS` package**. 
+2.  **The `Q3` (IAC) Restriction:** Package `Q3` houses the `FAN_RELAY` and `IAC` channels. Because the `IAC` channel has a dedicated freewheeling diode (which prevents the high-voltage inductive spike needed for fast injector closing), **the `IAC` channel can NEVER be used for an injector**. Doing so will result in a severely "lazy" closing time and unpredictable fueling.
+3.  **The IAC Downgrade:** While `IAC` cannot drive an injector, it *can* safely be repurposed to drive a standard low-current relay (such as a fan or fuel pump).
+
+#### Valid Sequential Combinations
+
+Because the `IAC` channel is disqualified, the `FAN_RELAY` channel on chip `Q3` **must** become your 3rd injector. You then have the freedom to choose either `BOOST` or `FP_RELAY` from chip `Q4` as your 4th injector, leaving the remaining channels for relays.
+
+Here is the most safe valid configurations for 4-channel sequential injection:
+
+**Using BOOST as an Injector**
+
+| Sequential Channel | Board Output | Chip Used | Function / Load Status |
+| :--- | :--- | :--- | :--- |
+| **Injector 1** | `INJ1` | `IRLR2905` | Dedicated Injector Driver |
+| **Injector 2** | `INJ2` | `IRLR2905` | Dedicated Injector Driver |
+| **Injector 3** | `FAN_RELAY` | `Q3` | **Repurposed:** Drives Injector 3 |
+| **Injector 4** | `BOOST` | `Q4` | **Repurposed:** Drives Injector 4 |
+| *Fan Relay* | `IAC` | `Q3` | **Downgraded:** Drives a Relay (e.g., Cooling Fan) |
+| *Fuel Pump Relay* | `FP_RELAY` | `Q4` | Remains standard Fuel Pump Relay |
+
+!!! success "Configuration Summary"
+    By following this routing you spread the thermal load across all available driver packages (one injector per SOIC-8 chip) while safely avoiding the freewheeling diode on the `IAC` channel. All leftover channels safely serve as low-current relay triggers.
+
+
+### 🔄 4-Channel Sequential WITH Active IAC
+
+Since you must use the `IAC` channel for the IAC valve (due to its necessary freewheeling diode and PWM capabilities), your routing options are strictly locked into a specific configuration to satisfy the "one injector per package" rule.
+
+#### The Configuration
+
+To keep the IAC, `Q3` must share its package between the IAC valve and an injector. `Q4` will handle the 4th injector and a standard relay.
+
+| Sequential Channel | Board Output | Chip Used | Function / Load Status |
+| :--- | :--- | :--- | :--- |
+| **Injector 1** | `INJ1` | `IRLR2905` | Dedicated Injector Driver |
+| **Injector 2** | `INJ2` | `IRLR2905` | Dedicated Injector Driver |
+| **Injector 3** | `FAN_RELAY` | `Q3` | **Repurposed:** Drives Injector 3 |
+| **Injector 4** | `BOOST` | `Q4` | **Repurposed:** Drives Injector 4 |
+| *Idle Control* | `IAC` | `Q3` | **Standard:** Drives the IAC Valve |
+| *Relay A* | `FP_RELAY` | `Q4` | Remains standard Relay trigger |
+
+By running both an **Injector** (`FAN_RELAY`) and the **IAC Valve** (`IAC`) on chip `Q3`, you are pairing a low-duty-cycle load (the injector) with a continuous high-frequency PWM load (the IAC). 
+   
+While the freewheeling diode on the `IAC` channel significantly reduces the heat generated by the IAC's inductive spikes, the continuous PWM current will still raise the baseline temperature of the `Q3` package. 
+
+!!! warning "To run this safely:"
+    *   Add a small adhesive **heatsink** to Q3 or risk damaging the device.
+
+    *   **High-Impedance Only:** You absolutely must use high-impedance (high-Z) fuel injectors ($>10\ \Omega$) to keep the injector current draw as low as possible (typically $\approx 1\ \text{A}$ peak).
+
+    *   **Healthy IAC Valve:** Ensure your IAC valve is in good condition and not shorting or pulling excessive current.

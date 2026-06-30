@@ -7,19 +7,7 @@ The Motorsteuergerät 24P V1 is Hüpftronik's main engine control unit — an op
 around the STM32F405 microcontroller and running a rusEFI firmware image built from the rusEFI firmware project. It handles fuel injection, ignition
 timing, and auxiliary outputs through a single sealed 24-pin connector.
 
-!!! standpunkt "Standpunkt"
-    We build this for ourselves, choosing intentionality over the shortcut of simply "finishing the car." By combining standard solutions with hard-won experience, we treat this ECU as a story of growth rather than just a piece of hardware. We believe the true value is found in the reasoning and the struggle, and we document it all honestly to provide a blueprint for building with purpose.
-
 ![PCB Render](./hupftronik_motorsteurgerat_24p_v1_pcbrender.png)
-
-## Enclosure
-
-Although the board is designed for common cast aluminium 24 Pins "AliExpres" enclosure, it is not part of the product at this time.
-
-When used with this enclosure this is the result:
-
-![PCB in Case](./hupftronik_motorsteurgerat_24p_v1_in_case.jpg)
-
 
 ## Specifications
 
