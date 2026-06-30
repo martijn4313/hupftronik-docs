@@ -32,7 +32,9 @@ Using this aluminum case provides two major benefits:
 
 ### Custom / DIY Solutions
 If you prefer your own housing, you can do so, but you must handle two things carefully:
+
 1. **The Connector:** You will need to source the 24-pin automotive header separately, as it is not a standard part.
+
 2. **The Heat:** Plastic (3D printed) cases trap heat. If you use plastic, you **must** design a flat aluminum base plate and use a thermal pad to connect the PCB to that metal plate.
 
 ---
