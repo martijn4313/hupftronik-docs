@@ -83,4 +83,4 @@ When you have worked through each category, you should be able to answer the fol
 - What sensors beyond the baseline?
 - Do any auxiliary loads push you over the onboard I/O limit?
 
-Once those are settled, return to the [Setup and Commissioning](setup-and-commissioning.md) guide and continue from the firmware selection step.
+Once those are settled, return to the Setup and Commissioning guide of the ECU and continue from the firmware selection step.
