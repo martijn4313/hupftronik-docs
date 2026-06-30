@@ -1,6 +1,6 @@
 # Motorsteuergerät 24P V1
 <div style="display: flex; align-items: flex-end; flex-wrap: wrap;">
-<div class="tooltip"><alt="Tooltip">Current status : Beta testing</div></div>
+<div class="tooltip"><alt="Tooltip">Current status : Alpha testing</div></div>
 ##Overview
 
 The Motorsteuergerät 24P V1 is Hüpftronik's main engine control unit — an open-hardware ECU built

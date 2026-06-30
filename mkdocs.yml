@@ -40,7 +40,7 @@ nav:
   - Home: index.md
   - Products:
     - Motorsteuergerät 24P V1:
-      - Overview & Specs: products/motorsteuergerat-24p-v1/index.md
+      - Overview & Specs: products/motorsteuergerat-24p-v1/24p_v1_overview.md
       - Hardware & Wiring: products/motorsteuergerat-24p-v1/wiring.md
       - Design Reference: products/motorsteuergerat-24p-v1/reference.md
       - Setup guide:
