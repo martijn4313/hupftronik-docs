@@ -2,6 +2,8 @@
 <div style="display: flex; align-items: flex-end; flex-wrap: wrap;">
 <div class="tooltip"><alt="Tooltip">Current status : Alpha testing</div></div>
 
+---
+
 ## 1. Overview
 
 The Motorsteuergerät 24P V1 is Hüpftronik's main engine control unit — an open-hardware ECU built
@@ -9,6 +11,8 @@ around the STM32F405 microcontroller and running a rusEFI firmware image built f
 timing, and auxiliary outputs through a single sealed 24-pin connector.
 
 ![PCB Render](./hupftronik_motorsteurgerat_24p_v1_pcbrender.png)
+
+---
 
 ## 2. Specifications
 
@@ -23,6 +27,8 @@ timing, and auxiliary outputs through a single sealed 24-pin connector.
 | SD card logging | Native SDIO — supports Class 10 cards |
 | CAN bus | 1× ISO 11898 channel |
 | USB | Full-speed — console access and firmware flashing |
+
+---
 
 ## 3. IO Overview
 
@@ -80,6 +86,8 @@ All 24 pins are on a single FCI connector, arranged in three rows (A, B, C) of e
 |---|---|---|
 | A5 | CAN_H | CAN bus high |
 | B5 | CAN_L | CAN bus low |
+
+---
 
 ## 4. Expansion headers
 

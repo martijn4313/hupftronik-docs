@@ -1,5 +1,7 @@
 # Wiring and hardware guide
 
+---
+
 ## 1. Wiring harness
 
 Most installations are easiest when the harness stays simple and the original loom can be reused where it is still healthy. If the factory loom is intact, keep it as the base and add only the new power, trigger, and sensor wiring needed by the board. If you build a new harness, keep the injector and sensor wiring short, use automotive-grade stranded cable, and avoid routing it next to high-current ignition, starter, or alternator leads.
@@ -10,6 +12,8 @@ A few practical rules help a lot:
 - Use wire with insulation rated for the engine bay and choose a conductor size that keeps voltage drop low under cranking.
 - Keep the injector return path and sensor ground consistent, because a poor ground often causes intermittent faults.
 - Label the loom clearly and leave enough service slack near the engine and fuse box for future repairs.
+
+---
 
 ## 2. Connectors
 
@@ -22,6 +26,8 @@ A few habits make the harness more reliable:
 - Use the correct terminal size for the wire gauge and avoid overfilling the connector.
 - Add heat-shrink or sealing where moisture, vibration, or splash exposure is expected.
 
+---
+
 ## 3. Injector and driver choices
 
 The board supports several injector strategies, and the best choice depends on the engine, the available outputs, and the firmware mode. Batch fire is the simplest and most forgiving option, while 
@@ -30,6 +36,8 @@ Common choices include:
 - 4-cylinder batch fire: a simple starting point that keeps the wiring straightforward and reduces the number of driver channels needed.
 - 6- or 8-cylinder bank fire: the same idea can be used with grouped injection events, but the power distribution and trigger wiring still need to be clean and symmetrical.
 - Sequential injection: the best choice when you want cylinder-by-cylinder fueling and the board has enough suitable outputs available.
+
+---
 
 ## 4. Configurations
 

@@ -43,7 +43,6 @@ nav:
       - Overview & Specs: products/motorsteuergerat-24p-v1/24p_v1_overview.md
       - Hardware & Wiring: products/motorsteuergerat-24p-v1/wiring.md
       - Design Reference: products/motorsteuergerat-24p-v1/reference.md
-      - Interactive Thermal Widget: products/motorsteuergerat-24p-v1/interactive_heat.html
       - Setup guide:
         - Setup Overview: products/motorsteuergerat-24p-v1/setup/index.md
         - Flashing the PCB: products/motorsteuergerat-24p-v1/setup/flashing.md

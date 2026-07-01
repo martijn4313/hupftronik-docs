@@ -4,15 +4,21 @@ This sub-sections in this guide detail the process for bringing the Motorsteuerg
 
 This page provides a brief outline of the steps involved and links to more detailed information.
 
+---
+
 ## 1. Overview
 
 The Motorsteuergerät 24P V1 serves as a hardware platform designed to host open-source ECU firmware. It ships entirely blank. You intentionally choose the software ecosystem that matches your specific engineering goals and engine requirements. Currently, the board fully supports **rusEFI** and **Speeduino**.
+
+---
 
 ## 2. Plan Your Build
 
 Before you flash firmware or terminate a single wire, you need to know what you are building. Fuel delivery, intake, exhaust, sensors, and auxiliary loads all require explicit decisions before any of the later steps make sense—and your choices here directly constrain your wiring and calibration later.
 
 Work through the [Plan Your Build](#) guide before continuing.
+
+---
 
 ## 3. Firmware Architecture: Choosing Your Path
 
@@ -31,6 +37,8 @@ Two firmwares, two philosophies. For most users, this is enough to decide:
 
     **Speeduino: the superloop approach.** Speeduino relies on the **Arduino Core**. It operates on a "superloop" structure: a continuous main loop with hardware timers and interrupts directly driving the outputs. The STM32F405RGT6 is massively overpowered for this framework, so the result is extremely low overhead, near-instantaneous execution for basic tasks, and a significantly lower barrier to entry if you want to modify the source.
 
+---
+
 ## 4. Compilation and Flashing
 
 The project intentionally omits prebuilt binaries from the main upstream repositories. You compile the image from source. This ensures you run the exact version that matches your hardware revision and prevents "black box" deployments where you do not understand what runs on your hardware.
@@ -48,6 +56,8 @@ The project intentionally omits prebuilt binaries from the main upstream reposit
 3.  Compile the binary image.
 4.  Connect your SWD or USB adapter to the board's flashing header.
 5.  Execute the flash command and verify the sequence completes without errors.
+
+---
 
 ## 5. Wiring and Integration
 
@@ -71,6 +81,8 @@ The wiring sequence directly dictates system safety. Follow this progression:
 
 Why do we enforce strict ground separation and offer no reverse-polarity hand-holding on every I/O pin? Every series protection diode or PTC fuse introduces a voltage drop, changes the filter time constant, or increases the thermal load on the board. We prioritize a clean, fast signal path—where $R_{series}$ and $C_{shunt}$ are optimized purely for actual sensor bandwidth—over protecting the board from a miswired harness. A multimeter and careful pin-out verification prevent avoidable failures without compromising engine performance.
 
+---
+
 ## 6. Verification and Testing
 
 Once powered, perform a staged verification. Do not rush this process.
@@ -81,6 +93,8 @@ Once powered, perform a staged verification. Do not rush this process.
 4.  **I/O Validation:** Verify that sensor inputs read within expected physical ranges (e.g., Coolant and Intake Air temperatures match ambient) and trigger outputs correctly in test mode.
 
 Do not proceed to live engine testing until the board communicates reliably and you verify every physical connection.
+
+---
 
 ## 7. Next Steps
 

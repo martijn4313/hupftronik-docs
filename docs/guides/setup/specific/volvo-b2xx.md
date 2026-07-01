@@ -5,6 +5,7 @@
 
 ![Volvo Turbo Hare](../../../assets/icons/volvo_turbo_hare.png)
 
+---
 
 ## 1. Overview
 
@@ -13,6 +14,8 @@ The B2xx Redblock remains a well-understood inline-four with an impressive reput
 Running one on a standalone ECU is straightforward. 
 
 Since the "LH2.4 era" of the B2xx production spans almost a decade, OEM parts to convert carbureted or K-Jetronic units are often inexpensive and easy to find. Of course, for exotic (turbo) builds, different routes exist, but those are conscious choices left up to you.
+
+---
 
 ## 2. Variants covered
 
@@ -29,6 +32,7 @@ Since the "LH2.4 era" of the B2xx production spans almost a decade, OEM parts to
 Firing order for all variants: **1–3–4–2**. Cylinder 1 is at the front of the engine (timing cover end).
 
 ---
+
 
 ## 3. Engine position sensor
 
@@ -80,6 +84,7 @@ While alternative trigger options exist (e.g., front-mounted Hall sensors, after
 
 ---
 
+
 ## 4. Camshaft position sensor
 
 !!! standpunkt "Batch fueling and wasted spark meet the performance mandate"
@@ -100,6 +105,7 @@ Do not install or wire a camshaft position sensor. The B2xx engine architecture 
 The ECU calculates engine phase solely based on the primary crank trigger (60-2). Batch-fire injection and wasted spark ignition provide sufficient resolution, drivability, and power for both naturally aspirated and high-boost applications, completely bypassing the potential failure points of a retrofitted cam sync.
 
 ---
+
 
 ## 5. Throttle position sensor
 
@@ -128,6 +134,7 @@ Calibrate in TunerStudio using the *TPS calibration* tool. Do not use generic co
 The Volvo 850 TPS is cheap, widely available, and its signal range perfectly matches the expectations of modern ADCs. We power the TPS exclusively from the 24P V1's dedicated $+5\,\text{V}$ sensor reference rail. Do not power the TPS from a switched $+12\,\text{V}$ line and divide the voltage down. The dedicated rail ensures the reference voltage remains absolutely stable relative to the MCU's Analog-to-Digital Converter, eliminating sensor drift when system voltage fluctuates under heavy electrical loads.
 
 ---
+
 
 ## 6. Air charge sensing
 
@@ -161,6 +168,7 @@ If a T-MAP is unavailable, use an Audi `06B905379D` push-in IAT sensor paired wi
 We position the MAP/IAT sensor downstream of the throttle and intercooler, as close to the plenum as practical. Measuring air temperature before the intercooler provides false data to the speed-density algorithm, leaning out the engine under thermal load. The T-MAP is chosen because it minimizes wiring runs and eliminates a potential vacuum leak point by combining two critical sensors into one robust OEM housing.
 
 ---
+
 
 ## 7. Fueling
 
@@ -208,6 +216,7 @@ We retain K-Jetronic vane pumps on converted cars because their extreme flow hea
 
 ---
 
+
 ## 8. Ignition
 
 !!! standpunkt "High cylinder pressures demand high spark energy"
@@ -239,6 +248,7 @@ The 24P V1 uses $+5\,\text{V}$ logic-level ignition outputs rather than internal
 
 ---
 
+
 ## 9. rusEFI configuration
 
 Key values to verify before the first start:
@@ -252,6 +262,8 @@ Key values to verify before the first start:
 | Ignition mode | Wasted spark |
 | Trigger type | `60/2` |
 | Trigger offset | Set via timing light after first start |
+
+---
 
 ## 10. Known issues
 

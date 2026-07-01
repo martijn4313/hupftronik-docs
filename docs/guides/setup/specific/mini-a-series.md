@@ -1,5 +1,7 @@
 # Mini A-Series Setup Guide
 
+---
+
 ## 1. Coming Soon
 
 This guide covers the setup and installation of the Motorsteuergerät 24P V1 in Mini vehicles equipped with the A-Series engine.

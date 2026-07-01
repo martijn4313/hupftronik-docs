@@ -8,6 +8,7 @@ This document covers how the ECU is built, how it stays cool, and how the electr
 
 ---
 
+
 ## 1. Enclosure Options
 
 Choosing the right case is important for protecting the electronics and keeping the unit from overheating.
@@ -39,6 +40,7 @@ If you prefer your own housing, you can do so, but you must handle two things ca
 
 ---
 
+
 ## 2. Keeping it Cool (Thermal Management)
 
 The "injector drivers" (the parts that fire your fuel injectors) generate heat. If they get too hot, they will fail.
@@ -53,6 +55,7 @@ If you use the aluminum enclosure, you can significantly improve cooling by plac
 *(For the math behind these requirements, see the **Thermal Analysis** section in the Technical Appendix)*
 
 ---
+
 
 ## 3. Sensor Inputs (Analog Inputs)
 
@@ -71,6 +74,7 @@ Analog inputs are used to read sensors (like temperature or pressure). Because e
 *(For a detailed circuit breakdown, see **Analog Input Topology** in the Technical Appendix)*
 
 ---
+
 
 ## 4. Outputs (Low-Side Drivers)
 
@@ -102,6 +106,7 @@ Unlike the injectors, the Idle Air Control (`IAC`) channel operates under contin
 
 ---
 
+
 ### 4.4. Output Summary Table
 
 All low-side channels are rated for automotive voltage levels. Due to heat dissipation constraints on the PCB, the practical on-board continuous current limits are lower than the standalone silicon ratings.
@@ -117,6 +122,7 @@ All low-side channels are rated for automotive voltage levels. Due to heat dissi
 <small>\* *Note: The IRLR2905's silicon capability is high, but thermal performance on the PCB restricts actual continuous current. Refer to the thermal calculations in Section 1 for multi-injector bank limit details.*</small>
 
 ---
+
 # 🛠️ Technical Appendix
 
 This section contains the mathematical proofs and detailed component specifications for engineers and advanced users.
@@ -152,6 +158,7 @@ With a 50°C ambient temperature it would reach about **244°C**.
 
 ---
 
+
 ### 4.6. Discrete MOSFET vs. Automotive Smart Driver
 
 Using an automotive smart low-side driver instead of a low-$R_{\mathrm{DS(on)}}$ discrete MOSFET shifts the thermal profile and alters the system's failure mode.
@@ -175,9 +182,10 @@ The discrete IRLR2905 and NCE6005 will continue operating under extreme thermal 
 
 Check operating conditions and heatsinking with this widget.
 
-<iframe src="../interactive_heat.html" title="Interactive thermal comparison" style="width: 100%; min-height: 700px; border: 0;"></iframe>
-
----
+<div style="margin: 0 0 0.25rem 0; padding: 0;">
+  <iframe src="../interactive_heat.html" title="Interactive thermal comparison" style="width: 100%; height: 650px; min-height: 650px; border: 0; display: block; margin: 0;"></iframe>
+</div>
+<hr style="margin-top: 0.5rem; margin-bottom: 1rem;">
 
 ### 4.7. Analog Input Topology
 
@@ -194,6 +202,7 @@ Corner Frequency
     The TVS diode is designed to sacrifice itself if 12 V is accidentally applied to an input, maintaining signal purity for normal 0–5V operation.
 
 ---
+
 
 ### 4.8. Output Characteristics
 

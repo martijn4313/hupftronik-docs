@@ -1,5 +1,7 @@
 # Speeduino Setup Guide for Motorsteuergerät 24P V1
 
+---
+
 ## 1. Coming Soon
 
 This guide covers the setup and configuration of Speeduino firmware on the Motorsteuergerät 24P V1.

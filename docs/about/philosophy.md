@@ -2,6 +2,8 @@
 
 Hüpftronik revolves around frugality. This is not about cheapness or cutting corners; it is about making every design choice count. We want products that are light and efficient in material, cost, and complexity, so that more people can build, repair, and use them without unnecessary barriers.
 
+---
+
 ## 1. Core principles
 
 Presented with a tradeoff between absolute fault tolerance and peak operational performance, we prioritize the latter. We distinguish between systemic threats (environmental noise, thermal loads), which are inevitable and must be engineered against, and user errors (miswiring, extreme abuse), which are avoidable. We believe that compromising the 99.9% of normal operation to guard against a preventable failure is an inefficient design.
@@ -13,6 +15,8 @@ This results in a number of core values:
 * **No Fluff:** We deliberately avoid unnecessary complexity. Instead of using expensive, all-in-one ICs (that will likely be impossible to source 10 to 20 years from now) we favor straightforward, readily available components.
 * **Highly Repairable:** Because we avoid complex proprietary chips, the ECU is incredibly forgiving and easy to fix.
 * **Brand Independence:** We try to use components that are as brand-independent as possible, with clear engineering justifications for their selection. This also applies to the use of specialized ICs. Sometimes they are absolutely necessary to meet the product's footprint and performance targets, but we always thoroughly investigate and consider standard alternatives first.
+
+---
 
 ## 2. Community and Ecosystem
 

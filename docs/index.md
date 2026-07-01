@@ -6,6 +6,8 @@ This documentation covers the Hüpftronik ECU ecosystem.
 
 On this site, you can find product overviews, hardware setup and wiring guides, flashing instructions, tuning basics, and troubleshooting tips for our ECU systems.
 
+---
+
 ## 1. What you can find here
 
 - Product introductions for the Motorsteurgerät and Schildknappe systems
@@ -14,11 +16,15 @@ On this site, you can find product overviews, hardware setup and wiring guides, 
 - Tuning fundamentals and troubleshooting advice
 - Reference material for connectors, sensors, and common setups
 
+---
+
 ## 2. Start here
 
 - [Motorsteurgerät overview and wiring](products/motorsteuergerat/)
 - [Tuning basics](tuning/basics.md)
 - [Troubleshooting tips](tuning/troubleshooting.md)
+
+---
 
 ## 3. Hüpftronik
 

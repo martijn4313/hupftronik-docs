@@ -1,5 +1,7 @@
 # Programming the board
 
+---
+
 ## 1. What is flashing?
 
 Before the board can do anything, we need to copy the program that makes it work. This is called flashing.
@@ -12,6 +14,8 @@ This page shows the basic steps to update the STM32F405 used on the Motorsteuerg
 There are two flashing options:
 - USB DFU bootloader: hold the boot switch while powering the board to enter DFU mode.
 - ST-Link via SWD.
+
+---
 
 ## 2. USB DFU bootloader
 
@@ -26,6 +30,7 @@ Notes
 - If the device is locked or not responding, perform a full chip erase first.
 - Verify the correct firmware for the STM32F405 before flashing.
 
+---
 
 ## 3. Flashing with STM32CubeProgrammer
 
@@ -49,6 +54,8 @@ Requirements:
 6. Set the start address to `0x08000000`.
 7. Click **Start Programming** (or **Download**).
 8. After programming completes, reset the board and verify operation.
+
+---
 
 ## 4. Command-line flashing
 
