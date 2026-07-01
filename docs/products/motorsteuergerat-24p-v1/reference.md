@@ -175,7 +175,7 @@ The discrete IRLR2905 and NCE6005 will continue operating under extreme thermal 
 
 Check operating conditions and heatsinking with this widget.
 
-<iframe src="../interactive_heat.html" title="Interactive thermal comparison" style="width: 100%; min-height: 760px; border: 0;"></iframe>
+<iframe src="../interactive_heat.html" title="Interactive thermal comparison" style="width: 100%; min-height: 700px; border: 0;"></iframe>
 
 ---
 
