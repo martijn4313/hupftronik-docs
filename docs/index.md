@@ -6,7 +6,7 @@ This documentation covers the Hüpftronik ECU ecosystem.
 
 On this site, you can find product overviews, hardware setup and wiring guides, flashing instructions, tuning basics, and troubleshooting tips for our ECU systems.
 
-## What you can find here
+## 1. What you can find here
 
 - Product introductions for the Motorsteurgerät and Schildknappe systems
 - Wiring and mounting guidance for DIY car and motorcycle builds
@@ -14,17 +14,17 @@ On this site, you can find product overviews, hardware setup and wiring guides, 
 - Tuning fundamentals and troubleshooting advice
 - Reference material for connectors, sensors, and common setups
 
-## Start here
+## 2. Start here
 
 - [Motorsteurgerät overview and wiring](products/motorsteuergerat/)
 - [Tuning basics](tuning/basics.md)
 - [Troubleshooting tips](tuning/troubleshooting.md)
 
-## Hüpftronik 
+## 3. Hüpftronik
 
 Hüpftronik is a collection of hardware solutions and documentation specifically for people building their own custom car and motorcycle projects.
 
-### Motorsteurgerät
+### 3.1. Motorsteurgerät
 
 The Motorsteurgerät (Engine Control Unit) is the first product in the Hüpftronik world. 
 

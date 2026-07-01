@@ -1,6 +1,6 @@
 # Programming the board
 
-## What is flashing?
+## 1. What is flashing?
 
 Before the board can do anything, we need to copy the program that makes it work. This is called flashing.
 Flashing means copying this program into the MCU (microcontroller) memory on the board. 
@@ -13,7 +13,7 @@ There are two flashing options:
 - USB DFU bootloader: hold the boot switch while powering the board to enter DFU mode.
 - ST-Link via SWD.
 
-## USB DFU bootloader
+## 2. USB DFU bootloader
 
 1. Hold the boot switch and power the board to enter DFU mode.
 2. Connect the board to USB.
@@ -27,7 +27,7 @@ Notes
 - Verify the correct firmware for the STM32F405 before flashing.
 
 
-## Flashing with STM32CubeProgrammer
+## 3. Flashing with STM32CubeProgrammer
 
 Requirements:
 
@@ -50,7 +50,7 @@ Requirements:
 7. Click **Start Programming** (or **Download**).
 8. After programming completes, reset the board and verify operation.
 
-## Command-line flashing
+## 4. Command-line flashing
 
 Example using STM32CubeProgrammer CLI:
 

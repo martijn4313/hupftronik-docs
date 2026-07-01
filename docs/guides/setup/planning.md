@@ -9,7 +9,7 @@ Every project differs. Each category below has more than one valid solution, and
 
 ---
 
-## Fuel Delivery
+## 1. Fuel Delivery
 
 Fuel delivery is the path from tank to cylinder. Every component in this chain interacts with how the ECU controls fuelling, so the choices here propagate forward into calibration.
 
@@ -25,7 +25,7 @@ Fuel delivery is the path from tank to cylinder. Every component in this chain i
 
 ---
 
-## Intake
+## 2. Intake
 
 The intake system covers everything between the air and the intake ports. Plan this before wiring sensors, since sensor placement depends on the intake topology.
 
@@ -39,7 +39,7 @@ The intake system covers everything between the air and the intake ports. Plan t
 
 ---
 
-## Exhaust
+## 3. Exhaust
 
 The exhaust side is primarily a boost control problem for forced-induction builds. On naturally aspirated engines there is little here the ECU manages beyond optional exhaust gas temperature monitoring.
 
@@ -47,7 +47,7 @@ The exhaust side is primarily a boost control problem for forced-induction build
 
 ---
 
-## Sensors
+## 4. Sensors
 
 The ECU is only as capable as what it can measure. The sensors below divide into baseline (required for any functioning installation) and optional (required only if your strategy calls for them).
 
@@ -63,7 +63,7 @@ The ECU is only as capable as what it can measure. The sensors below divide into
 
 ---
 
-## Auxiliary
+## 5. Auxiliary
 
 Auxiliary outputs are loads the ECU switches that sit outside the core engine control loop.
 
@@ -71,7 +71,7 @@ Auxiliary outputs are loads the ECU switches that sit outside the core engine co
 
 ---
 
-## Before You Continue
+## 6. Before You Continue
 
 When you have worked through each category, you should be able to answer the following:
 

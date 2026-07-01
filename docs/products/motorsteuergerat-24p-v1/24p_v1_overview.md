@@ -1,7 +1,8 @@
 # Motorsteuergerät 24P V1
 <div style="display: flex; align-items: flex-end; flex-wrap: wrap;">
 <div class="tooltip"><alt="Tooltip">Current status : Alpha testing</div></div>
-##Overview
+
+## 1. Overview
 
 The Motorsteuergerät 24P V1 is Hüpftronik's main engine control unit — an open-hardware ECU built
 around the STM32F405 microcontroller and running a rusEFI firmware image built from the rusEFI firmware project. It handles fuel injection, ignition
@@ -9,7 +10,7 @@ timing, and auxiliary outputs through a single sealed 24-pin connector.
 
 ![PCB Render](./hupftronik_motorsteurgerat_24p_v1_pcbrender.png)
 
-## Specifications
+## 2. Specifications
 
 | Parameter | Value |
 |---|---|
@@ -23,7 +24,7 @@ timing, and auxiliary outputs through a single sealed 24-pin connector.
 | CAN bus | 1× ISO 11898 channel |
 | USB | Full-speed — console access and firmware flashing |
 
-## IO Overview
+## 3. IO Overview
 
 All 24 pins are on a single FCI connector, arranged in three rows (A, B, C) of eight columns.
 
@@ -79,6 +80,27 @@ All 24 pins are on a single FCI connector, arranged in three rows (A, B, C) of e
 |---|---|---|
 | A5 | CAN_H | CAN bus high |
 | B5 | CAN_L | CAN bus low |
+
+## 4. Expansion headers
+
+The PCB includes three simple 4-pin headers for board-level expansion and service access.
+
+| Header | Pin | Signal | Description |
+|---|---|---|---|
+| H1 | 1 | SPARE_IN5_RAW | Spare digital input 5 |
+|  | 2 | SPARE_IN4_RAW | Spare digital input 4 |
+|  | 3 | SPARE_IN3_RAW | Spare digital input 3 |
+|  | 4 | GND | Ground reference |
+| H2 | 1 | +3V3 | 3.3 V power for SWD adapter |
+|  | 2 | SWDIO | SWD data line |
+|  | 3 | SWCLK | SWD clock line |
+|  | 4 | GND | Ground reference |
+| H3 | 1 | +5V | 5 V power output |
+|  | 2 | RS232_RX | RS232 receive input |
+|  | 3 | RS232_TX | RS232 transmit output |
+|  | 4 | GND | Ground reference |
+
+These headers make it easy to attach external debugging, logging or custom input wiring without modifying the main 24-pin automotive connector.
 
 
 

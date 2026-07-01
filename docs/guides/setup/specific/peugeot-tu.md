@@ -1,10 +1,10 @@
 # Peugeot TU Series Setup Guide
 
-## Coming Soon
+## 1. Coming Soon
 
 This guide covers the setup and installation of the Motorsteuergerät 24P V1 in Peugeot vehicles equipped with the TU series engine.
 
-### Contents
+### 1.1. Contents
 - Engine specifications
 - Wiring harness adaptation
 - Sensor configuration

@@ -6,7 +6,7 @@
 ![Volvo Turbo Hare](../../../assets/icons/volvo_turbo_hare.png)
 
 
-## Overview
+## 1. Overview
 
 The B2xx Redblock remains a well-understood inline-four with an impressive reputation across multiple disciplines. 
 
@@ -14,7 +14,7 @@ Running one on a standalone ECU is straightforward.
 
 Since the "LH2.4 era" of the B2xx production spans almost a decade, OEM parts to convert carbureted or K-Jetronic units are often inexpensive and easy to find. Of course, for exotic (turbo) builds, different routes exist, but those are conscious choices left up to you.
 
-## Variants covered
+## 2. Variants covered
 
 | Code | Displacement | Valvetrain | Notes |
 |------|-------------|------------|-------|
@@ -30,12 +30,12 @@ Firing order for all variants: **1–3–4–2**. Cylinder 1 is at the front of 
 
 ---
 
-## Engine position sensor
+## 3. Engine position sensor
 
 !!! standpunkt "Trigger integrity dictates engine survival"
     The trigger signal is the heartbeat of the ECU. Take this seriously. Chasing trigger or sync problems later on is a major headache, and a fluctuating timing signal causes immediate engine damage under high load.
 
-### Quick Scan
+### 3.1. Quick Scan
 
 | Path | Target | Sensor | rusEFI Type | Hardware Effort |
 |------|--------|--------|-------------|-----------------|
@@ -44,25 +44,25 @@ Firing order for all variants: **1–3–4–2**. Cylinder 1 is at the front of 
 | B21 / B23 | 60-2 Crank wheel | VR (Passive) | `60/2` | Fabricate bracket |
 | Distributor | 4 pulses / 2 revs | Contact | `Basic Distributor` | Lock advance weights |
 
-### Technical Detail
+### 3.2. Technical Detail
 
-#### Standard late B230
+#### 3.2.1. Standard late B230
 Late B230 engines (LH-Jetronic 2.4, roughly 1989 onward) come from the factory with a 60-2 toothed ring on the flywheel and a VR sensor mounted in a bracket on the back of the engine. There is a cutout in the bellhousing of the gearbox. Older M4x gearboxes sometimes lack this cutout. 
 
 Verify the flywheel before assuming; Motronic and Renix flywheels look similar but have different tooth counts and use incompatible sensors.
 
-#### Early Motronic B230 and B230ET
+#### 3.2.2. Early Motronic B230 and B230ET
 The early Bosch Motronic system relies on two VR sensors at different positions rather than a single multi-tooth ring. Swap to a late B230 "dog-dish" flywheel with the standard 60-2 ring. Any late M46 or M47 flywheel from an LH2.4 car is a direct fit. Dual-mass M90 flywheels from a post-1995 940 technically work with an M90 gearbox, but they have lower limits for input torque and RPM.
 
 !!! warning "Flywheel condition"
     Used parts accumulate significant mileage. When selecting a flywheel, inspect critically for micro-cracking and verify the condition of the damper on dual-mass units.
 
-#### B21 and B23
+#### 3.2.3. B21 and B23
 The B21 and B23 predate Volvo's move to flywheel-based trigger sensing. Press or key a 60-2 wheel onto the crankshaft snout at the front of the engine, and mount a VR pickup in a fabricated bracket. Target a sensor gap of $0.5 - 1.0\,\text{mm}$. The sensor bracket must be absolutely rigid.
 
 You can swap to a later 60-2 flywheel and modify the bellhousing, but the early engine blocks lack the factory mounting holes for the rear VR sensor bracket.
 
-#### Distributor contacts
+#### 3.2.4. Distributor contacts
 Although not optimal, you can use the distributor contact points as a trigger source. 
 
 > This primarily applies to setups like older B18/B20 pushrod engines or carbureted engines with a good working mechanical distributor. You must build a board that takes the flyback pulse and conditions it for the ECU. 
@@ -74,45 +74,45 @@ Weld or pin the mechanical advance weights solid in the fully advanced position.
 ??? info "Signal conditioning when using distributor contacts"
     The signal routes to the `T1+` input through a conditioning circuit: a $1\,\text{k}\Omega$ pull-up resistor to $+5\,\text{V}$, a $10\,\text{nF}$ capacitor to ground for debounce, and a $1\,\text{k}\Omega$ series resistor to adapt the square wave for the differential VR stage.
 
-### Design Rationale
+### 3.3. Design Rationale
 
 While alternative trigger options exist (e.g., front-mounted Hall sensors, aftermarket cam triggers), utilizing the factory 60-2 VR setup offers the best balance of high-resolution timing data and mechanical simplicity. The 60-2 wheel provides enough density for highly accurate ignition timing calculation during rapid acceleration transients, outperforming 4-pulse distributor setups entirely.
 
 ---
 
-## Camshaft position sensor
+## 4. Camshaft position sensor
 
 !!! standpunkt "Batch fueling and wasted spark meet the performance mandate"
     Adding a cam sync for fully sequential operation yields marginal idle emissions improvements but introduces unnecessary mechanical complexity to a B2xx. We optimize for robust performance, not theoretical perfection. The 24P V1 focuses on batch fueling and wasted spark, rendering a camshaft position sensor obsolete.
 
-### Quick Scan
+### 4.1. Quick Scan
 
 | Component | Status | Target |
 |-----------|--------|--------|
 | Cam Sensor | Omitted | N/A |
 
-### Technical Detail
+### 4.2. Technical Detail
 
 Do not install or wire a camshaft position sensor. The B2xx engine architecture does not require it for standard performance builds.
 
-### Design Rationale
+### 4.3. Design Rationale
 
 The ECU calculates engine phase solely based on the primary crank trigger (60-2). Batch-fire injection and wasted spark ignition provide sufficient resolution, drivability, and power for both naturally aspirated and high-boost applications, completely bypassing the potential failure points of a retrofitted cam sync.
 
 ---
 
-## Throttle position sensor
+## 5. Throttle position sensor
 
 !!! standpunkt "Transient fueling requires intent"
     A MAP sensor alone cannot predict rapid throttle transients; it only reacts to them after the manifold pressure drops. An analog TPS is mandatory for immediate acceleration enrichment. Relying solely on MAP for acceleration is a lazy configuration that compromises drivability.
 
-### Quick Scan
+### 5.1. Quick Scan
 
 | Component | Part Number | Output | Connector |
 |-----------|-------------|--------|-----------|
 | Volvo 850 TPS | Volvo `1336385` / Bosch `0 280 122 001` | $\sim 0.5\,\text{V}$ (closed) to $4.5\,\text{V}$ (WOT) | 3-pin Bosch |
 
-### Technical Detail
+### 5.2. Technical Detail
 
 The stock B2xx throttle body lacks an analog TPS, relying only on an idle contact switch. Bolt a Volvo 850 TPS (a three-wire Bosch potentiometer) to the throttle body using a fabricated adapter bracket. 
 
@@ -123,18 +123,18 @@ Wire it directly to the 24P V1:
 
 Calibrate in TunerStudio using the *TPS calibration* tool. Do not use generic constants; calibrate against your actual sensor limits.
 
-### Design Rationale
+### 5.3. Design Rationale
 
 The Volvo 850 TPS is cheap, widely available, and its signal range perfectly matches the expectations of modern ADCs. We power the TPS exclusively from the 24P V1's dedicated $+5\,\text{V}$ sensor reference rail. Do not power the TPS from a switched $+12\,\text{V}$ line and divide the voltage down. The dedicated rail ensures the reference voltage remains absolutely stable relative to the MCU's Analog-to-Digital Converter, eliminating sensor drift when system voltage fluctuates under heavy electrical loads.
 
 ---
 
-## Air charge sensing
+## 6. Air charge sensing
 
 !!! standpunkt "Speed-density is the correct operating model"
     A speed-density tune belongs to the builder, not to the airbox. The OEM hot-wire Air Mass Meter (AMM) restricts airflow and ties fuel delivery to a specific intake geometry; MAP and IAT do not. Switching to speed-density is not a workaround for a missing sensor—it is a conscious engineering choice for a modified engine.
 
-### Quick Scan
+### 6.1. Quick Scan
 
 | Application | Sensor Type | Bosch Part Number | Range (Absolute) |
 |-------------|-------------|-------------------|------------------|
@@ -142,7 +142,7 @@ The Volvo 850 TPS is cheap, widely available, and its signal range perfectly mat
 | Mild Boost | T-MAP | `0 281 002 437` | $0.2 - 3.0\,\text{bar}$ |
 | High Boost | T-MAP | `0 281 006 059` | $0.5 - 4.0\,\text{bar}$ |
 
-### Technical Detail
+### 6.2. Technical Detail
 
 Leave the stock AMM disconnected. It serves no purpose in this installation. The 24P V1 supports Speed-Density natively using MAP and IAT. 
 
@@ -156,20 +156,20 @@ A T-MAP sensor packages both MAP and IAT elements into a single body. The Bosch 
 **Discrete Sensors**
 If a T-MAP is unavailable, use an Audi `06B905379D` push-in IAT sensor paired with a standalone Bosch MAP sensor sized for your build pressure. Configure the IAT in TunerStudio using the standard Bosch NTC curve.
 
-### Design Rationale
+### 6.3. Design Rationale
 
 We position the MAP/IAT sensor downstream of the throttle and intercooler, as close to the plenum as practical. Measuring air temperature before the intercooler provides false data to the speed-density algorithm, leaning out the engine under thermal load. The T-MAP is chosen because it minimizes wiring runs and eliminates a potential vacuum leak point by combining two critical sensors into one robust OEM housing.
 
 ---
 
-## Fueling
+## 7. Fueling
 
 !!! standpunkt "Software cannot fix a dry pump"
     The fuel system must be mechanically sound before the ECU takes over. We retain high-headroom mechanical setups like twin-pump architectures because physical flow volume and anti-starvation mechanics trump algorithmic fault-tolerance. We do not attempt to patch a failing fuel system with software.
 
-### Quick Scan
+### 7.1. Quick Scan
 
-#### Injectors (Bosch EV1, High-Impedance)
+#### 7.1.1. Injectors (Bosch EV1, High-Impedance)
 
 | Engine | System | Bosch Part | Flow Rate (@ 3 bar) |
 |--------|--------|------------|---------------------|
@@ -178,7 +178,7 @@ We position the MAP/IAT sensor downstream of the throttle and intercooler, as cl
 | B230FT | LH2.4 | `0 280 150 804` | $337\,\text{cc/min}$ |
 | B234F | LH2.4 | `0 280 150 749` | $214\,\text{cc/min}$ |
 
-#### Fuel Pumps
+#### 7.1.2. Fuel Pumps
 
 | Setup | Pump Type | Part Number | Flow Rate |
 |-------|-----------|-------------|-----------|
@@ -187,7 +187,7 @@ We position the MAP/IAT sensor downstream of the throttle and intercooler, as cl
 | 940 Post-1995 | In-tank | Walbro GSS342 / DW200 | $255\,\text{L/hr}$ |
 | K-Jetronic | Inline | Bosch `0 580 254 911` | $\sim 180\,\text{L/hr}$ |
 
-### Technical Detail
+### 7.2. Technical Detail
 
 **Injection — Batch**
 Wire the high-impedance EV1 injectors in parallel on each channel. Set the injector flow rate in TunerStudio and use a dead time of $1.1\,\text{ms}$ at $14\,\text{V}$ as a starting point.
@@ -200,7 +200,7 @@ The ECU does not replicate OEM relay logic directly. Route the ECU fuel pump out
 *   **940 Post-1995:** The fuel hanger easily accepts a modern $255\,\text{L/hr}$ upgrade pump (e.g., Walbro GSS342).
 *   **K-Jetronic Conversions:** Utilize a conventional return-line regulator (e.g., $3.0\,\text{bar}$). Do not use a returnless setup, as the massive flow volume of a vane pump will overwhelm it.
 
-### Design Rationale
+### 7.3. Design Rationale
 
 The 24P V1 injector drivers are discrete, un-limited MOSFETs rated for a $14\,\text{A}$ continuous load. Two high-impedance EV1 injectors wired in parallel draw approximately $2\,\text{A}$, operating well within the thermal limits of the board.
 
@@ -208,19 +208,19 @@ We retain K-Jetronic vane pumps on converted cars because their extreme flow hea
 
 ---
 
-## Ignition
+## 8. Ignition
 
 !!! standpunkt "High cylinder pressures demand high spark energy"
     Relying on a 30-year-old distributor cap and rotor for forced induction is a liability. Wasted spark removes physical wear items and delivers consistent ignition energy at high RPM.
 
-### Quick Scan
+### 8.1. Quick Scan
 
 | Setup | Coil Type | Coil Part Number | Igniter (Power Stage) | Plug Gap |
 |-------|-----------|------------------|-----------------------|----------|
 | Wasted Spark | 2x2 Pack | Bosch `0 221 503 407` | Bosch `0 227 100 200` | $0.6 - 0.7\,\text{mm}$ |
 | OEM Distributor | Single Coil | Stock LH2.4 | Stock Bosch `-124` or `-145` | $0.7 - 0.8\,\text{mm}$ |
 
-### Technical Detail
+### 8.2. Technical Detail
 
 **Ignition — Wasted Spark (Recommended)**
 Use a standard 4-cylinder wasted spark coil pack featuring two independent primary windings (the Bosch `0 221 503 407` is the European standard). Pair this with a 2-channel "dumb" external igniter (Bosch `0 227 100 200`). Wire the $+5\,\text{V}$ logic-level outputs from the ECU directly to the igniter inputs.
@@ -233,13 +233,13 @@ If you opt to retain the OEM single coil, high-tension (HT) distributor, and ign
 *   **Head-mounted distributors:** Standard on 740/940 series. These frequently suffer from leaky shaft seals and mechanical play.
 *   **Wiring Warning:** Verify the condition of the "Radio Suppression Relay" on 940 models, as a failing relay causes intermittent voltage drops to the coil.
 
-### Design Rationale
+### 8.3. Design Rationale
 
 The 24P V1 uses $+5\,\text{V}$ logic-level ignition outputs rather than internal high-current IGBTs. Driving ignition coils directly generates intense localized heat and introduces severe flyback voltage spikes inside the enclosure. By pushing the high-current switching out to a rugged, inexpensive external Bosch igniter bolted to a heat sink in the engine bay, we optimize the ECU's thermal environment. If a coil shorts and over-currents the system, the external igniter burns out—an acceptable, avoidable failure mode that protects the microcontroller from catastrophic damage.
 
 ---
 
-## rusEFI configuration
+## 9. rusEFI configuration
 
 Key values to verify before the first start:
 
@@ -253,6 +253,6 @@ Key values to verify before the first start:
 | Trigger type | `60/2` |
 | Trigger offset | Set via timing light after first start |
 
-## Known issues
+## 10. Known issues
 
 *   **B21/B23 Bracket Fabrication:** The front crank snout on early engines is shorter than on the later B230. Off-the-shelf trigger wheel kits designed for the B230 do not fit without significant modification. Design your brackets and spacer hubs intentionally.

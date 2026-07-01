@@ -2,7 +2,7 @@
 
 Hüpftronik revolves around frugality. This is not about cheapness or cutting corners; it is about making every design choice count. We want products that are light and efficient in material, cost, and complexity, so that more people can build, repair, and use them without unnecessary barriers.
 
-## Core principles
+## 1. Core principles
 
 Presented with a tradeoff between absolute fault tolerance and peak operational performance, we prioritize the latter. We distinguish between systemic threats (environmental noise, thermal loads), which are inevitable and must be engineered against, and user errors (miswiring, extreme abuse), which are avoidable. We believe that compromising the 99.9% of normal operation to guard against a preventable failure is an inefficient design.
 
@@ -14,7 +14,7 @@ This results in a number of core values:
 * **Highly Repairable:** Because we avoid complex proprietary chips, the ECU is incredibly forgiving and easy to fix.
 * **Brand Independence:** We try to use components that are as brand-independent as possible, with clear engineering justifications for their selection. This also applies to the use of specialized ICs. Sometimes they are absolutely necessary to meet the product's footprint and performance targets, but we always thoroughly investigate and consider standard alternatives first.
 
-## Community and Ecosystem
+## 2. Community and Ecosystem
 
 The DIY community surrounding standalone ECUs is massive. It goes far beyond hobbyists; it forms an entire ecosystem of professionals who do this for a living. This includes tuners, installation technicians, restoration shops, and countless others. Although smaller than the automotive sector, the dedicated scene of builders retromodding classic motorcycles with modern fuel injection is also a vital and growing part of this network.
 
