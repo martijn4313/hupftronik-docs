@@ -1,4 +1,5 @@
 # CAN Bus Basics
+<div class="content-status status-ai-draft" title="AI-drafted from general engineering knowledge this session — verify against your specific hardware, engine code, or factory documentation before relying on it. See About > Open-Source &amp; Community for what this means.">AI-drafted — verify before use</div>
 
 CAN (Controller Area Network) is a two-wire serial bus that lets multiple electronic modules share
 data over a single pair of wires instead of a dedicated wire per signal. The Motorsteuergerät 24P V1

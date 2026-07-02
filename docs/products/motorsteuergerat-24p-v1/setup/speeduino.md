@@ -1,4 +1,5 @@
 # Speeduino Setup Guide for Motorsteuergerät 24P V1
+<div class="content-status status-ai-draft" title="AI-drafted from general engineering knowledge this session — verify against your specific hardware, engine code, or factory documentation before relying on it. See About > Open-Source &amp; Community for what this means.">AI-drafted — verify before use</div>
 
 This guide walks through first-time Speeduino configuration on a freshly-flashed Motorsteuergerät
 24P V1 — telling the firmware which pin does what, so the generic Speeduino image becomes a config

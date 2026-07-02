@@ -1,4 +1,5 @@
 # License & Disclaimer
+<div class="content-status status-ai-draft" title="AI-drafted from general engineering knowledge this session — verify against your specific hardware, engine code, or factory documentation before relying on it. See About > Open-Source &amp; Community for what this means.">AI-drafted — verify before use</div>
 
 This page covers the legal terms around using Hüpftronik hardware, firmware, and documentation, and
 the safety disclaimer that applies to every build described on this site. Read this before you rely

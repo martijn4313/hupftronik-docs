@@ -1,4 +1,5 @@
 # Setup and Commissioning
+<div class="content-status status-reviewed" title="Checked for internal consistency and technical accuracy; not tested on physical hardware. See About > Open-Source & Community for what this means.">Reviewed</div>
 
 This sub-sections in this guide detail the process for bringing the Motorsteuergerät 24P V1 online.
 

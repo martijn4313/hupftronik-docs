@@ -1,4 +1,5 @@
 # Troubleshooting
+<div class="content-status status-ai-draft" title="AI-drafted from general engineering knowledge this session — verify against your specific hardware, engine code, or factory documentation before relying on it. See About > Open-Source &amp; Community for what this means.">AI-drafted — verify before use</div>
 
 Every procedure page on this site points here when something doesn't work as described. This page
 collects the symptoms builders hit most often, organized by the stage of commissioning they show up

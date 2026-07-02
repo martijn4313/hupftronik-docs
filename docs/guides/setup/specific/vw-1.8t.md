@@ -1,4 +1,5 @@
 # Volkswagen 1.8T
+<div class="content-status status-ai-draft" title="AI-drafted from general engineering knowledge this session — verify against your specific hardware, engine code, or factory documentation before relying on it. See About > Open-Source &amp; Community for what this means.">AI-drafted — verify before use</div>
 
 The VW/Audi 1.8T (EA827-based, 20-valve turbo four-cylinder, common engine codes AEB/APU/AWP/AWU
 and others across the Mk4 Golf/Jetta, B5 Passat, and Audi A4/A3 platforms) is one of the

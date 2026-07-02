@@ -111,7 +111,9 @@ pre code {
 }
 
 /* Tooltip positioned inline with header - wrapper flex container */
-h1 + .tooltip {
+h1 + .tooltip,
+h1 + .content-status,
+.tooltip + .content-status {
   display: inline-flex;
   margin-left: 0.5em;
 }
@@ -138,6 +140,33 @@ h1 + .tooltip {
   width: 20px;
   height: auto;
   vertical-align: middle;
+}
+
+/* --- Content-status badges ---
+   Tells the reader whether a page's technical claims were checked for internal
+   consistency this session ("Reviewed") or are freshly AI-drafted and still need
+   verification against the reader's own hardware ("AI-drafted"). See
+   about/community.md#content-status-labels for the full explanation. */
+.content-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  border-radius: 4px;
+  padding: 2px 8px;
+  font-size: 1em;
+  border: 1px solid;
+}
+
+.content-status.status-reviewed {
+  background: rgba(0, 153, 255, 0.08);
+  border-color: rgba(0, 153, 255, 0.3);
+  color: #0099FF;
+}
+
+.content-status.status-ai-draft {
+  background: rgba(255, 190, 0, 0.1);
+  border-color: rgba(255, 190, 0, 0.4);
+  color: #FFBE00;
 }
 
 /* Make expandable sections easier to spot */

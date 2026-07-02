@@ -1,4 +1,5 @@
 # Plan Your Build
+<div class="content-status status-reviewed" title="Checked for internal consistency and technical accuracy; not tested on physical hardware. See About > Open-Source & Community for what this means.">Reviewed</div>
 
 An ECU can only manage what you have planned for. Before you flash firmware, terminate a single wire, or open a tuning dashboard, you need to know what your engine system looks like in full—the injectors the ECU drives, the sensors it reads, and the actuators it commands all trace back to decisions you make here.
 

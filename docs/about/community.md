@@ -1,4 +1,5 @@
 # Open-Source & Community
+<div class="content-status status-ai-draft" title="AI-drafted from general engineering knowledge this session — verify against your specific hardware, engine code, or factory documentation before relying on it. See About > Open-Source &amp; Community for what this means.">AI-drafted — verify before use</div>
 
 This page explains what "open-source" means in practice for Hüpftronik, and how to get help or
 contribute back. Read this if you're stuck on a build, want to report a documentation gap, or want
@@ -41,6 +42,29 @@ installation technicians, restoration shops, and the smaller but active scene re
 motorcycles with modern fuel injection. See [Our Philosophy](philosophy.md#2-community-and-ecosystem)
 for why Hüpftronik considers all of these part of the same community, including builders who never
 touch a soldering iron themselves.
+
+## 5. Content status labels
+
+Most pages on this site carry a small badge next to the title, next to (or instead of) the product
+status badge. It tells you how much scrutiny the page's technical content has had — read it before
+you trust a page's specifics with your engine:
+
+- <span class="content-status status-reviewed" style="display:inline-flex;">Reviewed</span> — the
+  content has been checked for internal consistency, cross-references, and (where applicable) the
+  underlying math. It has **not** been tested on physical hardware — that verification is still
+  yours to do, the same as with any documentation.
+- <span class="content-status status-ai-draft" style="display:inline-flex;">AI-drafted — verify
+  before use</span> — written from general engineering knowledge, not checked against a specific
+  car's factory documentation or bench-tested. Treat exact part numbers, trigger patterns, and
+  wiring specifics on these pages as a starting point to verify, not a confirmed fact — the page
+  itself usually says where the biggest verification risk is (e.g. "confirm against your engine
+  code").
+
+Pages without either badge (like [Our Philosophy](philosophy.md) or the homepage) don't carry
+technical claims that need this kind of status in the first place.
+
+If you verify a page against your own hardware and it holds up — or if you find it doesn't — report
+it per [§3](#3-reporting-a-documentation-problem) so the badge can be corrected for the next reader.
 
 ---
 

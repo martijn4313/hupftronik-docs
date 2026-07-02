@@ -1,4 +1,5 @@
 # Hardware Reference
+<div class="content-status status-reviewed" title="Checked for internal consistency and technical accuracy; not tested on physical hardware. See About > Open-Source & Community for what this means.">Reviewed</div>
 
 This guide provides a walkthrough of the schematics and PCB designs for the Hüpftronik Engine Control Unit (ECU). 
 

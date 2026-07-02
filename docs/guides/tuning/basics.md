@@ -1,4 +1,5 @@
 # Tuning Basics
+<div class="content-status status-ai-draft" title="AI-drafted from general engineering knowledge this session — verify against your specific hardware, engine code, or factory documentation before relying on it. See About > Open-Source &amp; Community for what this means.">AI-drafted — verify before use</div>
 
 Tuning is the process of teaching the ECU how much fuel to inject and when to fire the spark for
 every combination of engine speed and load. A stock base map gets an engine running; only tuning

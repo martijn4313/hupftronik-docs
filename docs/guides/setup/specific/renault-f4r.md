@@ -1,4 +1,5 @@
 # Renault F4R
+<div class="content-status status-ai-draft" title="AI-drafted from general engineering knowledge this session — verify against your specific hardware, engine code, or factory documentation before relying on it. See About > Open-Source &amp; Community for what this means.">AI-drafted — verify before use</div>
 
 The Renault F4R (2.0L 16v inline-four, used across the Mégane, Scénic, Laguna, and the Clio Sport
 variants) is a common standalone-ECU swap in the hot-hatch scene, largely because the Clio
