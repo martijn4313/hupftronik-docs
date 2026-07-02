@@ -157,16 +157,42 @@ h1 + .content-status,
   border: 1px solid;
 }
 
+.content-status::before {
+  content: "";
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  flex: none;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-size: contain;
+  mask-size: contain;
+  -webkit-mask-position: center;
+  mask-position: center;
+}
+
 .content-status.status-reviewed {
   background: rgba(0, 153, 255, 0.08);
   border-color: rgba(0, 153, 255, 0.3);
   color: #0099FF;
 }
 
+.content-status.status-reviewed::before {
+  background-color: #0099FF;
+  -webkit-mask-image: url('data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12,2C6.5,2,2,6.5,2,12s4.5,10,10,10s10-4.5,10-10S17.5,2,12,2z M10,17l-5-5l1.41-1.41L10,14.17l7.59-7.59L19,8L10,17z"/></svg>');
+  mask-image: url('data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12,2C6.5,2,2,6.5,2,12s4.5,10,10,10s10-4.5,10-10S17.5,2,12,2z M10,17l-5-5l1.41-1.41L10,14.17l7.59-7.59L19,8L10,17z"/></svg>');
+}
+
 .content-status.status-ai-draft {
   background: rgba(255, 190, 0, 0.1);
   border-color: rgba(255, 190, 0, 0.4);
   color: #FFBE00;
+}
+
+.content-status.status-ai-draft::before {
+  background-color: #FFBE00;
+  -webkit-mask-image: url('data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12,2L14,9L21,11L14,13L12,20L10,13L3,11L10,9Z"/></svg>');
+  mask-image: url('data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12,2L14,9L21,11L14,13L12,20L10,13L3,11L10,9Z"/></svg>');
 }
 
 /* Make expandable sections easier to spot */
