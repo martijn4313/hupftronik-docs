@@ -1,6 +1,5 @@
 # Motorsteuergerät 24P V1
-<div style="display: flex; align-items: flex-end; flex-wrap: wrap;">
-<div class="tooltip"><alt="Tooltip">Current status : Alpha testing</div></div>
+<div class="tooltip" title="Alpha testing: hardware and documentation are still under active development.">Current status: Alpha testing</div>
 
 ---
 
@@ -34,6 +33,12 @@ timing, and auxiliary outputs through a single sealed 24-pin connector.
 
 All 24 pins are on a single FCI connector, arranged in three rows (A, B, C) of eight columns.
 
+!!! danger "Reverse polarity and shorted outputs will destroy the board"
+    `VIN_KL30` and `VIN_KL15` are unprotected +12 V inputs, and the low-side driver outputs below
+    will fail if shorted to power. Verify every pin against this table with a multimeter before
+    applying power for the first time. See [Wiring and hardware guide](wiring.md) for full harness
+    practice.
+
 **Power and reference**
 
 | Pin | Signal | Description |
@@ -44,6 +49,10 @@ All 24 pins are on a single FCI connector, arranged in three rows (A, B, C) of e
 | B8, C1 | GND | Power ground (×2) |
 
 **Engine position**
+
+A VR (Variable Reluctance) sensor is a passive magnetic pickup that generates an AC signal as
+toothed metal (typically the crank or cam wheel) passes it; the board reads this differentially on
+`VR_POS`/`VR_NEG` through a dedicated MAX9924 VR-to-digital conditioner IC.
 
 | Pin | Signal | Description |
 |---|---|---|
@@ -109,6 +118,16 @@ The PCB includes three simple 4-pin headers for board-level expansion and servic
 |  | 4 | GND | Ground reference |
 
 These headers make it easy to attach external debugging, logging or custom input wiring without modifying the main 24-pin automotive connector.
+
+`SPARE_IN3`–`SPARE_IN5` on H1 accept 0–5 V digital triggers, the same as `SPARE_IN1`/`SPARE_IN2` on
+the main connector. You'll need to add your own connector to H1 to wire them up (a standard 2.54 mm
+pin header mates directly).
+
+!!! warning "H1 spare inputs have no dedicated ESD protection"
+    Unlike the main connector's analog inputs (protected by a TVS diode — see the
+    [Hardware Reference](reference.md#3-sensor-inputs-analog-inputs)), `SPARE_IN3`–`SPARE_IN5` on H1
+    are protected only by their input resistor divider. Keep wiring to these pins short and route it
+    away from ignition and high-current leads.
 
 
 

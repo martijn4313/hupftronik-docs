@@ -30,7 +30,8 @@ A few habits make the harness more reliable:
 
 ## 3. Injector and driver choices
 
-The board supports several injector strategies, and the best choice depends on the engine, the available outputs, and the firmware mode. Batch fire is the simplest and most forgiving option, while 
+The board supports several injector strategies, and the best choice depends on the engine, the available outputs, and the firmware mode. Batch fire is the simplest and most forgiving option, while sequential injection gives the most control at the cost of needing more driver channels and more careful wiring.
+
 Common choices include:
 
 - 4-cylinder batch fire: a simple starting point that keeps the wiring straightforward and reduces the number of driver channels needed.
@@ -52,7 +53,7 @@ Recommended wiring practice:
 - Provide a solid ground point near the engine or the ECU mounting area.
 - If the engine uses a shared injector rail, verify injector polarity and trigger logic before applying power.
 
-For a typical 4-cylinder batch-fire setup, one injector driver can be assigned to the group while a separate relay or output handles the fuel pump and cooling fan. For V6 and V8 bank-fire systems, keep the wiring symmetrical so each bank has a similar resistance and routing path.
+For a typical 4-cylinder batch-fire setup, split the injectors across the two dedicated drivers `INJ1` and `INJ2`, two cylinders per driver. Pair cylinders by firing order — the two cylinders 360° apart in the 720° cycle — not by physical position on the block; this is the same grouping used for wasted-spark ignition, and it spaces each driver's pulses evenly across the cycle. See the [Volvo B2xx guide](../../guides/setup/specific/volvo-b2xx.md#7-fueling) for a worked example. For V6 and V8 bank-fire systems, keep the wiring symmetrical so each bank has a similar resistance and routing path.
 
 ### 4.2. TBI setup
 
@@ -65,9 +66,9 @@ Practical notes:
 - If the engine originally used a mechanical or OEM-style relay arrangement, preserve the same power-up behavior so the fuel pump and injector rail behave predictably.
 - Verify that the chosen output can handle the injector type and that the firmware mode matches the engine's trigger configuration.
 
-### 4.3. 🚀 4-Channel Sequential Injection Routing
+### 4.3. 4-channel sequential injection routing
 
-Although not really needed for most older 4 cilinder engine, sequential injection can provide better idle quality and economy in some situations, but needs more careful tuning.
+Although not really needed for most older 4-cylinder engines, sequential injection can provide better idle quality and economy in some situations, but needs more careful tuning. This subsection goes deeper than 4.1/4.2 because getting a 4th sequential channel means repurposing outputs that are dedicated to other jobs elsewhere on this page — worth the detail, since getting it wrong costs you a relay output you didn't expect to lose.
 
 To run a 4-cylinder engine in fully sequential mode, you need four independent injector drivers. The board natively provides two dedicated high-current channels `INJ1` and `INJ2`. To get the remaining two channels, you must repurpose outputs from the two `NCE6005AS` dual-MOSFET chips (`Q3` and `Q4`).
 
@@ -96,6 +97,13 @@ A safe and practical routing is:
 
 !!! success "Configuration Summary"
     This routing spreads the thermal load across all available driver packages while avoiding the `IAC` freewheeling diode path for injector operation.
+
+!!! warning "This routing gives up onboard boost control"
+    Using `BOOST` as injector 4 means the board has no output left to drive a boost solenoid — full
+    4-cylinder sequential injection and onboard closed-loop boost control are mutually exclusive on
+    this board. If your build is turbocharged and needs boost control, use `FP_RELAY` as injector 4
+    instead and keep `BOOST` free; you'll then need to drive the fuel pump relay from a source other
+    than the ECU (for example, an oil-pressure or ECU-power-triggered relay wired independently).
 
 #### 4.3.3. 4-Channel Sequential WITH Active IAC
 

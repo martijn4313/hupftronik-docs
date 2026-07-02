@@ -16,7 +16,7 @@ The Motorsteuergerät 24P V1 serves as a hardware platform designed to host open
 
 Before you flash firmware or terminate a single wire, you need to know what you are building. Fuel delivery, intake, exhaust, sensors, and auxiliary loads all require explicit decisions before any of the later steps make sense—and your choices here directly constrain your wiring and calibration later.
 
-Work through the [Plan Your Build](#) guide before continuing.
+Work through the [Plan Your Build](../../../guides/setup/planning.md) guide before continuing.
 
 ---
 
@@ -52,10 +52,15 @@ The project intentionally omits prebuilt binaries from the main upstream reposit
 **The Workflow**
 
 1.  Clone the repository for your chosen firmware.
-2.  Configure the build target specifically for the Motorsteuergerät 24P V1 hardware profile.
+2.  Configure the build target specifically for the Motorsteuergerät 24P V1 hardware profile. Check
+    the firmware repository's board list for the current profile name — it's tracked there, not
+    duplicated here, so this page doesn't go stale when the profile is renamed upstream.
 3.  Compile the binary image.
 4.  Connect your SWD or USB adapter to the board's flashing header.
 5.  Execute the flash command and verify the sequence completes without errors.
+
+See [Flashing the PCB](flashing.md) for the concrete DFU and SWD flashing steps once you have a
+compiled `.bin` or `.hex` file.
 
 ---
 

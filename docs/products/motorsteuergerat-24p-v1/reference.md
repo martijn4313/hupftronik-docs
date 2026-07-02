@@ -2,7 +2,10 @@
 
 This guide provides a walkthrough of the schematics and PCB designs for the Hüpftronik Engine Control Unit (ECU). 
 
-**Design Files:** All files are available on GitHub: **[Link]**
+!!! note "Design files"
+    The board is currently in alpha testing (see the [product overview](24p_v1_overview.md)) and the
+    schematic/PCB source files are not yet published. This page will link to the GitHub repository
+    once the design is public.
 
 This document covers how the ECU is built, how it stays cool, and how the electrical circuits handle signals and power.
 
@@ -29,7 +32,10 @@ Using this aluminum case provides two major benefits:
 ![PCB in Case](./hupftronik_motorsteurgerat_24p_v1_in_case.jpg)
 
 !!! tip "Sourcing"
-    [Insert specific AliExpress product/search link here]
+    Search AliExpress or a similar marketplace for "24 pin waterproof aluminum ECU case" — several
+    sellers offer this connector/enclosure combination. We don't yet have a vetted single source to
+    link to directly; verify the connector pinout matches an FCI 24-pin sealed automotive connector
+    (3×8 grid) before buying.
 
 ### 1.3. Custom / DIY Solutions
 If you prefer your own housing, you can do so, but you must handle two things carefully:
@@ -119,11 +125,21 @@ All low-side channels are rated for automotive voltage levels. Due to heat dissi
 | `FAN_RELAY` | Cooling Fan Relay | `NCE6005AS` (SOIC-8) | `5 A` | **`< 2.0 A`** peak |
 | `FP_RELAY` | Fuel Pump Relay | `NCE6005AS` (SOIC-8) | `5 A` | **`< 2.0 A`** peak |
 
-<small>\* *Note: The IRLR2905's silicon capability is high, but thermal performance on the PCB restricts actual continuous current. Refer to the thermal calculations in Section 1 for multi-injector bank limit details.*</small>
+<small>\* *Note: The IRLR2905's silicon capability is high, but thermal performance on the PCB restricts actual continuous current. Refer to the thermal calculations in the Technical Appendix (§4.5–4.6) for multi-injector bank limit details.*</small>
+
+<small>\* *The `NCE6005AS` channels carry the same PCB-thermal-limit logic, scaled down: the SOIC-8
+package has a much smaller footprint and lower thermal mass than the IRLR2905's D-PAK, so its
+board-mounted derating is tighter in proportion. We haven't published a worked calculation for this
+package the way we have for the injector drivers (§4.5–4.6) — treat `< 2.0 A` as the practical
+continuous limit and avoid running it near the 5 A datasheet maximum on the PCB.*</small>
 
 ---
 
-# 🛠️ Technical Appendix
+## Technical Appendix
+
+Sections 1–4 above cover what most builders need. The rest of this page shows the math and
+component-level detail behind those numbers — read it if you want to verify the thermal limits
+yourself, compare driver architectures, or adapt the board for a load outside the summary table.
 
 This section contains the mathematical proofs and detailed component specifications for engineers and advanced users.
 
@@ -131,14 +147,16 @@ This section contains the mathematical proofs and detailed component specificati
 
 In a 4-injector single-driver setup, the thermal load rises, but the design remains practical when heat is moved into the enclosure efficiently. The IRLR2905 MOSFET stays well within reach of a robust thermal solution when the PCB is coupled to the aluminum case with a thermal pad.
 
-Without that path, the junction temperature rise would be:
+Without that path — PCB junction-to-ambient thermal resistance alone, $R_{\theta JA} = 50\ \text{°C/W}$ per the IRLR2905 datasheet, no thermal pad to the case — the junction temperature rise would be:
 
 $$\Delta T_{\mathrm{JA}} = 3.88\ \text{W} \cdot 50\ \text{°C/W} = 194\ \text{°C}$$
 
 With a 50°C ambient temperature it would reach about **244°C**.
 
 !!! success "Thermal coupling to enclosure"
-    A thermal pad helps moving heat out of the MOSFET and into the case.
+    A thermal pad drops the effective thermal resistance from the bare-PCB $50\ \text{°C/W}$ above to
+    roughly $8.36\ \text{°C/W}$ by giving the heat a low-resistance path into the aluminum case
+    (see §4.6.1 for the resulting junction temperatures with this coupling in place).
 
 #### 4.5.1. Loss Calculations
 
@@ -174,7 +192,7 @@ The physics of the inductive load remain identical — the energy from the injec
 | Inductive Loss | $3.27\ \text{W}$ | $3.27\ \text{W}$ |
 | Total Thermal Load | $3.88\ \text{W}$ | $4.49\ \text{W}$ |
 
-Using the same enclosure coupling ($8.36\ \text{°C/W}$) at a $50\ \text{°C}$ ambient temperature, the smart driver runs hotter ($87.5\ \text{°C}$ vs $82.4\ \text{°C}$).
+Using the same enclosure coupling introduced in §4.5 ($8.36\ \text{°C/W}$, PCB-to-case via thermal pad) at a $50\ \text{°C}$ ambient temperature, the smart driver runs hotter ($87.5\ \text{°C}$ vs $82.4\ \text{°C}$).
 
 #### 4.6.2. Architecture & Failure Modes
 
@@ -208,7 +226,7 @@ Corner Frequency
 
 All channels are driven by the `SN74ACT244PWR` buffer (rail-to-rail `5 V`, `24 mA` source/sink).
 
-| Specification | NCE8005AS (Relays/Solenoids) | IRLR2905 (Injectors) |
+| Specification | NCE6005AS (Relays/Solenoids) | IRLR2905 (Injectors) |
 | :--- | :--- | :--- |
 | **Gate Resistor** | `1 kΩ` | `220 Ω` *(chosen to maximize switching speed)* |
 | **Rise Time (10–90%)** | `~2.15 µs` | `~756 ns` |

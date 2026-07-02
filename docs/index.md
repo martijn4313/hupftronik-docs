@@ -20,9 +20,9 @@ On this site, you can find product overviews, hardware setup and wiring guides, 
 
 ## 2. Start here
 
-- [Motorsteurgerät overview and wiring](products/motorsteuergerat/)
-- [Tuning basics](tuning/basics.md)
-- [Troubleshooting tips](tuning/troubleshooting.md)
+- [Motorsteuergerät overview and wiring](products/motorsteuergerat-24p-v1/24p_v1_overview.md)
+- [Tuning basics](guides/tuning/basics.md)
+- [Troubleshooting tips](guides/setup/troubleshooting.md)
 
 ---
 

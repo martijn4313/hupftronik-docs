@@ -1,5 +1,5 @@
 # Volvo B2xx Redblock
-> "Sturdy beast of burden" — A Wise Man
+> "Sturdy beast of burden" — a description that's followed this engine family around the Volvo community for decades, and one it's earned.
 
 <br>
 
@@ -72,6 +72,11 @@ Although not optimal, you can use the distributor contact points as a trigger so
 > This primarily applies to setups like older B18/B20 pushrod engines or carbureted engines with a good working mechanical distributor. You must build a board that takes the flyback pulse and conditions it for the ECU. 
 > 
 > For engines running L-Jetronic with Renix (Volvo 360 series), we advise using the 36-2-2 flywheel these engines already possess. To keep a stock appearance on a Volvo 360, retain the HT distributor but replace the intelligent Renix coil with a "dumb" coil from a Volvo 4xx series, triggered directly by the Motorsteuergerät.
+
+!!! warning "Locking the distributor is irreversible"
+    Welding or pinning the advance weights permanently removes mechanical advance. Do this with the
+    distributor removed from the engine and the battery disconnected, and confirm before you start
+    that you're committing to ECU-controlled timing — reverting requires a replacement distributor.
 
 Weld or pin the mechanical advance weights solid in the fully advanced position. The trigger offset needs to be at least $\sim 40^\circ$ to create a workable solution. If you do not want to lock your distributor, you can run the ECU in "Fuel Only" mode.
 
@@ -198,9 +203,9 @@ We position the MAP/IAT sensor downstream of the throttle and intercooler, as cl
 ### 7.2. Technical Detail
 
 **Injection — Batch**
-Wire the high-impedance EV1 injectors in parallel on each channel. Set the injector flow rate in TunerStudio and use a dead time of $1.1\,\text{ms}$ at $14\,\text{V}$ as a starting point.
-*   **INJ1:** Cylinders 1 and 2
-*   **INJ2:** Cylinders 3 and 4
+Wire the high-impedance EV1 injectors in parallel on each channel. Pair cylinders the same way as the wasted-spark ignition groups below (360° apart in the 720° cycle), not by physical adjacency, so each batch pulse lands evenly spaced across the cycle. Set the injector flow rate in TunerStudio and use a dead time of $1.1\,\text{ms}$ at $14\,\text{V}$ as a starting point.
+*   **INJ1:** Cylinders 1 and 4
+*   **INJ2:** Cylinders 2 and 3
 
 **Fuel Pump Logic**
 The ECU does not replicate OEM relay logic directly. Route the ECU fuel pump output to drive an external relay coil; do not run main pump current directly through the low-side driver. 
@@ -230,6 +235,12 @@ We retain K-Jetronic vane pumps on converted cars because their extreme flow hea
 | OEM Distributor | Single Coil | Stock LH2.4 | Stock Bosch `-124` or `-145` | $0.7 - 0.8\,\text{mm}$ |
 
 ### 8.2. Technical Detail
+
+!!! danger "Disconnect the battery before ignition wiring"
+    Coil primary and HT secondary circuits can deliver a dangerous shock even with the engine off if
+    the battery is connected and the ECU commands a spark event during wiring. Disconnect the
+    battery negative terminal before wiring or rewiring any ignition component, and keep clear of
+    plug leads and coil towers when the battery is reconnected for testing.
 
 **Ignition — Wasted Spark (Recommended)**
 Use a standard 4-cylinder wasted spark coil pack featuring two independent primary windings (the Bosch `0 221 503 407` is the European standard). Pair this with a 2-channel "dumb" external igniter (Bosch `0 227 100 200`). Wire the $+5\,\text{V}$ logic-level outputs from the ECU directly to the igniter inputs.
@@ -268,3 +279,14 @@ Key values to verify before the first start:
 ## 10. Known issues
 
 *   **B21/B23 Bracket Fabrication:** The front crank snout on early engines is shorter than on the later B230. Off-the-shelf trigger wheel kits designed for the B230 do not fit without significant modification. Design your brackets and spacer hubs intentionally.
+
+---
+
+## 11. Next steps
+
+With the engine-specific decisions above folded into your plan, wire the harness per the
+[Wiring and hardware guide](../../../products/motorsteuergerat-24p-v1/wiring.md), then follow
+[Setup and Commissioning](../../../products/motorsteuergerat-24p-v1/setup/index.md) to flash and
+bring the board online. For first-start tuning, see [Tuning Basics](../../tuning/basics.md). If
+the engine won't start or run cleanly on the first attempt, see
+[Troubleshooting](../troubleshooting.md).

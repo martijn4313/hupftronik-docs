@@ -53,7 +53,7 @@ nav:
      - Planning your build: guides/setup/planning.md
      - Tuning Basics: guides/tuning/basics.md
      - Software Tools (TunerStudio): guides/tuning/software.md
-     - CAN Bus Basics: guides/tuning/canbus-basics.md
+     - CAN Bus Basics: guides/setup/canbus-basics.md
      - Troubleshooting: guides/setup/troubleshooting.md
 
      - Vehicle specific setup guides:
