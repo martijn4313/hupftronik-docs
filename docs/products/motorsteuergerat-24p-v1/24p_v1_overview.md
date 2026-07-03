@@ -34,12 +34,13 @@ timing, and auxiliary outputs through a single sealed 24-pin connector.
 
 All 24 pins are on a single FCI connector, arranged in three rows (A, B, C) of eight columns.
 
-!!! danger "Reverse polarity and shorted outputs will destroy the board"
-    `VIN_KL30` and `VIN_KL15` are unprotected +12 V inputs, and the low-side driver outputs below
-    will fail if shorted to power. Verify every pin against this table with a multimeter before
-    applying power for the first time. See [Wiring and hardware guide](wiring.md) for full harness
-    practice.
+!!! success "Reverse polarity and ESD protection"
+    `VIN_KL30` and `VIN_KL15` are protected +12 V inputs, there is a SHOTTKY diode in series followed by a TVS crowbar for preventing short voltage surges to reach the voltage regulators. 
 
+!!! warning "Overvoltage"
+	Applying substantial overvoltage to these power pins will cause the TVS diode to overheat and short out. 
+	
+	
 **Power and reference**
 
 | Pin | Signal | Description |
