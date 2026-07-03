@@ -1,4 +1,5 @@
 # Setup and Commissioning
+--8<-- "status-reviewed.md"
 
 This sub-sections in this guide detail the process for bringing the Motorsteuergerät 24P V1 online.
 
@@ -16,7 +17,7 @@ The Motorsteuergerät 24P V1 serves as a hardware platform designed to host open
 
 Before you flash firmware or terminate a single wire, you need to know what you are building. Fuel delivery, intake, exhaust, sensors, and auxiliary loads all require explicit decisions before any of the later steps make sense—and your choices here directly constrain your wiring and calibration later.
 
-Work through the [Plan Your Build](#) guide before continuing.
+Work through the [Plan Your Build](../../../guides/setup/planning.md) guide before continuing.
 
 ---
 
@@ -46,16 +47,21 @@ The project intentionally omits prebuilt binaries from the main upstream reposit
 **Quick Scan: Flashing Requirements**
 
 *   **Target MCU:** STM32F405RGT6
-*   **Interface:** USB-to-Serial or SWD ($3.3\text{V}$ logic)
+*   **Interface:** USB DFU or SWD ($3.3\text{V}$ logic) — see [Flashing the PCB](flashing.md)
 *   **Toolchain:** ARM GCC (rusEFI) or Arduino IDE / PlatformIO (Speeduino)
 
 **The Workflow**
 
 1.  Clone the repository for your chosen firmware.
-2.  Configure the build target specifically for the Motorsteuergerät 24P V1 hardware profile.
+2.  Configure the build target specifically for the Motorsteuergerät 24P V1 hardware profile. Check
+    the firmware repository's board list for the current profile name — it's tracked there, not
+    duplicated here, so this page doesn't go stale when the profile is renamed upstream.
 3.  Compile the binary image.
 4.  Connect your SWD or USB adapter to the board's flashing header.
 5.  Execute the flash command and verify the sequence completes without errors.
+
+See [Flashing the PCB](flashing.md) for the concrete DFU and SWD flashing steps once you have a
+compiled `.bin` or `.hex` file.
 
 ---
 
@@ -100,9 +106,6 @@ Do not proceed to live engine testing until the board communicates reliably and 
 
 With the hardware online and communicating, you move into the calibration phase.
 
-!!! note "In Progress"
-    Detailed guides for firmware configuration, actuator calibration, and dynamic testing are being written. Check back as these sections are completed.
-
-*   **Firmware Configuration:** Define cylinder counts, trigger wheel decoder settings, and base sensor calibrations.
-*   **Actuator Calibration:** Set precise dead-times for injectors and base duty cycles for idle control valves.
-*   **Dynamic Testing:** Proceed to functional tests on the target vehicle or an engine simulator bench.
+*   **Firmware Configuration:** Define cylinder counts, trigger wheel decoder settings, and base sensor calibrations — see the [rusEFI](rusefi.md) or [Speeduino](speeduino.md) setup guide for your chosen firmware.
+*   **Actuator Calibration:** Set precise dead-times for injectors and base duty cycles for idle control valves — see [Calibration and Dynamic Testing](calibration.md).
+*   **Dynamic Testing:** Proceed to functional tests on the target vehicle, from first start through loaded testing — also covered in [Calibration and Dynamic Testing](calibration.md#6-first-start-and-dynamic-testing).

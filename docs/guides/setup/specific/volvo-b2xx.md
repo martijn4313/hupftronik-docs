@@ -1,5 +1,7 @@
 # Volvo B2xx Redblock
-> "Sturdy beast of burden" — A Wise Man
+--8<-- "status-reviewed.md"
+
+> "Sturdy beast of burden" — a description that's followed this engine family around the Volvo community for decades, and one it's earned.
 
 <br>
 
@@ -73,10 +75,19 @@ Although not optimal, you can use the distributor contact points as a trigger so
 > 
 > For engines running L-Jetronic with Renix (Volvo 360 series), we advise using the 36-2-2 flywheel these engines already possess. To keep a stock appearance on a Volvo 360, retain the HT distributor but replace the intelligent Renix coil with a "dumb" coil from a Volvo 4xx series, triggered directly by the Motorsteuergerät.
 
+!!! warning "Locking the distributor is irreversible"
+    Welding or pinning the advance weights permanently removes mechanical advance. Do this with the
+    distributor removed from the engine and the battery disconnected, and confirm before you start
+    that you're committing to ECU-controlled timing — reverting requires a replacement distributor.
+
 Weld or pin the mechanical advance weights solid in the fully advanced position. The trigger offset needs to be at least $\sim 40^\circ$ to create a workable solution. If you do not want to lock your distributor, you can run the ECU in "Fuel Only" mode.
 
 ??? info "Signal conditioning when using distributor contacts"
-    The signal routes to the `T1+` input through a conditioning circuit: a $1\,\text{k}\Omega$ pull-up resistor to $+5\,\text{V}$, a $10\,\text{nF}$ capacitor to ground for debounce, and a $1\,\text{k}\Omega$ series resistor to adapt the square wave for the differential VR stage.
+    The signal routes to the `VR_POS` trigger input (pin C4 — see the
+    [IO Overview](../../../products/motorsteuergerat-24p-v1/24p_v1_overview.md#3-io-overview))
+    through a conditioning circuit: a $1\,\text{k}\Omega$ pull-up resistor to $+5\,\text{V}$, a
+    $10\,\text{nF}$ capacitor to ground for debounce, and a $1\,\text{k}\Omega$ series resistor to
+    adapt the square wave for the differential VR stage.
 
 ### 3.3. Design Rationale
 
@@ -198,9 +209,9 @@ We position the MAP/IAT sensor downstream of the throttle and intercooler, as cl
 ### 7.2. Technical Detail
 
 **Injection — Batch**
-Wire the high-impedance EV1 injectors in parallel on each channel. Set the injector flow rate in TunerStudio and use a dead time of $1.1\,\text{ms}$ at $14\,\text{V}$ as a starting point.
-*   **INJ1:** Cylinders 1 and 2
-*   **INJ2:** Cylinders 3 and 4
+Wire the high-impedance EV1 injectors in parallel on each channel. Pair cylinders the same way as the wasted-spark ignition groups below (360° apart in the 720° cycle), not by physical adjacency, so each batch pulse lands evenly spaced across the cycle. Set the injector flow rate in TunerStudio and use a dead time of $1.1\,\text{ms}$ at $14\,\text{V}$ as a starting point.
+*   **INJ1:** Cylinders 1 and 4
+*   **INJ2:** Cylinders 2 and 3
 
 **Fuel Pump Logic**
 The ECU does not replicate OEM relay logic directly. Route the ECU fuel pump output to drive an external relay coil; do not run main pump current directly through the low-side driver. 
@@ -210,7 +221,7 @@ The ECU does not replicate OEM relay logic directly. Route the ECU fuel pump out
 
 ### 7.3. Design Rationale
 
-The 24P V1 injector drivers are discrete, un-limited MOSFETs rated for a $14\,\text{A}$ continuous load. Two high-impedance EV1 injectors wired in parallel draw approximately $2\,\text{A}$, operating well within the thermal limits of the board.
+The 24P V1 injector drivers are discrete, un-limited MOSFETs. The silicon itself is rated far higher than the board can dissipate — the practical on-board limit is about $5\,\text{A}$ peak per channel, set by PCB thermal constraints (see the [output summary table](../../../products/motorsteuergerat-24p-v1/reference.md#44-output-summary-table)). Two high-impedance EV1 injectors wired in parallel draw approximately $2\,\text{A}$, operating well within the thermal limits of the board.
 
 We retain K-Jetronic vane pumps on converted cars because their extreme flow headroom is highly beneficial for forced induction. The twin-pump architecture of the 240 prevents cavitation during high-G cornering—a physical reality that no software logic can correct. 
 
@@ -230,6 +241,12 @@ We retain K-Jetronic vane pumps on converted cars because their extreme flow hea
 | OEM Distributor | Single Coil | Stock LH2.4 | Stock Bosch `-124` or `-145` | $0.7 - 0.8\,\text{mm}$ |
 
 ### 8.2. Technical Detail
+
+!!! danger "Disconnect the battery before ignition wiring"
+    Coil primary and HT secondary circuits can deliver a dangerous shock even with the engine off if
+    the battery is connected and the ECU commands a spark event during wiring. Disconnect the
+    battery negative terminal before wiring or rewiring any ignition component, and keep clear of
+    plug leads and coil towers when the battery is reconnected for testing.
 
 **Ignition — Wasted Spark (Recommended)**
 Use a standard 4-cylinder wasted spark coil pack featuring two independent primary windings (the Bosch `0 221 503 407` is the European standard). Pair this with a 2-channel "dumb" external igniter (Bosch `0 227 100 200`). Wire the $+5\,\text{V}$ logic-level outputs from the ECU directly to the igniter inputs.
@@ -268,3 +285,14 @@ Key values to verify before the first start:
 ## 10. Known issues
 
 *   **B21/B23 Bracket Fabrication:** The front crank snout on early engines is shorter than on the later B230. Off-the-shelf trigger wheel kits designed for the B230 do not fit without significant modification. Design your brackets and spacer hubs intentionally.
+
+---
+
+## 11. Next steps
+
+With the engine-specific decisions above folded into your plan, wire the harness per the
+[Wiring and hardware guide](../../../products/motorsteuergerat-24p-v1/wiring.md), then follow
+[Setup and Commissioning](../../../products/motorsteuergerat-24p-v1/setup/index.md) to flash and
+bring the board online. For first-start tuning, see [Tuning Basics](../../tuning/basics.md). If
+the engine won't start or run cleanly on the first attempt, see
+[Troubleshooting](../troubleshooting.md).

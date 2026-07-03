@@ -30,11 +30,20 @@ extra_javascript:
 markdown_extensions:
   - admonition
   - pymdownx.details
-  - pymdownx.superfences
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
+  # Include system: pull reusable blocks (status badges, shared warnings,
+  # product-specific notes) from includes/ with the --8<-- "file.md" syntax.
+  - pymdownx.snippets:
+      base_path: [includes]
+      check_paths: true
   - attr_list
   - pymdownx.arithmatex:
       generic: true
-  
+
 # Navigation Tree
 nav:
   - Home: index.md
@@ -48,15 +57,19 @@ nav:
         - Flashing the PCB: products/motorsteuergerat-24p-v1/setup/flashing.md
         - rusEFI Guide: products/motorsteuergerat-24p-v1/setup/rusefi.md
         - Speeduino Guide: products/motorsteuergerat-24p-v1/setup/speeduino.md
-      
+        - Calibration & Dynamic Testing: products/motorsteuergerat-24p-v1/setup/calibration.md
+    - Schildknappe (CAN Node):
+      - Overview (in development): products/schildknappe/index.md
+
   - Guides:
      - Planning your build: guides/setup/planning.md
      - Tuning Basics: guides/tuning/basics.md
      - Software Tools (TunerStudio): guides/tuning/software.md
-     - CAN Bus Basics: guides/tuning/canbus-basics.md
+     - CAN Bus Basics: guides/setup/canbus-basics.md
      - Troubleshooting: guides/setup/troubleshooting.md
 
      - Vehicle specific setup guides:
+        - Overview: guides/setup/specific/index.md
         - Volvo B2xx Redblock: guides/setup/specific/volvo-b2xx.md
         - Peugeot TU Series: guides/setup/specific/peugeot-tu.md
         - Renault F4R: guides/setup/specific/renault-f4r.md
@@ -71,15 +84,13 @@ nav:
     - Open-Source & Community: about/community.md
     - License & Disclaimer: about/license.md
 
-  
-#    - Schildknappe (CAN Node):
-#      - Overview & Specs: products/schildknappe/index.md
+
+# Planned Schildknappe pages, to be enabled under "Schildknappe (CAN Node)"
+# above as they are written (the placeholder .md files exist, currently empty):
 #      - Hardware & Wiring: products/schildknappe/wiring.md
-#      - Firmware Setup:
-#        - Setup Overview: products/schildknappe/setup/index.md
-#        - Flashing the PCB: products/schildknappe/setup/flashing.md
-#        - rusEFI Guide: products/schildknappe/setup/rusefi.md
-#        - Speeduino Guide: products/schildknappe/setup/speeduino.md
+#      - Flashing the PCB: products/schildknappe/flashing.md
+#      - rusEFI Guide: products/schildknappe/rusefi.md
+#      - Speeduino Guide: products/schildknappe/speeduino.md
 #      - Standalone Operation: products/schildknappe/standalone.md
 #      - Hardware Reference: products/schildknappe/reference.md
 

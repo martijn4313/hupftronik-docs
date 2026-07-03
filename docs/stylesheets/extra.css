@@ -111,7 +111,9 @@ pre code {
 }
 
 /* Tooltip positioned inline with header - wrapper flex container */
-h1 + .tooltip {
+h1 + .tooltip,
+h1 + .content-status,
+.tooltip + .content-status {
   display: inline-flex;
   margin-left: 0.5em;
 }
@@ -140,6 +142,59 @@ h1 + .tooltip {
   vertical-align: middle;
 }
 
+/* --- Content-status badges ---
+   Tells the reader whether a page's technical claims were checked for internal
+   consistency this session ("Reviewed") or are freshly AI-drafted and still need
+   verification against the reader's own hardware ("AI-drafted"). See
+   about/community.md#content-status-labels for the full explanation. */
+.content-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  border-radius: 4px;
+  padding: 2px 8px;
+  font-size: 1em;
+  border: 1px solid;
+}
+
+.content-status::before {
+  content: "";
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  flex: none;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-size: contain;
+  mask-size: contain;
+  -webkit-mask-position: center;
+  mask-position: center;
+}
+
+.content-status.status-reviewed {
+  background: rgba(0, 153, 255, 0.08);
+  border-color: rgba(0, 153, 255, 0.3);
+  color: #0099FF;
+}
+
+.content-status.status-reviewed::before {
+  background-color: #0099FF;
+  -webkit-mask-image: url('data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12,2C6.5,2,2,6.5,2,12s4.5,10,10,10s10-4.5,10-10S17.5,2,12,2z M10,17l-5-5l1.41-1.41L10,14.17l7.59-7.59L19,8L10,17z"/></svg>');
+  mask-image: url('data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12,2C6.5,2,2,6.5,2,12s4.5,10,10,10s10-4.5,10-10S17.5,2,12,2z M10,17l-5-5l1.41-1.41L10,14.17l7.59-7.59L19,8L10,17z"/></svg>');
+}
+
+.content-status.status-ai-draft {
+  background: rgba(255, 190, 0, 0.1);
+  border-color: rgba(255, 190, 0, 0.4);
+  color: #FFBE00;
+}
+
+.content-status.status-ai-draft::before {
+  background-color: #FFBE00;
+  -webkit-mask-image: url('data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12,2L14,9L21,11L14,13L12,20L10,13L3,11L10,9Z"/></svg>');
+  mask-image: url('data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12,2L14,9L21,11L14,13L12,20L10,13L3,11L10,9Z"/></svg>');
+}
+
 /* Make expandable sections easier to spot */
 .md-typeset summary {
   position: relative;
@@ -163,5 +218,29 @@ details[open] > summary:after {
 img[src*="../assets/icons"] {
   vertical-align: middle;
   display: inline;
+}
+
+/* --- Custom "standpunkt" admonition ---
+   Hüpftronik's opinionated design-rationale callout (why we made a deliberate
+   engineering trade-off), distinct from the standard note/tip/warning/danger set. */
+:root {
+  --md-admonition-icon--standpunkt: url('data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12,2L22,12L12,22L2,12Z"/></svg>');
+}
+
+.md-typeset .admonition.standpunkt,
+.md-typeset details.standpunkt {
+  border-color: #FF5500;
+}
+
+.md-typeset .standpunkt > .admonition-title,
+.md-typeset .standpunkt > summary {
+  background-color: rgba(255, 85, 0, 0.1);
+}
+
+.md-typeset .standpunkt > .admonition-title::before,
+.md-typeset .standpunkt > summary::before {
+  background-color: #FF5500;
+  -webkit-mask-image: var(--md-admonition-icon--standpunkt);
+          mask-image: var(--md-admonition-icon--standpunkt);
 }
 

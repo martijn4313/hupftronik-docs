@@ -5,3 +5,5 @@ site/
 build-site/
 .cursor
 scripts/
+build-site.zip
+*.zip

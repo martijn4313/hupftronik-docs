@@ -1,4 +1,5 @@
 # Wiring and hardware guide
+--8<-- "status-reviewed.md"
 
 ---
 
@@ -12,6 +13,21 @@ A few practical rules help a lot:
 - Use wire with insulation rated for the engine bay and choose a conductor size that keeps voltage drop low under cranking.
 - Keep the injector return path and sensor ground consistent, because a poor ground often causes intermittent faults.
 - Label the loom clearly and leave enough service slack near the engine and fuse box for future repairs.
+
+### 1.1. Grounding topology
+
+Use a star ground: one low-resistance ground point (an engine-block or chassis stud with a clean,
+strapped connection to the battery negative) that every ground return leads back to. Sensor grounds
+are the exception — they return through the harness to the ECU, never to the chassis, so that no
+load current flows through the wire your sensor readings are measured against.
+
+```mermaid
+flowchart TD
+    BATN["Battery negative terminal"] --- STAR(("Star ground point<br/>(engine block / chassis stud)"))
+    STAR --- ECU["ECU power ground<br/>(pins B8, C1)"]
+    STAR --- LOAD["High-current load returns<br/>(fuel pump, fan, coils)"]
+    SENS["Sensors<br/>(TPS, MAP, CLT, IAT)"] -->|"sensor ground returns to the ECU<br/>through the harness — never to chassis"| ECU
+```
 
 ---
 
@@ -30,7 +46,8 @@ A few habits make the harness more reliable:
 
 ## 3. Injector and driver choices
 
-The board supports several injector strategies, and the best choice depends on the engine, the available outputs, and the firmware mode. Batch fire is the simplest and most forgiving option, while 
+The board supports several injector strategies, and the best choice depends on the engine, the available outputs, and the firmware mode. Batch fire is the simplest and most forgiving option, while sequential injection gives the most control at the cost of needing more driver channels and more careful wiring.
+
 Common choices include:
 
 - 4-cylinder batch fire: a simple starting point that keeps the wiring straightforward and reduces the number of driver channels needed.
@@ -52,7 +69,22 @@ Recommended wiring practice:
 - Provide a solid ground point near the engine or the ECU mounting area.
 - If the engine uses a shared injector rail, verify injector polarity and trigger logic before applying power.
 
-For a typical 4-cylinder batch-fire setup, one injector driver can be assigned to the group while a separate relay or output handles the fuel pump and cooling fan. For V6 and V8 bank-fire systems, keep the wiring symmetrical so each bank has a similar resistance and routing path.
+For a typical 4-cylinder batch-fire setup, split the injectors across the two dedicated drivers `INJ1` and `INJ2`, two cylinders per driver. Pair cylinders by firing order — the two cylinders 360° apart in the 720° cycle — not by physical position on the block; this is the same grouping used for wasted-spark ignition, and it spaces each driver's pulses evenly across the cycle. See the [Volvo B2xx guide](../../guides/setup/specific/volvo-b2xx.md#7-fueling) for a worked example. For V6 and V8 bank-fire systems, keep the wiring symmetrical so each bank has a similar resistance and routing path.
+
+```mermaid
+flowchart LR
+    F12["Fused +12 V feed<br/>(stable during cranking)"] --> P14["Injectors cyl 1 & 4<br/>(high side, parallel)"]
+    F12 --> P23["Injectors cyl 2 & 3<br/>(high side, parallel)"]
+    subgraph ECU["Motorsteuergerät 24P V1"]
+        INJ1D["INJ1_DRV (pin C8)"]
+        INJ2D["INJ2_DRV (pin A8)"]
+    end
+    P14 -->|"low side"| INJ1D
+    P23 -->|"low side"| INJ2D
+```
+
+*Minimal 4-cylinder batch-fire injector wiring for a 1–3–4–2 firing order: the ECU switches the low
+side of each injector pair; the high side is a shared, fused +12 V feed.*
 
 ### 4.2. TBI setup
 
@@ -65,9 +97,9 @@ Practical notes:
 - If the engine originally used a mechanical or OEM-style relay arrangement, preserve the same power-up behavior so the fuel pump and injector rail behave predictably.
 - Verify that the chosen output can handle the injector type and that the firmware mode matches the engine's trigger configuration.
 
-### 4.3. 🚀 4-Channel Sequential Injection Routing
+### 4.3. 4-channel sequential injection routing
 
-Although not really needed for most older 4 cilinder engine, sequential injection can provide better idle quality and economy in some situations, but needs more careful tuning.
+Although not really needed for most older 4-cylinder engines, sequential injection can provide better idle quality and economy in some situations, but needs more careful tuning. This subsection goes deeper than 4.1/4.2 because getting a 4th sequential channel means repurposing outputs that are dedicated to other jobs elsewhere on this page — worth the detail, since getting it wrong costs you a relay output you didn't expect to lose.
 
 To run a 4-cylinder engine in fully sequential mode, you need four independent injector drivers. The board natively provides two dedicated high-current channels `INJ1` and `INJ2`. To get the remaining two channels, you must repurpose outputs from the two `NCE6005AS` dual-MOSFET chips (`Q3` and `Q4`).
 
@@ -97,6 +129,13 @@ A safe and practical routing is:
 !!! success "Configuration Summary"
     This routing spreads the thermal load across all available driver packages while avoiding the `IAC` freewheeling diode path for injector operation.
 
+!!! warning "This routing gives up onboard boost control"
+    Using `BOOST` as injector 4 means the board has no output left to drive a boost solenoid — full
+    4-cylinder sequential injection and onboard closed-loop boost control are mutually exclusive on
+    this board. If your build is turbocharged and needs boost control, use `FP_RELAY` as injector 4
+    instead and keep `BOOST` free; you'll then need to drive the fuel pump relay from a source other
+    than the ECU (for example, an oil-pressure or ECU-power-triggered relay wired independently).
+
 #### 4.3.3. 4-Channel Sequential WITH Active IAC
 
 If the `IAC` output is needed for an idle control valve, the routing options are more constrained. In this case, `Q3` must share its package between the IAC valve and an injector, while `Q4` handles the 4th injector and a relay.
@@ -116,3 +155,24 @@ This configuration is workable, but it places a continuous PWM load on `Q3` alon
     - Add a small adhesive heatsink to `Q3` if the IAC is used continuously.
     - Use high-impedance injectors only, typically above $10\,\Omega$, to keep current draw modest.
     - Make sure the IAC valve is healthy and not shorting or drawing excessive current.
+
+---
+
+## 5. Relay outputs
+
+The `FPRELAY_DRV` and `FANRELAY_DRV` outputs switch **relay coils, not loads**. The ECU sinks the
+coil's few-hundred-milliamp current to ground; the relay's contacts carry the pump or fan current
+from their own fused battery feed. Never route pump or fan current through the ECU connector.
+
+```mermaid
+flowchart LR
+    K15["+12 V ignition-switched<br/>(fused)"] --> COIL["Relay coil<br/>(terminal 86)"]
+    COIL -->|"terminal 85"| DRV["ECU low-side driver<br/>FPRELAY_DRV (B6) / FANRELAY_DRV (B7)"]
+    K30["+12 V battery<br/>(fused for the load)"] --> CONT["Relay contact<br/>(terminal 30 → 87)"]
+    CONT --> PUMP["Fuel pump / fan"]
+    PUMP --> GND["Star ground"]
+```
+
+*Standard relay wiring for the fuel pump and fan outputs: the ECU completes the coil circuit to
+ground; the load current never enters the ECU. See the
+[output summary table](reference.md#44-output-summary-table) for the driver current limits.*

@@ -1,8 +1,12 @@
 # Hardware Reference
+--8<-- "status-reviewed.md"
 
 This guide provides a walkthrough of the schematics and PCB designs for the Hüpftronik Engine Control Unit (ECU). 
 
-**Design Files:** All files are available on GitHub: **[Link]**
+!!! note "Design files"
+    The board is currently in alpha testing (see the [product overview](24p_v1_overview.md)) and the
+    schematic/PCB source files are not yet published. This page will link to the GitHub repository
+    once the design is public.
 
 This document covers how the ECU is built, how it stays cool, and how the electrical circuits handle signals and power.
 
@@ -29,7 +33,10 @@ Using this aluminum case provides two major benefits:
 ![PCB in Case](./hupftronik_motorsteurgerat_24p_v1_in_case.jpg)
 
 !!! tip "Sourcing"
-    [Insert specific AliExpress product/search link here]
+    Search AliExpress or a similar marketplace for "24 pin waterproof aluminum ECU case" — several
+    sellers offer this connector/enclosure combination. We don't yet have a vetted single source to
+    link to directly; verify the connector pinout matches an FCI 24-pin sealed automotive connector
+    (3×8 grid) before buying.
 
 ### 1.3. Custom / DIY Solutions
 If you prefer your own housing, you can do so, but you must handle two things carefully:
@@ -52,7 +59,7 @@ If you use the aluminum enclosure, you can significantly improve cooling by plac
 | **2 Cylinders per Driver** (Standard) | Low | Standard PCB cooling is usually enough. A thermal pad is a good "extra" safety measure. |
 | **4 Cylinders per Driver** (High Stress) | High | **Mandatory:** You must use a thermal pad to bridge the heat directly to the aluminum case. |
 
-*(For the math behind these requirements, see the **Thermal Analysis** section in the Technical Appendix)*
+*(For the math behind these requirements, see **§A.1 Thermal Analysis** in the Technical Appendix)*
 
 ---
 
@@ -71,7 +78,7 @@ Analog inputs are used to read sensors (like temperature or pressure). Because e
 2. **Cleaning:** A small network of resistors and a capacitor (an RC filter) smooths out the signal.
 3. **Scaling:** The processor can only handle up to 3.3 V. The circuit scales the standard 5 V sensor signal down so it fits safely.
 
-*(For a detailed circuit breakdown, see **Analog Input Topology** in the Technical Appendix)*
+*(For a detailed circuit breakdown, see **§A.3 Analog Input Topology** in the Technical Appendix)*
 
 ---
 
@@ -93,7 +100,7 @@ To protect the switching MOSFETs from the high-voltage inductive "kickback" gene
 
 *   **How it Works:** When the driver turns off, the magnetic field in the injector coil collapses, generating a high-voltage spike. Once this voltage exceeds the Zener diode threshold, current flows back into the MOSFET's Gate. This turns the MOSFET slightly back on (into its linear region) to dissipate the inductive energy safely across its silicon channel.
 
-*  **Fast Injector Closing:** By clamping the inductive spike at a relatively high voltage ($36\text{V}$ in the case of Motorsteurgerat 24P V1), the magnetic field is forced to collapse rapidly. This results in fast and repeatable injector closing times, minimizing injector lag.
+*  **Fast Injector Closing:** By clamping the inductive spike at a relatively high voltage ($36\text{V}$ in the case of the Motorsteuergerät 24P V1), the magnetic field is forced to collapse rapidly. This results in fast and repeatable injector closing times, minimizing injector lag.
 
 *  **Thermal Distribution:** The robust MOSFET silicon absorbs the bulk of the thermal energy spike, preventing small, discrete diodes on the board from overheating.
 
@@ -119,28 +126,180 @@ All low-side channels are rated for automotive voltage levels. Due to heat dissi
 | `FAN_RELAY` | Cooling Fan Relay | `NCE6005AS` (SOIC-8) | `5 A` | **`< 2.0 A`** peak |
 | `FP_RELAY` | Fuel Pump Relay | `NCE6005AS` (SOIC-8) | `5 A` | **`< 2.0 A`** peak |
 
-<small>\* *Note: The IRLR2905's silicon capability is high, but thermal performance on the PCB restricts actual continuous current. Refer to the thermal calculations in Section 1 for multi-injector bank limit details.*</small>
+<small>\* *Note: The IRLR2905's silicon capability is high, but thermal performance on the PCB restricts actual continuous current. Refer to the thermal calculations in the Technical Appendix (§A.1–A.2) for multi-injector bank limit details.*</small>
+
+<small>\* *The `NCE6005AS` channels carry the same PCB-thermal-limit logic, scaled down: the SOIC-8
+package has a much smaller footprint and lower thermal mass than the IRLR2905's D-PAK, so its
+board-mounted derating is tighter in proportion. We haven't published a worked calculation for this
+package the way we have for the injector drivers (§A.1–A.2) — treat `< 2.0 A` as the practical
+continuous limit and avoid running it near the 5 A datasheet maximum on the PCB.*</small>
 
 ---
 
-# 🛠️ Technical Appendix
+
+## 5. Ignition Outputs
+
+Unlike the injector and relay channels, the two ignition outputs `IGN1` and `IGN2` are **logic-level
+trigger outputs, not power drivers**. They are designed to command an external igniter (power stage)
+or a smart coil with a built-in igniter — never an ignition coil primary directly.
+
+### 5.1. Circuit
+
+Each channel is driven by an `NSG4437` driver stage with a $330\ \Omega$ series resistor on the
+output. The series resistor limits output current into the igniter input and damps ringing on the
+trigger line, keeping the edge clean over a real-world harness run into the engine bay.
+
+| Specification | Value |
+| :--- | :--- |
+| Output type | $+5\ \text{V}$ logic-level trigger (push) |
+| Driver | `NSG4437` |
+| Series resistance | $330\ \Omega$ per channel |
+| Intended load | External igniter input or smart-coil trigger input |
+| Channels | 2 (`IGN1`, `IGN2`) |
+
+!!! danger "Never connect a coil primary directly to IGN1/IGN2"
+    An ignition coil primary draws amps and generates a flyback spike of several hundred volts —
+    both far beyond what a logic-level output survives. Always switch the coil through an external
+    igniter (e.g. a Bosch 2-channel power stage) or use smart coils with integrated power stages.
+
+### 5.2. Design Rationale
+
+Driving ignition coils directly from inside the ECU generates intense localized heat and injects
+severe flyback transients into the enclosure. By pushing the high-current switching out to a rugged,
+inexpensive igniter mounted in the engine bay, the ECU's thermal and EMI environment stays clean —
+and if a coil shorts, the external igniter fails instead of the ECU.
+
+With two channels, a 4-cylinder engine runs **wasted spark**: `IGN1` fires the coils for the
+cylinder pair 360° apart (e.g. 1+4), `IGN2` the other pair (2+3). Fully sequential per-cylinder
+ignition would require four channels and is not available on this board.
+
+---
+
+
+## 6. Trigger Input (VR Interface)
+
+Engine position comes in through a dedicated differential VR sensor interface built around the
+`MAX9924` IC (pins `VR_POS`/`VR_NEG` — see the
+[IO Overview](24p_v1_overview.md#3-io-overview)).
+
+A VR (variable reluctance) sensor outputs an analog voltage swing whose amplitude grows with engine
+speed — from well under a volt at cranking to tens of volts at redline. The `MAX9924` handles this
+with:
+
+*   **Differential input:** both sensor wires are measured against each other, not against ground,
+    so noise induced equally on both wires (the dominant failure mode near ignition wiring) cancels
+    out.
+*   **Adaptive threshold:** the detection threshold tracks the signal amplitude, so the same wiring
+    works from cranking speed to redline without adjustment.
+*   **Zero-crossing detection:** the output edge lands on the true magnetic zero crossing, keeping
+    the decoded tooth position stable regardless of signal amplitude.
+
+The interface also accepts a conditioned $0$–$5\ \text{V}$ square-wave trigger on `VR_POS` for
+non-VR sources — see the
+[Volvo distributor-contact case](../../guides/setup/specific/volvo-b2xx.md#324-distributor-contacts)
+for the required conditioning circuit.
+
+For a Hall-effect **cam sync** sensor, use one of the general-purpose inputs `SPARE_IN1`/`SPARE_IN2`
+(0–5 V digital) and assign it as the cam input in your firmware configuration.
+
+---
+
+
+## 7. Power Supply
+
+The board takes automotive $12\ \text{V}$ power on two inputs (see the
+[IO Overview](24p_v1_overview.md#3-io-overview)):
+
+*   **`VIN_KL30`** — permanent battery feed. Keeps the MCU alive for functions that must survive
+    ignition-off (e.g. closing the SD log file cleanly).
+*   **`VIN_KL15`** — ignition-switched feed. Tells the ECU the key is on.
+
+### 7.1. Input protection
+
+Both inputs pass through a series Schottky diode (reverse-polarity protection) followed by a TVS
+crowbar that clips short transient surges before they reach the voltage regulators — the standard
+load-dump environment of an automotive supply is handled by design.
+
+!!! warning "Long-term overvoltage"
+    The TVS crowbar protects against *short* surges. Sustained overvoltage above $\sim 20\ \text{V}$
+    (e.g. a 24 V jump start) overheats the TVS diode until it fails short. See the
+    [product overview](24p_v1_overview.md#3-io-overview).
+
+### 7.2. Internal rails
+
+Behind the protection stage, onboard LDO regulators derive two logic rails:
+
+| Rail | Used for | Exposed on |
+| :--- | :--- | :--- |
+| $+5\ \text{V}$ | Sensor reference, output buffer, RS232 header | Pin C5, header H3 |
+| $+3.3\ \text{V}$ | MCU, logic | Header H2 (SWD) |
+
+The $+5\ \text{V}$ rail on pin C5 is the **sensor reference** — power your TPS, MAP/T-MAP, and other
+5 V sensors from it (never from switched +12 V through a divider) so sensor readings stay ratiometric
+with the ADC reference.
+
+!!! note "Sensor rail current budget: to be confirmed"
+    The rated external load of the $+5\ \text{V}$ sensor rail (how many sensors it can feed with
+    what margin) has not been published yet. A typical passive-sensor set (TPS + T-MAP + CLT) draws
+    only a few tens of mA and is well within any LDO's capability; for unusual loads (many active
+    sensors, external modules), wait for the confirmed figure or measure your own draw.
+
+---
+
+
+## 8. Communications and Storage
+
+### 8.1. CAN bus
+
+One ISO 11898 CAN channel is exposed on pins A5/B5 (`CAN_H`/`CAN_L`). See
+[CAN Bus Basics](../../guides/setup/canbus-basics.md) for wiring and termination rules.
+
+!!! note "Onboard termination: to be confirmed"
+    Whether the board fits an onboard $120\ \Omega$ terminator (and whether it is jumper-selectable)
+    will be documented here once confirmed against the production board. Until then, verify your bus
+    empirically: with everything powered off, measure across `CAN_H`/`CAN_L` — $\approx 60\ \Omega$
+    means two terminators are present (correct), $\approx 120\ \Omega$ means only one, open means
+    none.
+
+### 8.2. SD card logging
+
+The SD card slot is wired to the MCU's native SDIO interface (not SPI), which is fast enough for
+high-rate logging. Use a Class 10 card. Logging behavior (file format, start/stop conditions) is a
+firmware feature — rusEFI and Speeduino each document their own SD logging configuration. Logs are
+analyzed on a PC with the same tools used for TunerStudio datalogs.
+
+### 8.3. USB
+
+The full-speed USB port serves three roles: the TunerStudio/console connection during setup and
+tuning, firmware console access, and DFU firmware flashing (see
+[Flashing the PCB](setup/flashing.md#2-usb-dfu-bootloader)).
+
+---
+
+## Technical Appendix
+
+Sections 1–8 above cover what most builders need. The rest of this page shows the math and
+component-level detail behind those numbers — read it if you want to verify the thermal limits
+yourself, compare driver architectures, or adapt the board for a load outside the summary table.
 
 This section contains the mathematical proofs and detailed component specifications for engineers and advanced users.
 
-### 4.5. Thermal Analysis
+### A.1. Thermal Analysis
 
 In a 4-injector single-driver setup, the thermal load rises, but the design remains practical when heat is moved into the enclosure efficiently. The IRLR2905 MOSFET stays well within reach of a robust thermal solution when the PCB is coupled to the aluminum case with a thermal pad.
 
-Without that path, the junction temperature rise would be:
+Without that path — PCB junction-to-ambient thermal resistance alone, $R_{\theta JA} = 50\ \text{°C/W}$ per the IRLR2905 datasheet, no thermal pad to the case — the junction temperature rise would be:
 
 $$\Delta T_{\mathrm{JA}} = 3.88\ \text{W} \cdot 50\ \text{°C/W} = 194\ \text{°C}$$
 
 With a 50°C ambient temperature it would reach about **244°C**.
 
 !!! success "Thermal coupling to enclosure"
-    A thermal pad helps moving heat out of the MOSFET and into the case.
+    A thermal pad drops the effective thermal resistance from the bare-PCB $50\ \text{°C/W}$ above to
+    roughly $8.36\ \text{°C/W}$ by giving the heat a low-resistance path into the aluminum case
+    (see §A.2.1 for the resulting junction temperatures with this coupling in place).
 
-#### 4.5.1. Loss Calculations
+#### A.1.1. Loss Calculations
 
 *   **Conduction Losses ($P_{\mathrm{cond}}$)**
     Parallel resistance for 4 injectors is $3\ \Omega$; Peak current at 14V is $4.67\ \text{A}$.
@@ -159,11 +318,11 @@ With a 50°C ambient temperature it would reach about **244°C**.
 ---
 
 
-### 4.6. Discrete MOSFET vs. Automotive Smart Driver
+### A.2. Discrete MOSFET vs. Automotive Smart Driver
 
 Using an automotive smart low-side driver instead of a low-$R_{\mathrm{DS(on)}}$ discrete MOSFET shifts the thermal profile and alters the system's failure mode.
 
-#### 4.6.1. Thermal Comparison
+#### A.2.1. Thermal Comparison
 
 The physics of the inductive load remain identical — the energy from the injector coils must be dissipated. Because smart drivers use an internal active clamp, the $3.27\ \text{W}$ inductive loss remains fixed. However, smart drivers typically have a higher $R_{\mathrm{DS(on)}}$ (for example $70\ \text{m}\Omega$), which increases conduction losses.
 
@@ -174,9 +333,9 @@ The physics of the inductive load remain identical — the energy from the injec
 | Inductive Loss | $3.27\ \text{W}$ | $3.27\ \text{W}$ |
 | Total Thermal Load | $3.88\ \text{W}$ | $4.49\ \text{W}$ |
 
-Using the same enclosure coupling ($8.36\ \text{°C/W}$) at a $50\ \text{°C}$ ambient temperature, the smart driver runs hotter ($87.5\ \text{°C}$ vs $82.4\ \text{°C}$).
+Using the same enclosure coupling introduced in §A.1 ($8.36\ \text{°C/W}$, PCB-to-case via thermal pad) at a $50\ \text{°C}$ ambient temperature, the smart driver runs hotter ($87.5\ \text{°C}$ vs $82.4\ \text{°C}$).
 
-#### 4.6.2. Architecture & Failure Modes
+#### A.2.2. Architecture & Failure Modes
 
 The discrete IRLR2905 and NCE6005 will continue operating under extreme thermal stress until destructive failure. 
 
@@ -187,7 +346,7 @@ Check operating conditions and heatsinking with this widget.
 </div>
 <hr style="margin-top: 0.5rem; margin-bottom: 1rem;">
 
-### 4.7. Analog Input Topology
+### A.3. Analog Input Topology
 
 ESD Protection
 :   `USBLC6-2SC6` bidirectional TVS diode placed at the connector to prevent traces from acting as antennas for EMI.
@@ -204,11 +363,11 @@ Corner Frequency
 ---
 
 
-### 4.8. Output Characteristics
+### A.4. Output Characteristics
 
 All channels are driven by the `SN74ACT244PWR` buffer (rail-to-rail `5 V`, `24 mA` source/sink).
 
-| Specification | NCE8005AS (Relays/Solenoids) | IRLR2905 (Injectors) |
+| Specification | NCE6005AS (Relays/Solenoids) | IRLR2905 (Injectors) |
 | :--- | :--- | :--- |
 | **Gate Resistor** | `1 kΩ` | `220 Ω` *(chosen to maximize switching speed)* |
 | **Rise Time (10–90%)** | `~2.15 µs` | `~756 ns` |

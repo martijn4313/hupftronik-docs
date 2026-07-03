@@ -1,11 +1,12 @@
 # Plan Your Build
+--8<-- "status-reviewed.md"
 
 An ECU can only manage what you have planned for. Before you flash firmware, terminate a single wire, or open a tuning dashboard, you need to know what your engine system looks like in full—the injectors the ECU drives, the sensors it reads, and the actuators it commands all trace back to decisions you make here.
 
 Every project differs. Each category below has more than one valid solution, and your engine, goals, and budget determine which is right. Work through them in order and **document your choices**. That document becomes the reference you wire and tune against throughout commissioning.
 
 !!! note "Watch your I/O budget"
-    The Motorsteuergerät 24P V1 has a finite number of inputs and outputs. Tally your sensors and actuators against the [pinout documentation](#) as you plan. If a build exceeds the onboard I/O—a full sensor suite with an electronic throttle body, for example—a CAN expander node such as the Schildknappe can offload the overflow.
+    The Motorsteuergerät 24P V1 has a finite number of inputs and outputs. Tally your sensors and actuators against the [pinout documentation](../../products/motorsteuergerat-24p-v1/24p_v1_overview.md#3-io-overview) as you plan. If a build exceeds the onboard I/O—a full sensor suite with an electronic throttle body, for example—a CAN expander node such as the [Schildknappe](../../products/schildknappe/index.md) (a separate Hüpftronik product for offloading extra sensors and outputs onto the CAN bus, **currently in development**) will eventually be able to absorb the overflow. Until it ships, treat the onboard I/O count as a hard limit.
 
 ---
 
@@ -37,7 +38,7 @@ The intake system covers everything between the air and the intake ports. Plan t
 
 **Intercooler.** If fitted, the charge air temperature sensor should be placed post-intercooler to give the ECU an accurate reading of what actually enters the manifold.
 
-**Throttle.** This is a significant decision point. A mechanical cable throttle is simpler: the ECU reads position via a TPS and does not command the throttle body directly. An electronic throttle body (ETB) adds a second TPS (pedal-side), a motor driver, and a closed-loop control loop in the firmware. The Motorsteuergerät 24P V1 supports ETB control, but the output count is limited—review your I/O budget before committing to this path. If the onboard outputs are already committed to other actuators, consider offloading ETB control to a Schildknappe node.
+**Throttle.** This is a significant decision point. A mechanical cable throttle is simpler: the ECU reads position via a TPS and does not command the throttle body directly. An electronic throttle body (ETB) adds a second TPS (pedal-side), a motor driver, and a closed-loop control loop in the firmware. rusEFI and Speeduino both support ETB control in firmware, but the 24P V1's six onboard driver outputs (see the [IO Overview](../../products/motorsteuergerat-24p-v1/24p_v1_overview.md#3-io-overview)) are single-ended low-side switches, not a bidirectional H-bridge — driving an ETB motor needs an external ETB-capable motor driver module wired to two of those outputs, not a direct connection. Confirm your firmware's ETB wiring requirements before committing to this path, and plan which two onboard outputs you can spare for it. If the onboard outputs are already committed to other actuators, offloading ETB control to a [Schildknappe](../../products/schildknappe/index.md) node will be an option once that product ships — until then, an ETB build must fit the onboard outputs.
 
 ---
 
