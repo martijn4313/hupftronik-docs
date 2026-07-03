@@ -52,9 +52,7 @@ All 24 pins are on a single FCI connector, arranged in three rows (A, B, C) of e
 
 **Engine position**
 
-A VR (Variable Reluctance) sensor is a passive magnetic pickup that generates an AC signal as
-toothed metal (typically the crank or cam wheel) passes it; the board reads this differentially on
-`VR_POS`/`VR_NEG` through a dedicated MAX9924 VR-to-digital conditioner IC.
+The board has a differential VR sensor input`VR_POS`/`VR_NEG` using a dedicated MAX9924 IC.
 
 | Pin | Signal | Description |
 |---|---|---|
