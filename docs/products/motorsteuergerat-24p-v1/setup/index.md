@@ -1,5 +1,5 @@
 # Setup and Commissioning
-<div class="content-status status-reviewed" title="Checked for internal consistency and technical accuracy; not tested on physical hardware. See About > Open-Source & Community for what this means.">Reviewed</div>
+--8<-- "status-reviewed.md"
 
 This sub-sections in this guide detail the process for bringing the Motorsteuergerät 24P V1 online.
 
@@ -47,7 +47,7 @@ The project intentionally omits prebuilt binaries from the main upstream reposit
 **Quick Scan: Flashing Requirements**
 
 *   **Target MCU:** STM32F405RGT6
-*   **Interface:** USB-to-Serial or SWD ($3.3\text{V}$ logic)
+*   **Interface:** USB DFU or SWD ($3.3\text{V}$ logic) — see [Flashing the PCB](flashing.md)
 *   **Toolchain:** ARM GCC (rusEFI) or Arduino IDE / PlatformIO (Speeduino)
 
 **The Workflow**
@@ -106,9 +106,6 @@ Do not proceed to live engine testing until the board communicates reliably and 
 
 With the hardware online and communicating, you move into the calibration phase.
 
-!!! note "In Progress"
-    Detailed guides for firmware configuration, actuator calibration, and dynamic testing are being written. Check back as these sections are completed.
-
-*   **Firmware Configuration:** Define cylinder counts, trigger wheel decoder settings, and base sensor calibrations.
-*   **Actuator Calibration:** Set precise dead-times for injectors and base duty cycles for idle control valves.
-*   **Dynamic Testing:** Proceed to functional tests on the target vehicle or an engine simulator bench.
+*   **Firmware Configuration:** Define cylinder counts, trigger wheel decoder settings, and base sensor calibrations — see the [rusEFI](rusefi.md) or [Speeduino](speeduino.md) setup guide for your chosen firmware.
+*   **Actuator Calibration:** Set precise dead-times for injectors and base duty cycles for idle control valves — see [Calibration and Dynamic Testing](calibration.md).
+*   **Dynamic Testing:** Proceed to functional tests on the target vehicle, from first start through loaded testing — also covered in [Calibration and Dynamic Testing](calibration.md#6-first-start-and-dynamic-testing).

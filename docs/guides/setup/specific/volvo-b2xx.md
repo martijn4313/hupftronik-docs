@@ -1,5 +1,5 @@
 # Volvo B2xx Redblock
-<div class="content-status status-reviewed" title="Checked for internal consistency and technical accuracy; not tested on physical hardware. See About > Open-Source & Community for what this means.">Reviewed</div>
+--8<-- "status-reviewed.md"
 
 > "Sturdy beast of burden" — a description that's followed this engine family around the Volvo community for decades, and one it's earned.
 
@@ -83,7 +83,11 @@ Although not optimal, you can use the distributor contact points as a trigger so
 Weld or pin the mechanical advance weights solid in the fully advanced position. The trigger offset needs to be at least $\sim 40^\circ$ to create a workable solution. If you do not want to lock your distributor, you can run the ECU in "Fuel Only" mode.
 
 ??? info "Signal conditioning when using distributor contacts"
-    The signal routes to the `T1+` input through a conditioning circuit: a $1\,\text{k}\Omega$ pull-up resistor to $+5\,\text{V}$, a $10\,\text{nF}$ capacitor to ground for debounce, and a $1\,\text{k}\Omega$ series resistor to adapt the square wave for the differential VR stage.
+    The signal routes to the `VR_POS` trigger input (pin C4 — see the
+    [IO Overview](../../../products/motorsteuergerat-24p-v1/24p_v1_overview.md#3-io-overview))
+    through a conditioning circuit: a $1\,\text{k}\Omega$ pull-up resistor to $+5\,\text{V}$, a
+    $10\,\text{nF}$ capacitor to ground for debounce, and a $1\,\text{k}\Omega$ series resistor to
+    adapt the square wave for the differential VR stage.
 
 ### 3.3. Design Rationale
 
@@ -217,7 +221,7 @@ The ECU does not replicate OEM relay logic directly. Route the ECU fuel pump out
 
 ### 7.3. Design Rationale
 
-The 24P V1 injector drivers are discrete, un-limited MOSFETs rated for a $14\,\text{A}$ continuous load. Two high-impedance EV1 injectors wired in parallel draw approximately $2\,\text{A}$, operating well within the thermal limits of the board.
+The 24P V1 injector drivers are discrete, un-limited MOSFETs. The silicon itself is rated far higher than the board can dissipate — the practical on-board limit is about $5\,\text{A}$ peak per channel, set by PCB thermal constraints (see the [output summary table](../../../products/motorsteuergerat-24p-v1/reference.md#44-output-summary-table)). Two high-impedance EV1 injectors wired in parallel draw approximately $2\,\text{A}$, operating well within the thermal limits of the board.
 
 We retain K-Jetronic vane pumps on converted cars because their extreme flow headroom is highly beneficial for forced induction. The twin-pump architecture of the 240 prevents cavitation during high-G cornering—a physical reality that no software logic can correct. 
 

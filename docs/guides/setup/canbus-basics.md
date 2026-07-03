@@ -1,5 +1,5 @@
 # CAN Bus Basics
-<div class="content-status status-ai-draft" title="AI-drafted from general engineering knowledge this session — verify against your specific hardware, engine code, or factory documentation before relying on it. See About > Open-Source &amp; Community for what this means.">AI-drafted — verify before use</div>
+--8<-- "status-ai-draft.md"
 
 CAN (Controller Area Network) is a two-wire serial bus that lets multiple electronic modules share
 data over a single pair of wires instead of a dedicated wire per signal. The Motorsteuergerät 24P V1
@@ -23,8 +23,10 @@ CAN is wired as a single linear bus, not a star — every device connects to the
 its length, not through a central hub. The two physical ends of that line each need a $120\,\Omega$
 termination resistor across `CAN_H`/`CAN_L`; without both, reflections on the bus corrupt data,
 especially at higher bus speeds or longer wire runs. If the 24P V1 sits at one end of the bus, verify
-it (or the device it connects to) provides termination — check your specific device's documentation,
-since not every CAN node includes a built-in terminator.
+termination is present at that end — see
+[Hardware Reference §8.1](../../products/motorsteuergerat-24p-v1/reference.md#81-can-bus) for the
+board's own termination status and how to verify a bus with a multimeter. For third-party devices,
+check their documentation, since not every CAN node includes a built-in terminator.
 
 !!! warning "Missing or duplicate termination causes intermittent, hard-to-diagnose faults"
     A bus with zero or only one terminator may still work over a short bench connection and then fail

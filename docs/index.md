@@ -10,7 +10,7 @@ On this site, you can find product overviews, hardware setup and wiring guides, 
 
 ## 1. What you can find here
 
-- Product introductions for the Motorsteurgerät and Schildknappe systems
+- Product introductions for the Motorsteuergerät and the upcoming [Schildknappe](products/schildknappe/index.md) (in development)
 - Wiring and mounting guidance for DIY car and motorcycle builds
 - Flashing and configuration instructions for supported ECUs
 - Tuning fundamentals and troubleshooting advice
@@ -30,9 +30,9 @@ On this site, you can find product overviews, hardware setup and wiring guides, 
 
 Hüpftronik is a collection of hardware solutions and documentation specifically for people building their own custom car and motorcycle projects.
 
-### 3.1. Motorsteurgerät
+### 3.1. Motorsteuergerät
 
-The Motorsteurgerät (Engine Control Unit) is the first product in the Hüpftronik world. 
+The Motorsteuergerät (Engine Control Unit) is the first product in the Hüpftronik world. 
 
 Compared to its early days around the year 2000, the market for standalone ECUs and related solutions has grown massively. Today, there is a wide variety of professional, open-source, and DIY products available, each with its own set of pros and cons. However, none of them suited our requirements.
 

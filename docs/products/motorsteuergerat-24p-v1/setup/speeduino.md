@@ -1,5 +1,5 @@
 # Speeduino Setup Guide for Motorsteuergerät 24P V1
-<div class="content-status status-ai-draft" title="AI-drafted from general engineering knowledge this session — verify against your specific hardware, engine code, or factory documentation before relying on it. See About > Open-Source &amp; Community for what this means.">AI-drafted — verify before use</div>
+--8<-- "status-ai-draft.md"
 
 This guide walks through first-time Speeduino configuration on a freshly-flashed Motorsteuergerät
 24P V1 — telling the firmware which pin does what, so the generic Speeduino image becomes a config
@@ -18,7 +18,7 @@ the source, per that comparison.
 - Your engine's decisions from [Planning your build](../../../guides/setup/planning.md) settled
   (injector count/impedance, throttle type, sensor selection).
 - Vehicle-specific notes, if your engine has one: see the
-  [vehicle-specific guides](../../../guides/setup/planning.md) for known-good starting configs.
+  [vehicle-specific guides](../../../guides/setup/specific/index.md) for known-good starting configs.
 
 ## 2. Pin mapping
 

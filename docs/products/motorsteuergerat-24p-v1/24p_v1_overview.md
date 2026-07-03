@@ -1,13 +1,16 @@
 # Motorsteuergerät 24P V1
 <div class="tooltip" title="Alpha testing: hardware and documentation are still under active development.">Current status: Alpha testing</div>
-<div class="content-status status-reviewed" title="Checked for internal consistency and technical accuracy; not tested on physical hardware. See About > Open-Source & Community for what this means.">Reviewed</div>
+--8<-- "status-reviewed.md"
 
 ---
 
 ## 1. Overview
 
 The Motorsteuergerät 24P V1 is Hüpftronik's main engine control unit — an open-hardware ECU built
-around the STM32F405 microcontroller and running a rusEFI firmware image built from the rusEFI firmware project. It handles fuel injection, ignition
+around the STM32F405 microcontroller, running open-source firmware you compile yourself. Both
+**rusEFI** and **Speeduino** are supported (see
+[Setup and Commissioning](setup/index.md#3-firmware-architecture-choosing-your-path) for choosing
+between them). It handles fuel injection, ignition
 timing, and auxiliary outputs through a single sealed 24-pin connector.
 
 ![PCB Render](./hupftronik_motorsteurgerat_24p_v1_pcbrender.png)
@@ -21,12 +24,26 @@ timing, and auxiliary outputs through a single sealed 24-pin connector.
 | MCU | STM32F405RGT6 — 168 MHz Cortex-M4F |
 | Flash | 1 MB |
 | RAM | 192 KB |
-| Firmware project | rusEFI (open-source, GPLv3) |
+| Firmware project | rusEFI or Speeduino (open-source, GPLv3) |
 | Connector | FCI 24-pin sealed automotive (3×8 grid) |
 | Power input | 12 V automotive nominal — KL30 (permanent) + KL15 (switched) |
 | SD card logging | Native SDIO — supports Class 10 cards |
 | CAN bus | 1× ISO 11898 channel |
 | USB | Full-speed — console access and firmware flashing |
+
+**Mechanical and environmental**
+
+| Parameter | Value |
+|---|---|
+| Board dimensions | *To be confirmed* — designed to fit the standard 24-pin cast aluminum ECU enclosure (see [Hardware Reference §1](reference.md#1-enclosure-options)) |
+| Mounting | Via the matching aluminum enclosure; PCB thermally coupled to the case floor with a TIM pad (see [Hardware Reference §2](reference.md#2-keeping-it-cool-thermal-management)) |
+| Mating connector | FCI 24-pin sealed automotive housing, 3×8 grid — supplied with the recommended enclosure; terminals crimp with an SN-48B (see [Wiring guide §2](wiring.md#2-connectors)) |
+| Operating temperature | *To be confirmed* — component selection targets automotive engine-bay ambient |
+| Quiescent current draw | *To be confirmed* |
+
+!!! note "Values marked *to be confirmed*"
+    The board is in alpha testing; dimensions, temperature rating, and current draw will be filled
+    in from measurements on production-candidate hardware.
 
 ---
 
@@ -68,8 +85,8 @@ The board has a differential VR sensor input`VR_POS`/`VR_NEG` using a dedicated 
 | A4 | CLT_RAW | Coolant temperature |
 | B3 | MAP_RAW | Manifold absolute pressure |
 | C3 | TPS_RAW | Throttle position |
-| C2 | SPARE_IN1 | General-purpose analog / digital input |
-| B2 | SPARE_IN2 | General-purpose analog / digital input |
+| C2 | SPARE_IN1 | General-purpose analog / digital input (e.g. Hall cam-sync sensor) |
+| B2 | SPARE_IN2 | General-purpose analog / digital input (e.g. Hall cam-sync sensor) |
 
 **Low-side driver outputs**
 

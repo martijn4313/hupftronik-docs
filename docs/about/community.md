@@ -1,5 +1,5 @@
 # Open-Source & Community
-<div class="content-status status-ai-draft" title="AI-drafted from general engineering knowledge this session — verify against your specific hardware, engine code, or factory documentation before relying on it. See About > Open-Source &amp; Community for what this means.">AI-drafted — verify before use</div>
+--8<-- "status-ai-draft.md"
 
 This page explains what "open-source" means in practice for Hüpftronik, and how to get help or
 contribute back. Read this if you're stuck on a build, want to report a documentation gap, or want

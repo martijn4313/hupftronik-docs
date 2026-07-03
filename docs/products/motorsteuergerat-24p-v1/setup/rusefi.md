@@ -1,5 +1,5 @@
 # rusEFI Setup Guide for Motorsteuergerät 24P V1
-<div class="content-status status-ai-draft" title="AI-drafted from general engineering knowledge this session — verify against your specific hardware, engine code, or factory documentation before relying on it. See About > Open-Source &amp; Community for what this means.">AI-drafted — verify before use</div>
+--8<-- "status-ai-draft.md"
 
 This guide walks through first-time rusEFI configuration on a freshly-flashed Motorsteuergerät 24P
 V1 — telling the firmware which pin does what, so the generic rusEFI image becomes a config specific
@@ -18,7 +18,7 @@ deliberately.
   (injector count/impedance, throttle type, sensor selection) — you'll be entering these as
   configuration values, not deciding them for the first time here.
 - Vehicle-specific notes, if your engine has one: see the
-  [vehicle-specific guides](../../../guides/setup/planning.md) for known-good starting configs.
+  [vehicle-specific guides](../../../guides/setup/specific/index.md) for known-good starting configs.
 
 ## 2. Pin mapping
 

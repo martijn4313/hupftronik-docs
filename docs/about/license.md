@@ -1,5 +1,5 @@
 # License & Disclaimer
-<div class="content-status status-ai-draft" title="AI-drafted from general engineering knowledge this session — verify against your specific hardware, engine code, or factory documentation before relying on it. See About > Open-Source &amp; Community for what this means.">AI-drafted — verify before use</div>
+--8<-- "status-ai-draft.md"
 
 This page covers the legal terms around using Hüpftronik hardware, firmware, and documentation, and
 the safety disclaimer that applies to every build described on this site. Read this before you rely
@@ -18,6 +18,13 @@ on anything here for a vehicle you drive.
     section will be updated with the exact license (and a link to the design files) once that's
     settled — see [Design files](../products/motorsteuergerat-24p-v1/reference.md) for current
     status.
+
+    **Until a license is published, the interim position is:** the documentation text and images on
+    this site are © Hüpftronik, all rights reserved — you may read and link to them freely, but not
+    republish or redistribute them. The PCB design files are unpublished. The intent is to release
+    both under recognized open licenses (an open-hardware license for the design files, an open
+    documentation license for this site); "all rights reserved" is the interim default, not the
+    destination.
 
 ## 2. No warranty
 

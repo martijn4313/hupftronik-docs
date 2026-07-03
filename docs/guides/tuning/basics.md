@@ -1,5 +1,5 @@
 # Tuning Basics
-<div class="content-status status-ai-draft" title="AI-drafted from general engineering knowledge this session — verify against your specific hardware, engine code, or factory documentation before relying on it. See About > Open-Source &amp; Community for what this means.">AI-drafted — verify before use</div>
+--8<-- "status-ai-draft.md"
 
 Tuning is the process of teaching the ECU how much fuel to inject and when to fire the spark for
 every combination of engine speed and load. A stock base map gets an engine running; only tuning
@@ -49,7 +49,7 @@ Never start tuning from a blank table. Begin from one of:
 - A base map shipped with your firmware for a similar engine (displacement, injector size,
   aspiration).
 - A base map from another builder running the same engine on the same firmware — the
-  [vehicle-specific guides](../setup/planning.md) list known-good starting points where available.
+  [vehicle-specific guides](../setup/specific/index.md) list known-good starting points where available.
 - Manually calculated first-fill values from your injector flow rate and estimated volumetric
   efficiency, only if no closer starting point exists.
 

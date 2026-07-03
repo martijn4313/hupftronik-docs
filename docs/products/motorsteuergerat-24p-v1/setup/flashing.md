@@ -1,5 +1,5 @@
 # Programming the board
-<div class="content-status status-reviewed" title="Checked for internal consistency and technical accuracy; not tested on physical hardware. See About > Open-Source & Community for what this means.">Reviewed</div>
+--8<-- "status-reviewed.md"
 
 ---
 

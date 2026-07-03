@@ -1,5 +1,5 @@
 # Wiring and hardware guide
-<div class="content-status status-reviewed" title="Checked for internal consistency and technical accuracy; not tested on physical hardware. See About > Open-Source & Community for what this means.">Reviewed</div>
+--8<-- "status-reviewed.md"
 
 ---
 
@@ -13,6 +13,21 @@ A few practical rules help a lot:
 - Use wire with insulation rated for the engine bay and choose a conductor size that keeps voltage drop low under cranking.
 - Keep the injector return path and sensor ground consistent, because a poor ground often causes intermittent faults.
 - Label the loom clearly and leave enough service slack near the engine and fuse box for future repairs.
+
+### 1.1. Grounding topology
+
+Use a star ground: one low-resistance ground point (an engine-block or chassis stud with a clean,
+strapped connection to the battery negative) that every ground return leads back to. Sensor grounds
+are the exception — they return through the harness to the ECU, never to the chassis, so that no
+load current flows through the wire your sensor readings are measured against.
+
+```mermaid
+flowchart TD
+    BATN["Battery negative terminal"] --- STAR(("Star ground point<br/>(engine block / chassis stud)"))
+    STAR --- ECU["ECU power ground<br/>(pins B8, C1)"]
+    STAR --- LOAD["High-current load returns<br/>(fuel pump, fan, coils)"]
+    SENS["Sensors<br/>(TPS, MAP, CLT, IAT)"] -->|"sensor ground returns to the ECU<br/>through the harness — never to chassis"| ECU
+```
 
 ---
 
@@ -55,6 +70,21 @@ Recommended wiring practice:
 - If the engine uses a shared injector rail, verify injector polarity and trigger logic before applying power.
 
 For a typical 4-cylinder batch-fire setup, split the injectors across the two dedicated drivers `INJ1` and `INJ2`, two cylinders per driver. Pair cylinders by firing order — the two cylinders 360° apart in the 720° cycle — not by physical position on the block; this is the same grouping used for wasted-spark ignition, and it spaces each driver's pulses evenly across the cycle. See the [Volvo B2xx guide](../../guides/setup/specific/volvo-b2xx.md#7-fueling) for a worked example. For V6 and V8 bank-fire systems, keep the wiring symmetrical so each bank has a similar resistance and routing path.
+
+```mermaid
+flowchart LR
+    F12["Fused +12 V feed<br/>(stable during cranking)"] --> P14["Injectors cyl 1 & 4<br/>(high side, parallel)"]
+    F12 --> P23["Injectors cyl 2 & 3<br/>(high side, parallel)"]
+    subgraph ECU["Motorsteuergerät 24P V1"]
+        INJ1D["INJ1_DRV (pin C8)"]
+        INJ2D["INJ2_DRV (pin A8)"]
+    end
+    P14 -->|"low side"| INJ1D
+    P23 -->|"low side"| INJ2D
+```
+
+*Minimal 4-cylinder batch-fire injector wiring for a 1–3–4–2 firing order: the ECU switches the low
+side of each injector pair; the high side is a shared, fused +12 V feed.*
 
 ### 4.2. TBI setup
 
@@ -125,3 +155,24 @@ This configuration is workable, but it places a continuous PWM load on `Q3` alon
     - Add a small adhesive heatsink to `Q3` if the IAC is used continuously.
     - Use high-impedance injectors only, typically above $10\,\Omega$, to keep current draw modest.
     - Make sure the IAC valve is healthy and not shorting or drawing excessive current.
+
+---
+
+## 5. Relay outputs
+
+The `FPRELAY_DRV` and `FANRELAY_DRV` outputs switch **relay coils, not loads**. The ECU sinks the
+coil's few-hundred-milliamp current to ground; the relay's contacts carry the pump or fan current
+from their own fused battery feed. Never route pump or fan current through the ECU connector.
+
+```mermaid
+flowchart LR
+    K15["+12 V ignition-switched<br/>(fused)"] --> COIL["Relay coil<br/>(terminal 86)"]
+    COIL -->|"terminal 85"| DRV["ECU low-side driver<br/>FPRELAY_DRV (B6) / FANRELAY_DRV (B7)"]
+    K30["+12 V battery<br/>(fused for the load)"] --> CONT["Relay contact<br/>(terminal 30 → 87)"]
+    CONT --> PUMP["Fuel pump / fan"]
+    PUMP --> GND["Star ground"]
+```
+
+*Standard relay wiring for the fuel pump and fan outputs: the ECU completes the coil circuit to
+ground; the load current never enters the ECU. See the
+[output summary table](reference.md#44-output-summary-table) for the driver current limits.*

@@ -1,5 +1,5 @@
 # Peugeot TU Series
-<div class="content-status status-ai-draft" title="AI-drafted from general engineering knowledge this session — verify against your specific hardware, engine code, or factory documentation before relying on it. See About > Open-Source &amp; Community for what this means.">AI-drafted — verify before use</div>
+--8<-- "status-ai-draft.md"
 
 The Peugeot/Citroën TU series (TU1/TU3/TU5, 1.1–1.6L inline-fours found across the 106, 206, 306,
 Saxo, and shared PSA platforms) covers a wide spread of engine management hardware across its
@@ -53,7 +53,10 @@ TU5 variants commonly use coil-on-plug or paired coil-on-plug ignition (verify a
 wiring diagram), while earlier distributorless-but-batch-fire variants may use a single wasted-spark
 coil pack with an external igniter, the same architecture as the
 [Volvo B2xx wasted-spark setup](volvo-b2xx.md#82-technical-detail). Do not assume either
-architecture without checking your engine code.
+architecture without checking your engine code. Whichever coil hardware you have, the 24P V1 drives
+it through its **two ignition outputs** (`IGN1`/`IGN2`) in wasted-spark pairs (cylinders 1+4 and
+2+3) — individual coil-on-plug coils are wired in those same pairs, and fully sequential
+per-cylinder ignition is not available on this board.
 
 ## 4. rusEFI configuration
 
@@ -62,8 +65,8 @@ Key values to verify before the first start:
 | Parameter | Value |
 |---|---|
 | Cylinder count | 4 |
-| Injection mode | Sequential (if cam sensor present) or batch — verify for your engine code |
-| Ignition mode | Verify — coil-on-plug or wasted spark differ by variant |
+| Injection mode | Sequential (if cam sensor present — needs [output repurposing](../../../products/motorsteuergerat-24p-v1/wiring.md#43-4-channel-sequential-injection-routing)) or batch — verify for your engine code |
+| Ignition mode | Wasted spark — coil hardware varies by variant, always paired on `IGN1`/`IGN2` |
 | Trigger type | `60/2` for distributorless variants; verify for earlier engines |
 | Trigger offset | Set via timing light or a known-good reference after first start |
 
@@ -82,7 +85,4 @@ Key values to verify before the first start:
 
 ## Next steps
 
-Wire the harness per [Wiring and hardware guide](../../../products/motorsteuergerat-24p-v1/wiring.md),
-then follow [Setup and Commissioning](../../../products/motorsteuergerat-24p-v1/setup/index.md) to
-flash and bring the board online. For tuning, see [Tuning Basics](../../tuning/basics.md). If the
-engine won't start or run cleanly, see [Troubleshooting](../troubleshooting.md).
+--8<-- "products/motorsteuergerat-24p-v1/vehicle-guide-next-steps.md"
