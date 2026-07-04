@@ -203,6 +203,10 @@ export function buildMermaid(){
       case 'coil': case 'coil2x2': case 'cop': return `${D}["⚡ ${c.des}${val?' '+val:''}${lbl?'<br/>'+lbl:''}"]:::power`;
       case 'distributor': return `${D}["🔀 ${c.des}${lbl?'<br/>'+lbl:''}"]:::conn`;
       case 'sparkplug': return `${D}(("⚡ ${c.des}${lbl?'<br/>'+lbl:''}")):::load`;
+      case 'resistor': return `${D}["${c.des} ${val}${lbl?'<br/>'+lbl:''}"]:::conn`;
+      case 'diode': return `${D}{"${c.des}${lbl?'<br/>'+lbl:''}"}:::conn`;
+      case 'capacitor': return `${D}["${c.des} ${val}${lbl?'<br/>'+lbl:''}"]:::conn`;
+      case 'npn': case 'pnp': case 'nchannel': case 'pchannel': return `${D}["${c.des}${lbl?'<br/>'+lbl:''}"]:::module`;
     }
   };
   for(const c of state.comps){
