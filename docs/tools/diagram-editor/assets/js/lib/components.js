@@ -108,7 +108,7 @@ export const LIB = {
         <text x="65" y="33" fill="#fdd835" font-size="7" text-anchor="middle" font-family="inherit">${IGN_POSITIONS[pos]}</text>
       </g>`;
     }},
-  ignAmp1:{name:'Power Stage (1-ch)',prefix:'N',w:80,h:60,
+  ignAmp1:{name:'Power Stage (1-ch)',prefix:'V',w:80,h:60,
     pins:[{id:'in',label:'IN',x:0,y:30},{id:'15',label:'15',x:40,y:0},
           {id:'31',label:'31',x:40,y:60},{id:'1',label:'1',x:80,y:30}],
     draw:()=>`
@@ -122,7 +122,7 @@ export const LIB = {
       <line x1="24" y1="26" x2="34" y2="18" stroke="#ff8a65" stroke-width="1.5"/>
       <line x1="24" y1="34" x2="34" y2="42" stroke="#ff8a65" stroke-width="1.5"/>
       <path d="M44 34 h5 v-8 h5 v8 h5" fill="none" stroke="#ff8a65" stroke-width="1.5"/>`},
-  ignAmp2:{name:'Power Stage (2-ch)',prefix:'N',w:80,h:80,
+  ignAmp2:{name:'Power Stage (2-ch)',prefix:'V',w:80,h:80,
     pins:[{id:'in1',label:'IN1',x:0,y:30},{id:'in2',label:'IN2',x:0,y:50},
           {id:'15',label:'15',x:40,y:0},{id:'31',label:'31',x:40,y:80},
           {id:'1a',label:'1a',x:80,y:30},{id:'1b',label:'1b',x:80,y:50}],
@@ -381,6 +381,72 @@ export const LIB = {
       <line x1="70" y1="20" x2="80" y2="20" stroke="#d7dde3" stroke-width="2"/>
       <line x1="70" y1="60" x2="80" y2="60" stroke="#d7dde3" stroke-width="2"/>
       <rect x="10" y="0" width="60" height="80" rx="4" fill="#24282e" stroke="#8a939c" stroke-width="2" stroke-dasharray="6 3"/>`},
+  resistor:{name:'Resistor',prefix:'R',w:60,h:24,
+    pins:[{id:'1',label:'1',x:0,y:12},{id:'2',label:'2',x:60,y:12}],
+    valBase:{x:30,y:38}, valColor:'#4fc3f7', valSize:9,
+    draw:()=>`
+      <line x1="0" y1="12" x2="14" y2="12" stroke="#d7dde3" stroke-width="2"/>
+      <line x1="46" y1="12" x2="60" y2="12" stroke="#d7dde3" stroke-width="2"/>
+      <rect x="14" y="4" width="32" height="16" rx="2" fill="#132029" stroke="#4fc3f7" stroke-width="2"/>`,
+    value:'220Ω'},
+  diode:{name:'Diode',prefix:'D',w:50,h:24,
+    pins:[{id:'a',label:'A',x:0,y:12},{id:'k',label:'K',x:50,y:12}],
+    draw:()=>`
+      <line x1="0" y1="12" x2="15" y2="12" stroke="#d7dde3" stroke-width="2"/>
+      <line x1="35" y1="12" x2="50" y2="12" stroke="#d7dde3" stroke-width="2"/>
+      <path d="M15 4 L15 20 L33 12 Z" fill="none" stroke="#4fc3f7" stroke-width="2" stroke-linejoin="round"/>
+      <line x1="33" y1="4" x2="33" y2="20" stroke="#4fc3f7" stroke-width="2.4"/>`},
+  capacitor:{name:'Capacitor',prefix:'CAP',w:40,h:30,
+    pins:[{id:'1',label:'1',x:0,y:15},{id:'2',label:'2',x:40,y:15}],
+    valBase:{x:20,y:38}, valColor:'#4fc3f7', valSize:9,
+    draw:()=>`
+      <line x1="0" y1="15" x2="17" y2="15" stroke="#d7dde3" stroke-width="2"/>
+      <line x1="23" y1="15" x2="40" y2="15" stroke="#d7dde3" stroke-width="2"/>
+      <line x1="17" y1="5" x2="17" y2="25" stroke="#4fc3f7" stroke-width="2.6"/>
+      <line x1="23" y1="5" x2="23" y2="25" stroke="#4fc3f7" stroke-width="2.6"/>`,
+    value:'100nF'},
+  npn:{name:'Transistor NPN',prefix:'V',w:60,h:60,
+    pins:[{id:'b',label:'B',x:0,y:30},{id:'c',label:'C',x:60,y:0},{id:'e',label:'E',x:60,y:60}],
+    draw:()=>`
+      <circle cx="30" cy="30" r="27" fill="none" stroke="#f06292" stroke-width="1" stroke-dasharray="4 3"/>
+      <line x1="0" y1="30" x2="20" y2="30" stroke="#f06292" stroke-width="2"/>
+      <line x1="20" y1="12" x2="20" y2="48" stroke="#f06292" stroke-width="2.6"/>
+      <line x1="20" y1="18" x2="60" y2="0" stroke="#f06292" stroke-width="2"/>
+      <line x1="20" y1="42" x2="60" y2="60" stroke="#f06292" stroke-width="2"/>
+      <path d="M50 56 L42 57.5 L46 48.5 Z" fill="#f06292"/>`},
+  pnp:{name:'Transistor PNP',prefix:'V',w:60,h:60,
+    pins:[{id:'b',label:'B',x:0,y:30},{id:'c',label:'C',x:60,y:0},{id:'e',label:'E',x:60,y:60}],
+    draw:()=>`
+      <circle cx="30" cy="30" r="27" fill="none" stroke="#f06292" stroke-width="1" stroke-dasharray="4 3"/>
+      <line x1="0" y1="30" x2="20" y2="30" stroke="#f06292" stroke-width="2"/>
+      <line x1="20" y1="12" x2="20" y2="48" stroke="#f06292" stroke-width="2.6"/>
+      <line x1="20" y1="18" x2="60" y2="0" stroke="#f06292" stroke-width="2"/>
+      <line x1="20" y1="42" x2="60" y2="60" stroke="#f06292" stroke-width="2"/>
+      <path d="M38 50 L42 57.5 L46 48.5 Z" fill="#f06292"/>`},
+  nchannel:{name:'MOSFET N-Channel',prefix:'V',w:60,h:70,
+    pins:[{id:'g',label:'G',x:0,y:35},{id:'d',label:'D',x:40,y:0},{id:'s',label:'S',x:40,y:70}],
+    draw:()=>`
+      <circle cx="28" cy="35" r="30" fill="none" stroke="#ba68c8" stroke-width="1" stroke-dasharray="4 3"/>
+      <line x1="0" y1="35" x2="16" y2="35" stroke="#ba68c8" stroke-width="2"/>
+      <line x1="16" y1="20" x2="16" y2="50" stroke="#ba68c8" stroke-width="2.6"/>
+      <line x1="24" y1="14" x2="24" y2="56" stroke="#ba68c8" stroke-width="2"/>
+      <line x1="24" y1="14" x2="40" y2="14" stroke="#ba68c8" stroke-width="2"/>
+      <line x1="40" y1="14" x2="40" y2="0" stroke="#ba68c8" stroke-width="2"/>
+      <line x1="24" y1="56" x2="40" y2="56" stroke="#ba68c8" stroke-width="2"/>
+      <line x1="40" y1="56" x2="40" y2="70" stroke="#ba68c8" stroke-width="2"/>
+      <path d="M20 31 L20 39 L28 35 Z" fill="#ba68c8"/>`},
+  pchannel:{name:'MOSFET P-Channel',prefix:'V',w:60,h:70,
+    pins:[{id:'g',label:'G',x:0,y:35},{id:'d',label:'D',x:40,y:0},{id:'s',label:'S',x:40,y:70}],
+    draw:()=>`
+      <circle cx="28" cy="35" r="30" fill="none" stroke="#ba68c8" stroke-width="1" stroke-dasharray="4 3"/>
+      <line x1="0" y1="35" x2="16" y2="35" stroke="#ba68c8" stroke-width="2"/>
+      <line x1="16" y1="20" x2="16" y2="50" stroke="#ba68c8" stroke-width="2.6"/>
+      <line x1="24" y1="14" x2="24" y2="56" stroke="#ba68c8" stroke-width="2"/>
+      <line x1="24" y1="14" x2="40" y2="14" stroke="#ba68c8" stroke-width="2"/>
+      <line x1="40" y1="14" x2="40" y2="0" stroke="#ba68c8" stroke-width="2"/>
+      <line x1="24" y1="56" x2="40" y2="56" stroke="#ba68c8" stroke-width="2"/>
+      <line x1="40" y1="56" x2="40" y2="70" stroke="#ba68c8" stroke-width="2"/>
+      <path d="M28 31 L28 39 L20 35 Z" fill="#ba68c8"/>`},
   note:{name:'Text Note',prefix:'N',w:200,h:60,
     pins:[],
     draw:c=>{

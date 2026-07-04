@@ -38,6 +38,7 @@ export function buildPalette(){
     ['Power', ['battery','fuse','ground','splice']],
     ['Control', ['relay','relay5','switch','ignition','ecu']],
     ['Ignition', ['ignAmp1','ignAmp2','coil','coil2x2','cop','distributor','sparkplug']],
+    ['Electronics', ['resistor','diode','capacitor','npn','pnp','nchannel','pchannel']],
     ['Engine Management', ['injector', 'sensor2', 'sensor3', 'o2sensor3', 'o2sensor4', 'o2sensor5', 'valve', 'idleValve2', 'idleValve3', 'idleStepper', 'idleWax']],
     ['Loads', ['motor','pump','lamp']],
     ['Harness', ['connector', 'ublock']],
@@ -174,6 +175,7 @@ export function simulate(){
       switch(c.type){
         case 'fuse': add(c.id,'1','2'); break;
         case 'connector': add(c.id,'a','b'); break;
+        case 'resistor': add(c.id,'1','2'); break;
         case 'switch': if(c.on) add(c.id,'1','2'); break;
         case 'ignition':
           for(const [x,y] of IGN_CONDUCT[Math.max(0,Math.min(3,+c.keyPos||0))]) add(c.id,x,y);
