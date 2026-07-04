@@ -23,6 +23,31 @@ function relayArt(spdt){
   return s;
 }
 
+/* ECU pin layout: fixed 20px pitch so every pin lands on the snap grid */
+export function ecuHeight(pinCount=4){
+  return Math.max(80, (pinCount-1)*20 + 40);
+}
+function ecuPins(pinCount=4){
+  const h=ecuHeight(pinCount);
+  const pins=[];
+  if(pinCount<=0) return pins;
+  if(pinCount===1) return [{id:'p0',label:'1',x:0,y:h/2}];
+  const start=(h-(pinCount-1)*20)/2;
+  for(let i=0;i<pinCount;i++){
+    pins.push({id:'p'+i,label:''+(i+1),x:0,y:start+i*20});
+  }
+  return pins;
+}
+
+/* ignition key positions and which terminals conduct in each */
+export const IGN_POSITIONS = ['OFF','ACC','ON','START'];
+export const IGN_CONDUCT = [
+  [],
+  [['30','acc']],
+  [['30','acc'],['30','15']],
+  [['30','15'],['30','50']]
+];
+
 export const LIB = {
   battery:{name:'Battery',prefix:'BAT',w:80,h:60,
     pins:[{id:'plus',label:'+',x:20,y:0},{id:'minus',label:'−',x:60,y:0}],
@@ -55,12 +80,143 @@ export const LIB = {
     draw:()=>relayArt(true)},
   switch:{name:'Switch',prefix:'S',w:60,h:40,
     pins:[{id:'1',label:'1',x:0,y:20},{id:'2',label:'2',x:60,y:20}],
-    draw:()=>`
+    draw:c=>`
       <line x1="0" y1="20" x2="14" y2="20" stroke="#d7dde3" stroke-width="2"/>
       <line x1="46" y1="20" x2="60" y2="20" stroke="#d7dde3" stroke-width="2"/>
       <circle cx="14" cy="20" r="3" fill="#1c2024" stroke="#d7dde3" stroke-width="2"/>
       <circle cx="46" cy="20" r="3" fill="#1c2024" stroke="#d7dde3" stroke-width="2"/>
-      <line x1="16" y1="19" x2="43" y2="4" stroke="#d7dde3" stroke-width="2"/>`},
+      ${c.on
+        ? `<line x1="17" y1="20" x2="43" y2="20" stroke="#66bb6a" stroke-width="2.4"/>`
+        : `<line x1="16" y1="19" x2="43" y2="4" stroke="#d7dde3" stroke-width="2"/>`}`},
+  ignition:{name:'Ignition Switch',prefix:'S',w:80,h:60,
+    pins:[{id:'acc',label:'ACC',x:10,y:0},{id:'15',label:'15',x:40,y:0},{id:'50',label:'50',x:70,y:0},
+          {id:'30',label:'30',x:40,y:60}],
+    draw:c=>{
+      const pos=Math.max(0,Math.min(3,+c.keyPos||0));
+      const ang=[-50,-17,17,50][pos]*Math.PI/180;
+      const kx=40+Math.sin(ang)*8.5, ky=30-Math.cos(ang)*8.5;
+      return `
+      <line x1="10" y1="0" x2="10" y2="10" stroke="#d7dde3" stroke-width="2"/>
+      <line x1="40" y1="0" x2="40" y2="10" stroke="#d7dde3" stroke-width="2"/>
+      <line x1="70" y1="0" x2="70" y2="10" stroke="#d7dde3" stroke-width="2"/>
+      <line x1="40" y1="50" x2="40" y2="60" stroke="#f9a825" stroke-width="2"/>
+      <rect x="0" y="10" width="80" height="40" rx="5" fill="#2b2620" stroke="#fdd835" stroke-width="2"/>
+      <circle cx="40" cy="30" r="11" fill="#1c2024" stroke="#fdd835" stroke-width="1.6"/>
+      <line x1="40" y1="30" x2="${kx.toFixed(1)}" y2="${ky.toFixed(1)}" stroke="#fdd835" stroke-width="2.4" stroke-linecap="round"/>
+      <circle cx="40" cy="30" r="2" fill="#fdd835"/>
+      <g transform="rotate(${-(c.r||0)}, 65, 30)">
+        <text x="65" y="33" fill="#fdd835" font-size="7" text-anchor="middle" font-family="inherit">${IGN_POSITIONS[pos]}</text>
+      </g>`;
+    }},
+  ignAmp1:{name:'Power Stage (1-ch)',prefix:'N',w:80,h:60,
+    pins:[{id:'in',label:'IN',x:0,y:30},{id:'15',label:'15',x:40,y:0},
+          {id:'31',label:'31',x:40,y:60},{id:'1',label:'1',x:80,y:30}],
+    draw:()=>`
+      <line x1="0" y1="30" x2="10" y2="30" stroke="#d7dde3" stroke-width="2"/>
+      <line x1="40" y1="0" x2="40" y2="10" stroke="#f9a825" stroke-width="2"/>
+      <line x1="40" y1="50" x2="40" y2="60" stroke="#9e9e9e" stroke-width="2"/>
+      <line x1="70" y1="30" x2="80" y2="30" stroke="#d7dde3" stroke-width="2"/>
+      <rect x="10" y="10" width="60" height="40" rx="4" fill="#2e2018" stroke="#ff8a65" stroke-width="2"/>
+      <line x1="16" y1="30" x2="24" y2="30" stroke="#ff8a65" stroke-width="1.5"/>
+      <line x1="24" y1="22" x2="24" y2="38" stroke="#ff8a65" stroke-width="2"/>
+      <line x1="24" y1="26" x2="34" y2="18" stroke="#ff8a65" stroke-width="1.5"/>
+      <line x1="24" y1="34" x2="34" y2="42" stroke="#ff8a65" stroke-width="1.5"/>
+      <path d="M44 34 h5 v-8 h5 v8 h5" fill="none" stroke="#ff8a65" stroke-width="1.5"/>`},
+  ignAmp2:{name:'Power Stage (2-ch)',prefix:'N',w:80,h:80,
+    pins:[{id:'in1',label:'IN1',x:0,y:30},{id:'in2',label:'IN2',x:0,y:50},
+          {id:'15',label:'15',x:40,y:0},{id:'31',label:'31',x:40,y:80},
+          {id:'1a',label:'1a',x:80,y:30},{id:'1b',label:'1b',x:80,y:50}],
+    draw:()=>`
+      <line x1="0" y1="30" x2="10" y2="30" stroke="#d7dde3" stroke-width="2"/>
+      <line x1="0" y1="50" x2="10" y2="50" stroke="#d7dde3" stroke-width="2"/>
+      <line x1="40" y1="0" x2="40" y2="10" stroke="#f9a825" stroke-width="2"/>
+      <line x1="40" y1="70" x2="40" y2="80" stroke="#9e9e9e" stroke-width="2"/>
+      <line x1="70" y1="30" x2="80" y2="30" stroke="#d7dde3" stroke-width="2"/>
+      <line x1="70" y1="50" x2="80" y2="50" stroke="#d7dde3" stroke-width="2"/>
+      <rect x="10" y="10" width="60" height="60" rx="4" fill="#2e2018" stroke="#ff8a65" stroke-width="2"/>
+      <line x1="16" y1="30" x2="22" y2="30" stroke="#ff8a65" stroke-width="1.5"/>
+      <line x1="22" y1="24" x2="22" y2="36" stroke="#ff8a65" stroke-width="2"/>
+      <line x1="22" y1="27" x2="30" y2="21" stroke="#ff8a65" stroke-width="1.5"/>
+      <line x1="22" y1="33" x2="30" y2="39" stroke="#ff8a65" stroke-width="1.5"/>
+      <line x1="16" y1="50" x2="22" y2="50" stroke="#ff8a65" stroke-width="1.5"/>
+      <line x1="22" y1="44" x2="22" y2="56" stroke="#ff8a65" stroke-width="2"/>
+      <line x1="22" y1="47" x2="30" y2="41" stroke="#ff8a65" stroke-width="1.5"/>
+      <line x1="22" y1="53" x2="30" y2="59" stroke="#ff8a65" stroke-width="1.5"/>
+      <path d="M42 60 h5 v-8 h5 v8 h5" fill="none" stroke="#ff8a65" stroke-width="1.5"/>`},
+  coil:{name:'Ignition Coil',prefix:'T',w:40,h:60,
+    pins:[{id:'15',label:'15',x:10,y:0},{id:'1',label:'1',x:30,y:0},{id:'4',label:'4',x:20,y:60}],
+    draw:()=>`
+      <line x1="10" y1="0" x2="10" y2="10" stroke="#f9a825" stroke-width="2"/>
+      <line x1="30" y1="0" x2="30" y2="10" stroke="#d7dde3" stroke-width="2"/>
+      <line x1="20" y1="50" x2="20" y2="60" stroke="#e0e0e0" stroke-width="2.6"/>
+      <rect x="6" y="10" width="28" height="34" rx="6" fill="#2e2018" stroke="#ff8a65" stroke-width="2"/>
+      <path d="M13 16 a3 3 0 0 1 0 6 a3 3 0 0 1 0 6 a3 3 0 0 1 0 6" fill="none" stroke="#ff8a65" stroke-width="1.4"/>
+      <path d="M27 16 a3 3 0 0 0 0 6 a3 3 0 0 0 0 6 a3 3 0 0 0 0 6" fill="none" stroke="#ff8a65" stroke-width="1.4"/>
+      <line x1="20" y1="15" x2="20" y2="39" stroke="#ff8a65" stroke-width="1.2"/>
+      <path d="M15 44 h10 l-2 6 h-6 z" fill="#2e2018" stroke="#ff8a65" stroke-width="1.4"/>`},
+  coil2x2:{name:'Coil Pack 2×2',prefix:'T',w:80,h:60,
+    pins:[{id:'1a',label:'1a',x:10,y:0},{id:'15',label:'15',x:40,y:0},{id:'1b',label:'1b',x:70,y:0},
+          {id:'ht1',label:'1',x:10,y:60},{id:'ht2',label:'2',x:30,y:60},
+          {id:'ht3',label:'3',x:50,y:60},{id:'ht4',label:'4',x:70,y:60}],
+    draw:()=>`
+      <line x1="10" y1="0" x2="10" y2="10" stroke="#d7dde3" stroke-width="2"/>
+      <line x1="40" y1="0" x2="40" y2="10" stroke="#f9a825" stroke-width="2"/>
+      <line x1="70" y1="0" x2="70" y2="10" stroke="#d7dde3" stroke-width="2"/>
+      <line x1="10" y1="50" x2="10" y2="60" stroke="#e0e0e0" stroke-width="2.6"/>
+      <line x1="30" y1="50" x2="30" y2="60" stroke="#e0e0e0" stroke-width="2.6"/>
+      <line x1="50" y1="50" x2="50" y2="60" stroke="#e0e0e0" stroke-width="2.6"/>
+      <line x1="70" y1="50" x2="70" y2="60" stroke="#e0e0e0" stroke-width="2.6"/>
+      <rect x="4" y="10" width="72" height="40" rx="5" fill="#2e2018" stroke="#ff8a65" stroke-width="2"/>
+      <path d="M17 20 a3 3 0 0 1 0 6 a3 3 0 0 1 0 6" fill="none" stroke="#ff8a65" stroke-width="1.4"/>
+      <path d="M25 20 a3 3 0 0 0 0 6 a3 3 0 0 0 0 6" fill="none" stroke="#ff8a65" stroke-width="1.4"/>
+      <line x1="21" y1="19" x2="21" y2="33" stroke="#ff8a65" stroke-width="1.2"/>
+      <path d="M55 20 a3 3 0 0 1 0 6 a3 3 0 0 1 0 6" fill="none" stroke="#ff8a65" stroke-width="1.4"/>
+      <path d="M63 20 a3 3 0 0 0 0 6 a3 3 0 0 0 0 6" fill="none" stroke="#ff8a65" stroke-width="1.4"/>
+      <line x1="59" y1="19" x2="59" y2="33" stroke="#ff8a65" stroke-width="1.2"/>
+      <line x1="40" y1="14" x2="40" y2="46" stroke="#ff8a65" stroke-width="1" stroke-dasharray="3 3"/>`},
+  cop:{name:'COP Coil',prefix:'T',w:40,h:60,
+    pins:[{id:'15',label:'15',x:10,y:0},{id:'1',label:'1',x:30,y:0},{id:'4',label:'4',x:20,y:60}],
+    draw:()=>`
+      <line x1="10" y1="0" x2="10" y2="10" stroke="#f9a825" stroke-width="2"/>
+      <line x1="30" y1="0" x2="30" y2="10" stroke="#d7dde3" stroke-width="2"/>
+      <line x1="20" y1="52" x2="20" y2="60" stroke="#e0e0e0" stroke-width="2.6"/>
+      <rect x="8" y="10" width="24" height="14" rx="4" fill="#2e2018" stroke="#ff8a65" stroke-width="2"/>
+      <rect x="16" y="24" width="8" height="20" fill="#2e2018" stroke="#ff8a65" stroke-width="1.6"/>
+      <path d="M14 44 h12 v5 a4 4 0 0 1 -4 3 h-4 a4 4 0 0 1 -4 -3 z" fill="#2e2018" stroke="#ff8a65" stroke-width="1.6"/>
+      <line x1="18" y1="28" x2="18" y2="40" stroke="#ff8a65" stroke-width="1"/>
+      <line x1="22" y1="28" x2="22" y2="40" stroke="#ff8a65" stroke-width="1"/>`},
+  distributor:{name:'HT Distributor',prefix:'O',w:80,h:60,
+    pins:[{id:'in',label:'4',x:40,y:0},
+          {id:'ht1',label:'1',x:10,y:60},{id:'ht2',label:'2',x:30,y:60},
+          {id:'ht3',label:'3',x:50,y:60},{id:'ht4',label:'4',x:70,y:60}],
+    draw:()=>`
+      <line x1="40" y1="0" x2="40" y2="10" stroke="#e0e0e0" stroke-width="2.6"/>
+      <line x1="10" y1="50" x2="10" y2="60" stroke="#e0e0e0" stroke-width="2.6"/>
+      <line x1="30" y1="50" x2="30" y2="60" stroke="#e0e0e0" stroke-width="2.6"/>
+      <line x1="50" y1="50" x2="50" y2="60" stroke="#e0e0e0" stroke-width="2.6"/>
+      <line x1="70" y1="50" x2="70" y2="60" stroke="#e0e0e0" stroke-width="2.6"/>
+      <path d="M4 50 v-24 a36 18 0 0 1 72 0 v24 z" fill="#2e2018" stroke="#ff8a65" stroke-width="2"/>
+      <circle cx="40" cy="22" r="3" fill="none" stroke="#ff8a65" stroke-width="1.4"/>
+      <line x1="40" y1="25" x2="40" y2="34" stroke="#ff8a65" stroke-width="1.4"/>
+      <circle cx="40" cy="36" r="2.4" fill="#ff8a65"/>
+      <line x1="40" y1="36" x2="14" y2="44" stroke="#ff8a65" stroke-width="2"/>
+      <circle cx="10" cy="46" r="2" fill="none" stroke="#ff8a65" stroke-width="1.2"/>
+      <circle cx="30" cy="46" r="2" fill="none" stroke="#ff8a65" stroke-width="1.2"/>
+      <circle cx="50" cy="46" r="2" fill="none" stroke="#ff8a65" stroke-width="1.2"/>
+      <circle cx="70" cy="46" r="2" fill="none" stroke="#ff8a65" stroke-width="1.2"/>`},
+  sparkplug:{name:'Spark Plug',prefix:'Q',w:40,h:50,
+    pins:[{id:'ht',label:'',x:20,y:0}],
+    draw:()=>`
+      <line x1="20" y1="0" x2="20" y2="8" stroke="#e0e0e0" stroke-width="2.6"/>
+      <rect x="14" y="8" width="12" height="12" rx="2" fill="#2e2624" stroke="#eceff1" stroke-width="1.6"/>
+      <line x1="14" y1="12" x2="26" y2="12" stroke="#eceff1" stroke-width="1"/>
+      <line x1="14" y1="16" x2="26" y2="16" stroke="#eceff1" stroke-width="1"/>
+      <rect x="10" y="20" width="20" height="8" fill="#23282e" stroke="#eceff1" stroke-width="1.6"/>
+      <line x1="20" y1="28" x2="20" y2="38" stroke="#eceff1" stroke-width="2"/>
+      <line x1="28" y1="28" x2="28" y2="42" stroke="#eceff1" stroke-width="1.6"/>
+      <line x1="28" y1="42" x2="21" y2="42" stroke="#eceff1" stroke-width="1.6"/>
+      <line x1="12" y1="47" x2="28" y2="47" stroke="#8a939c" stroke-width="1.6"/>
+      <line x1="16" y1="50" x2="24" y2="50" stroke="#8a939c" stroke-width="1.6"/>`},
   motor:{name:'Motor / fan',prefix:'M',w:60,h:60,
     pins:[{id:'1',label:'+',x:30,y:0},{id:'2',label:'−',x:30,y:60}],
     draw:c=>`
@@ -85,28 +241,16 @@ export const LIB = {
       <line x1="44" y1="16" x2="16" y2="44" stroke="#fdd835" stroke-width="2"/>`},
   ecu:{name:'ECU Block',prefix:'A',w:120,h:60,
     pins:[], // pins will be generated dynamically based on pinCount
-    getPin:(idx)=>({id:'p'+idx,label:''+idx,x:0,y:20}),
-    getHeight:(pinCount=4)=>{
-      return Math.max(80, 20 + pinCount * 16 + 20);
-    },
-    getPins:(pinCount=4)=>{
-      const h = Math.max(80, 20 + pinCount * 16 + 20);
-      const pins=[];
-      if(pinCount===0) return pins;
-      if(pinCount===1){
-        pins.push({id:'p0',label:'1',x:0,y:h/2});
-      } else {
-        const spacing = (h - 40) / (pinCount - 1);
-        for(let i=0;i<pinCount;i++){
-          pins.push({id:'p'+i,label:''+(i+1),x:0,y:20+i*spacing});
-        }
-      }
-      return pins;
-    },
+    getHeight:ecuHeight,
+    getPins:ecuPins,
     draw:c=>{
       const pinCount=c.pinCount||4;
-      const h=Math.max(80, 20 + pinCount * 16 + 20);
+      const h=ecuHeight(pinCount);
+      const pins=(c.pins&&c.pins.length)?c.pins:ecuPins(pinCount);
+      const stubs=pins.map(p=>
+        `<line x1="0" y1="${p.y}" x2="10" y2="${p.y}" stroke="#d7dde3" stroke-width="2"/>`).join('');
       return `
+        ${stubs}
         <rect x="10" y="0" width="110" height="${h}" rx="3" fill="#241f30" stroke="#9575cd" stroke-width="2"/>
         <g transform="rotate(${-(c.r||0)}, 65, ${h/2})">
           <text x="65" y="${h/2+4}" fill="#b39ddb" font-size="12" text-anchor="middle" font-family="inherit">ECU</text>

@@ -1,7 +1,7 @@
 /* ============ IO, export, and modal layer ============ */
 
 import { DIN, DIN_MERMAID } from './constants.js';
-import { LIB } from './components.js';
+import { LIB, ecuHeight, IGN_POSITIONS } from './components.js';
 import { state, esc, comp } from './state.js';
 import { render, svg, wiresL, compsL, renderWires, renderComps, applyView } from './render.js';
 
@@ -34,7 +34,7 @@ export function setupIOButtons(){
       const d=LIB[c.type];
       let h=d.h;
       if(c.type==='ecu'&&c.pins){
-        h = Math.max(80, 20 + c.pins.length * 16 + 20);
+        h = ecuHeight(c.pins.length);
       }
       x1=Math.min(x1,c.x);y1=Math.min(y1,c.y);
       x2=Math.max(x2,c.x+d.w);y2=Math.max(y2,c.y+h);
@@ -71,9 +71,18 @@ export function setupIOButtons(){
         state.comps.forEach(c=>{
           if(c.type==='ecu'){
             c.pinCount=c.pinCount||4;
-            if(!c.pins||!Array.isArray(c.pins)){
-              c.pins=LIB.ecu.getPins(c.pinCount);
-            }
+            // regenerate pin geometry (older saves used off-grid spacing)
+            // while keeping any customized labels
+            const old=Array.isArray(c.pins)?c.pins:[];
+            c.pins=LIB.ecu.getPins(c.pinCount);
+            c.pins.forEach((p,i)=>{ if(old[i]&&old[i].label) p.label=old[i].label; });
+            c.pinStates=c.pinStates&&typeof c.pinStates==='object'?c.pinStates:{};
+          }
+          if(c.type==='switch'){
+            c.on=!!c.on;
+          }
+          if(c.type==='ignition'){
+            c.keyPos=Math.max(0,Math.min(3,+c.keyPos||0));
           }
           if(c.type==='note'){
             c.noteText = c.noteText ?? 'Note';
@@ -103,7 +112,7 @@ export function setupIOButtons(){
       const d=LIB[c.type];
       let h=d.h;
       if(c.type==='ecu'&&c.pins){
-        h = Math.max(80, 20 + c.pins.length * 16 + 20);
+        h = ecuHeight(c.pins.length);
       }
       x1=Math.min(x1,c.x-30);y1=Math.min(y1,c.y-30);
       x2=Math.max(x2,c.x+d.w+30);y2=Math.max(y2,c.y+h+30);
@@ -179,6 +188,7 @@ export function buildMermaid(){
       case 'battery': return `${D}[("🔋 ${c.des} ${val}")]:::battery`;
       case 'fuse': return `${D}{{"${c.des} ${val}${lbl?'<br/>'+lbl:''}"}}:::fuse`;
       case 'switch': return `${D}(["${c.des}${lbl?'<br/>'+lbl:''}"]):::switch`;
+      case 'ignition': return `${D}(["🔑 ${c.des} ${IGN_POSITIONS[Math.max(0,Math.min(3,+c.keyPos||0))]}${lbl?'<br/>'+lbl:''}"]):::switch`;
       case 'motor': case 'pump': return `${D}(("M${lbl?'<br/>'+lbl:''}")):::load`;
       case 'lamp': return `${D}(("✕ ${c.des}${lbl?'<br/>'+lbl:''}")):::load`;
       case 'ecu': return `${D}["${c.des} ECU${val?'<br/>'+val:''}${lbl?'<br/>'+lbl:''}"]:::module`;
@@ -189,6 +199,10 @@ export function buildMermaid(){
       case 'sensor2': case 'sensor3': case 'o2sensor3': case 'o2sensor4': case 'o2sensor5': return `${D}(["📶 ${c.des}${lbl?'<br/>'+lbl:''}"]):::module`;
       case 'idleValve2': case 'idleValve3': case 'idleStepper': case 'idleWax': return `${D}(("⚙️ ${c.des}${lbl?'<br/>'+lbl:''}")):::load`;
       case 'ublock': return `${D}["${c.des}${lbl?'<br/>'+lbl:''}"]:::module`;
+      case 'ignAmp1': case 'ignAmp2': return `${D}["⚡ ${c.des}${lbl?'<br/>'+lbl:''}"]:::module`;
+      case 'coil': case 'coil2x2': case 'cop': return `${D}["⚡ ${c.des}${val?' '+val:''}${lbl?'<br/>'+lbl:''}"]:::power`;
+      case 'distributor': return `${D}["🔀 ${c.des}${lbl?'<br/>'+lbl:''}"]:::conn`;
+      case 'sparkplug': return `${D}(("⚡ ${c.des}${lbl?'<br/>'+lbl:''}")):::load`;
     }
   };
   for(const c of state.comps){

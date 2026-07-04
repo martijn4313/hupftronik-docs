@@ -101,6 +101,9 @@ button.danger:hover{border-color:var(--danger);color:var(--danger)}
 }
 #props textarea{resize:vertical;min-height:84px;line-height:1.35}
 #props input:focus-visible,#props select:focus-visible,#props textarea:focus-visible{outline:2px solid var(--amber);outline-offset:1px}
+.pin-row{display:flex;gap:4px;margin-bottom:4px}
+#props .pin-row input{flex:1;min-width:0;width:auto}
+#props .pin-row select{width:72px;flex:none}
 .swatchbar{display:flex;flex-wrap:wrap;gap:4px;margin-top:4px}
 .swatch{
   width:22px;height:22px;border-radius:4px;border:2px solid transparent;cursor:pointer;padding:0;

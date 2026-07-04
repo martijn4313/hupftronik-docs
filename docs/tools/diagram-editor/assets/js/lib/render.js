@@ -1,9 +1,9 @@
 /* ============ rendering layer ============ */
 
 import { DIN, GAUGES } from './constants.js';
-import { LIB } from './components.js';
-import { state, esc, comp, uid } from './state.js';
-import { pinPos, textAnchor, textOffset, wirePath, routePoints, pinTextAnchor, pinTextOffset } from './geometry.js';
+import { LIB, ecuHeight, IGN_POSITIONS } from './components.js';
+import { state, esc, comp, uid, hooks } from './state.js';
+import { pinPos, pinAxis, textAnchor, textOffset, wirePath, routePoints, pinTextAnchor, pinTextOffset } from './geometry.js';
 
 // DOM references
 export let svg, wiresL, compsL, tempL, handleL;
@@ -51,19 +51,22 @@ export function renderWires(){
     return pts[pts.length-1];
   };
   wiresL.innerHTML = state.wires.map(w=>{
-    const a=pinPos(state.comps.find(c=>c.id===w.a.comp),w.a.pin), b=pinPos(state.comps.find(c=>c.id===w.b.comp),w.b.pin);
-    const pts=routePoints(a,b,w.wp);
+    const ca=state.comps.find(c=>c.id===w.a.comp), cb=state.comps.find(c=>c.id===w.b.comp);
+    const a=pinPos(ca,w.a.pin), b=pinPos(cb,w.b.pin);
+    const pts=routePoints(a,b,w.wp,pinAxis(ca,w.a.pin),pinAxis(cb,w.b.pin));
     const d='M'+pts.map(p=>`${p.x} ${p.y}`).join(' L');
     const base=DIN[w.color]||'#fff';
     const width = parseFloat(w.gauge)>=2.5?5:3.5;
     const dark = (w.color==='BK'||w.color==='BN');
     const halo = dark?'rgba(255,255,255,.5)':'rgba(0,0,0,.45)';
     const traceOn = !!state.trace;
-    const traced = !traceOn || !!state.trace.wireIds[w.id];
+    const hot = traceOn && !!state.trace.wireIds[w.id];
+    const gnd = traceOn && state.trace.gndWireIds && !!state.trace.gndWireIds[w.id];
+    const traced = !traceOn || hot || gnd;
     const dimOpacity = traceOn && !traced ? 0.14 : 1;
-    const traceGlow = traceOn && traced
+    const traceGlow = hot
       ? `<path d="${d}" fill="none" stroke="#66bb6a" stroke-width="${width+6}" opacity=".25"/>`
-      : '';
+      : (gnd ? `<path d="${d}" fill="none" stroke="#4dd0e1" stroke-width="${width+6}" opacity=".16"/>` : '');
     const selHalo = (state.sel&&state.sel.kind==='wire'&&state.sel.id===w.id)
       ? `<path d="${d}" fill="none" stroke="#f9a825" stroke-width="${width+5}" opacity=".55"/>`:'';
     const tracer = w.tracer
@@ -105,18 +108,26 @@ export function renderComps(){
     let compW = d.w;
     let compH = d.h;
     if(c.type==='ecu'&&c.pins){
-      compH = Math.max(80, 20 + c.pins.length * 16 + 20);
+      compH = ecuHeight(c.pins.length);
     }
     if(c.type==='note'){
       compW = Math.max(80, +c.noteW || d.w);
       compH = Math.max(40, +c.noteH || d.h);
     }
-    
+
     const isSel = state.sel&&state.sel.kind==='comp'&&state.sel.id===c.id;
     const traceOn = !!state.trace;
     const traced = !traceOn || !!state.trace.compIds[c.id];
+    const lit = traceOn && state.trace.litCompIds && state.trace.litCompIds[c.id];
+    const energized = traceOn && state.trace.energized && state.trace.energized[c.id];
     const sourceMark = traceOn && state.trace.sourceCompId===c.id
       ? `<rect x="-10" y="-10" width="${compW+20}" height="${compH+20}" rx="8" fill="none" stroke="#66bb6a" stroke-width="1.8" stroke-dasharray="6 4"/>`
+      : '';
+    const litMark = lit
+      ? `<rect x="-6" y="-6" width="${compW+12}" height="${compH+12}" rx="6" fill="rgba(253,216,53,0.10)" stroke="#fdd835" stroke-width="1.6"/>`
+      : '';
+    const energizedMark = energized
+      ? `<circle cx="${compW-4}" cy="4" r="4" fill="#66bb6a" pointer-events="none"/>`
       : '';
     const selRect = isSel
       ? `<rect x="-8" y="-8" width="${compW+16}" height="${compH+16}" rx="6" fill="none"
@@ -145,11 +156,14 @@ export function renderComps(){
         state.connectCandidate.compId === c.id &&
         state.connectCandidate.pinId === p.id
       );
+      const drive = c.type==='ecu' && c.pinStates ? c.pinStates[p.id] : null;
+      const pinStroke = pinCandidate ? '#66bb6a' : (drive==='12v' ? '#ef5350' : (drive==='gnd' ? '#90a4ae' : '#f9a825'));
+      const pinFill = drive==='12v' ? '#3a1d1d' : (drive==='gnd' ? '#20262b' : '#15181b');
       return `<g>
         <circle class="pin" data-comp="${c.id}" data-pin="${p.id}" cx="${p.x}" cy="${p.y}"
                 r="16" fill="rgba(0,0,0,0)" stroke="rgba(0,0,0,0)" stroke-width="0" pointer-events="all"/>
         <circle class="pin" data-comp="${c.id}" data-pin="${p.id}" cx="${p.x}" cy="${p.y}"
-                r="${pinCandidate?7:(state.pending?6:4.5)}" fill="#15181b" stroke="${pinCandidate?'#66bb6a':'#f9a825'}" stroke-width="${pinCandidate?2.2:1.6}" pointer-events="none"/>
+                r="${pinCandidate?7:(state.pending?6:4.5)}" fill="${pinFill}" stroke="${pinStroke}" stroke-width="${pinCandidate?2.2:(drive?2.2:1.6)}" pointer-events="none"/>
         ${p.label?`<text class="comp-text" data-comp="${c.id}" data-role="pin" data-pinid="${p.id}" transform="rotate(${invR}, ${pinBase.x+pinOff.x}, ${pinBase.y+pinOff.y})" x="${pinBase.x+pinOff.x}" y="${pinBase.y+pinOff.y}" fill="#8a939c" font-size="8" text-anchor="${pinBase.anchor||'start'}"
               font-family="inherit" pointer-events="all">${esc(p.label)}</text>`:''}
       </g>`;
@@ -164,6 +178,8 @@ export function renderComps(){
       : '';
     return `<g transform="translate(${c.x},${c.y}) rotate(${c.r||0}, ${compW/2}, ${compH/2})" opacity="${traceOn&&!traced?0.2:1}">
       ${sourceMark}
+      ${litMark}
+      ${energizedMark}
       ${selRect}
       <g class="comp-body" data-comp="${c.id}">
         <rect x="-6" y="-6" width="${compW+12}" height="${compH+12}" fill="rgba(0,0,0,0)"/>
@@ -188,16 +204,25 @@ export function renderTemp(mouse){
   const c = state.comps.find(c=>c.id===state.pending.compId);
   const a=pinPos(c,state.pending.pinId);
   const b=mouse||a;
-  tempL.innerHTML=`<path d="${wirePath(a,b,state.pendingWp||[])}" fill="none" stroke="${DIN[state.wireDefaults.color]}"
-    stroke-width="3" stroke-dasharray="6 6" opacity=".8"/>`;
+  let endAxis=null;
+  if(state.connectCandidate){
+    const cc=comp(state.connectCandidate.compId);
+    if(cc) endAxis=pinAxis(cc,state.connectCandidate.pinId);
+  }
+  const markers=(state.pendingWp||[]).map(p=>
+    `<rect x="${p.x-4}" y="${p.y-4}" width="8" height="8" rx="2" fill="#15181b" stroke="#f9a825" stroke-width="1.6" pointer-events="none"/>`).join('');
+  tempL.innerHTML=`<path d="${wirePath(a,b,state.pendingWp||[],pinAxis(c,state.pending.pinId),endAxis)}" fill="none" stroke="${DIN[state.wireDefaults.color]}"
+    stroke-width="3" stroke-dasharray="6 6" opacity=".8"/>${markers}`;
 }
 
 export function renderStatus(){
   document.querySelector('#stCounts').textContent =
     `${state.comps.length} components · ${state.wires.length} wires`;
   document.querySelector('#stHint').textContent = state.pending
-    ? 'Click canvas to add guide points, then click a destination pin — Esc cancels'
-    : 'Click a palette part to place it · pin → pin runs a wire · click battery/relay for power trace · arrows nudge selection';
+    ? 'Click canvas to drop guide points (Backspace removes the last one), then click a destination pin — Esc cancels'
+    : (state.trace
+      ? 'Interactive: click switches / ignition key to toggle · click ECU pins to cycle +12V / ground / off · click empty canvas to exit'
+      : 'Click a palette part to place it · pin → pin runs a wire · click battery/relay for interactive power mode · arrows nudge selection');
 }
 
 export function renderHandles(){
@@ -251,9 +276,35 @@ export function renderProps(){
     
     let ecuControls='';
     if(c.type==='ecu'){
+      const pinRows=(c.pins||[]).map(p=>{
+        const drive=(c.pinStates&&c.pinStates[p.id])||'';
+        return `<div class="pin-row">
+          <input type="text" class="ecu-pin-label" data-pin="${p.id}" value="${esc(p.label)}" title="pin label">
+          <select class="ecu-pin-drive" data-pin="${p.id}" title="drive this pin in interactive mode">
+            <option value="" ${drive===''?'selected':''}>off</option>
+            <option value="12v" ${drive==='12v'?'selected':''}>+12V</option>
+            <option value="gnd" ${drive==='gnd'?'selected':''}>GND</option>
+          </select>
+        </div>`;
+      }).join('');
       ecuControls=`
       <div class="field"><label for="fPinCount">Number of pins</label>
-        <input type="number" id="fPinCount" min="1" max="32" value="${c.pinCount||4}"></div>`;
+        <input type="number" id="fPinCount" min="1" max="32" value="${c.pinCount||4}"></div>
+      <div class="field"><label>Pinout — label · output drive</label>${pinRows}</div>`;
+    }
+
+    let switchControls='';
+    if(c.type==='switch'){
+      switchControls=`
+      <div class="field"><label><input type="checkbox" id="fSwOn" ${c.on?'checked':''}> Contact closed (ON)</label></div>`;
+    }
+
+    let ignControls='';
+    if(c.type==='ignition'){
+      ignControls=`
+      <div class="field"><label for="fKeyPos">Key position</label>
+        <select id="fKeyPos">${IGN_POSITIONS.map((pos,i)=>
+          `<option value="${i}" ${(c.keyPos||0)===i?'selected':''}>${pos}</option>`).join('')}</select></div>`;
     }
     
     let noteControls='';
@@ -299,6 +350,8 @@ export function renderProps(){
       ${'value' in c && d.value!==undefined?`<div class="field"><label for="fValue">Value / rating</label>
         <input type="text" id="fValue" value="${esc(c.value)}"></div>`:''}
       ${ecuControls}
+      ${switchControls}
+      ${ignControls}
       ${noteControls}
       <div class="field"><label for="fDes">Designator</label>
         <input type="text" id="fDes" value="${esc(c.des)}"></div>
@@ -311,8 +364,44 @@ export function renderProps(){
     if(fpc){
       fpc.oninput=e=>{
         c.pinCount=Math.max(1,Math.min(32,+e.target.value||4));
+        const old=c.pins||[];
         c.pins=d.getPins(c.pinCount);
+        c.pins.forEach((p,i)=>{ if(old[i]&&old[i].label) p.label=old[i].label; });
+        if(c.pinStates) for(const k of Object.keys(c.pinStates))
+          if(!c.pins.some(p=>p.id===k)) delete c.pinStates[k];
+        if(state.trace&&hooks.simulate) hooks.simulate();
         render();
+      };
+    }
+    el.querySelectorAll('.ecu-pin-label').forEach(inp=>{
+      inp.oninput=e=>{
+        const p=(c.pins||[]).find(p=>p.id===inp.dataset.pin);
+        if(p){p.label=e.target.value;renderComps();}
+      };
+    });
+    el.querySelectorAll('.ecu-pin-drive').forEach(sel=>{
+      sel.onchange=e=>{
+        c.pinStates=c.pinStates||{};
+        if(e.target.value) c.pinStates[sel.dataset.pin]=e.target.value;
+        else delete c.pinStates[sel.dataset.pin];
+        if(state.trace&&hooks.simulate) hooks.simulate();
+        renderWires();renderComps();
+      };
+    });
+    const fsw=document.querySelector('#fSwOn');
+    if(fsw){
+      fsw.onchange=e=>{
+        c.on=!!e.target.checked;
+        if(state.trace&&hooks.simulate) hooks.simulate();
+        renderWires();renderComps();
+      };
+    }
+    const fkp=document.querySelector('#fKeyPos');
+    if(fkp){
+      fkp.onchange=e=>{
+        c.keyPos=Math.max(0,Math.min(3,+e.target.value||0));
+        if(state.trace&&hooks.simulate) hooks.simulate();
+        renderWires();renderComps();
       };
     }
     // Note component properties
