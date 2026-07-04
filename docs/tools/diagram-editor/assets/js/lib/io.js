@@ -7,6 +7,52 @@ import { render, svg, wiresL, compsL, renderWires, renderComps, applyView } from
 
 let modalFile='export.txt';
 
+/* shared by the file-load handler and the startup demo seed */
+export function applyLoadedData(j){
+  if(!Array.isArray(j.comps)||!Array.isArray(j.wires)) throw 0;
+  state.comps=j.comps;state.wires=j.wires;state.counters=j.counters||{};state.nextId=j.nextId||1000;
+  state.showWireLabels = j.showWireLabels !== false;
+  state.wireDefaults = {
+    color: j.wireDefaults?.color || state.wireDefaults.color,
+    tracer: j.wireDefaults?.tracer || '',
+    gauge: j.wireDefaults?.gauge || state.wireDefaults.gauge,
+    lengthMm: j.wireDefaults?.lengthMm || ''
+  };
+  state.wires.forEach(w=>{w.wp=w.wp||[];w.lengthMm=w.lengthMm||'';});
+
+  // Ensure ECU components have proper pins initialized
+  state.comps.forEach(c=>{
+    if(c.type==='ecu'){
+      c.pinCount=c.pinCount||4;
+      // regenerate pin geometry (older saves used off-grid spacing)
+      // while keeping any customized labels
+      const old=Array.isArray(c.pins)?c.pins:[];
+      c.pins=LIB.ecu.getPins(c.pinCount);
+      c.pins.forEach((p,i)=>{ if(old[i]&&old[i].label) p.label=old[i].label; });
+      c.pinStates=c.pinStates&&typeof c.pinStates==='object'?c.pinStates:{};
+    }
+    if(c.type==='switch'){
+      c.on=!!c.on;
+    }
+    if(c.type==='ignition'){
+      c.keyPos=Math.max(0,Math.min(3,+c.keyPos||0));
+    }
+    if(c.type==='note'){
+      c.noteText = c.noteText ?? 'Note';
+      c.bgColor = c.bgColor || '#1e1a2e';
+      c.textColor = c.textColor || '#b39ddb';
+      c.hAlign = c.hAlign || 'center';
+      c.vAlign = c.vAlign || 'middle';
+      c.noteW = Math.max(80, +c.noteW || 200);
+      c.noteH = Math.max(40, +c.noteH || 60);
+      c.noteFont = c.noteFont || 'inherit';
+      c.noteFontSize = Math.max(8, +c.noteFontSize || 11);
+    }
+  });
+
+  state.sel=null;state.pending=null;state.pendingWp=[];state.connectCandidate=null;state.trace=null;
+}
+
 export function download(name,text,mime){
   const a=document.createElement('a');
   a.href=URL.createObjectURL(new Blob([text],{type:mime}));
@@ -55,49 +101,8 @@ export function setupIOButtons(){
     const f=e.target.files[0]; if(!f)return;
     f.text().then(t=>{
       try{
-        const j=JSON.parse(t);
-        if(!Array.isArray(j.comps)||!Array.isArray(j.wires)) throw 0;
-        state.comps=j.comps;state.wires=j.wires;state.counters=j.counters||{};state.nextId=j.nextId||1000;
-        state.showWireLabels = j.showWireLabels !== false;
-        state.wireDefaults = {
-          color: j.wireDefaults?.color || state.wireDefaults.color,
-          tracer: j.wireDefaults?.tracer || '',
-          gauge: j.wireDefaults?.gauge || state.wireDefaults.gauge,
-          lengthMm: j.wireDefaults?.lengthMm || ''
-        };
-        state.wires.forEach(w=>{w.wp=w.wp||[];w.lengthMm=w.lengthMm||'';});
-        
-        // Ensure ECU components have proper pins initialized
-        state.comps.forEach(c=>{
-          if(c.type==='ecu'){
-            c.pinCount=c.pinCount||4;
-            // regenerate pin geometry (older saves used off-grid spacing)
-            // while keeping any customized labels
-            const old=Array.isArray(c.pins)?c.pins:[];
-            c.pins=LIB.ecu.getPins(c.pinCount);
-            c.pins.forEach((p,i)=>{ if(old[i]&&old[i].label) p.label=old[i].label; });
-            c.pinStates=c.pinStates&&typeof c.pinStates==='object'?c.pinStates:{};
-          }
-          if(c.type==='switch'){
-            c.on=!!c.on;
-          }
-          if(c.type==='ignition'){
-            c.keyPos=Math.max(0,Math.min(3,+c.keyPos||0));
-          }
-          if(c.type==='note'){
-            c.noteText = c.noteText ?? 'Note';
-            c.bgColor = c.bgColor || '#1e1a2e';
-            c.textColor = c.textColor || '#b39ddb';
-            c.hAlign = c.hAlign || 'center';
-            c.vAlign = c.vAlign || 'middle';
-            c.noteW = Math.max(80, +c.noteW || 200);
-            c.noteH = Math.max(40, +c.noteH || 60);
-            c.noteFont = c.noteFont || 'inherit';
-            c.noteFontSize = Math.max(8, +c.noteFontSize || 11);
-          }
-        });
-        
-        state.sel=null;state.pending=null;state.pendingWp=[];state.connectCandidate=null;state.trace=null;render();document.querySelector('#btnFit').click();
+        applyLoadedData(JSON.parse(t));
+        render();document.querySelector('#btnFit').click();
       }catch{ alert('That file is not a Harness Bench JSON export.'); }
     });
     e.target.value='';
