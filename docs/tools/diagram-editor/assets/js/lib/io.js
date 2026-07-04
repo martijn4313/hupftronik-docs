@@ -24,7 +24,7 @@ function openModal(title,text,fname){
 export function setupIOButtons(){
   document.querySelector('#btnNew').onclick=()=>{
     if(state.comps.length&&!confirm('Clear the whole diagram?'))return;
-    state.comps=[];state.wires=[];state.counters={};state.nextId=1;state.sel=null;state.pending=null;state.cascade=0;render();
+    state.comps=[];state.wires=[];state.counters={};state.nextId=1;state.sel=null;state.pending=null;state.pendingWp=[];state.connectCandidate=null;state.trace=null;state.cascade=0;render();
   };
   
   document.querySelector('#btnFit').onclick=()=>{
@@ -58,7 +58,14 @@ export function setupIOButtons(){
         const j=JSON.parse(t);
         if(!Array.isArray(j.comps)||!Array.isArray(j.wires)) throw 0;
         state.comps=j.comps;state.wires=j.wires;state.counters=j.counters||{};state.nextId=j.nextId||1000;
-        state.wires.forEach(w=>{w.wp=w.wp||[];});
+        state.showWireLabels = j.showWireLabels !== false;
+        state.wireDefaults = {
+          color: j.wireDefaults?.color || state.wireDefaults.color,
+          tracer: j.wireDefaults?.tracer || '',
+          gauge: j.wireDefaults?.gauge || state.wireDefaults.gauge,
+          lengthMm: j.wireDefaults?.lengthMm || ''
+        };
+        state.wires.forEach(w=>{w.wp=w.wp||[];w.lengthMm=w.lengthMm||'';});
         
         // Ensure ECU components have proper pins initialized
         state.comps.forEach(c=>{
@@ -68,18 +75,29 @@ export function setupIOButtons(){
               c.pins=LIB.ecu.getPins(c.pinCount);
             }
           }
+          if(c.type==='note'){
+            c.noteText = c.noteText ?? 'Note';
+            c.bgColor = c.bgColor || '#1e1a2e';
+            c.textColor = c.textColor || '#b39ddb';
+            c.hAlign = c.hAlign || 'center';
+            c.vAlign = c.vAlign || 'middle';
+            c.noteW = Math.max(80, +c.noteW || 200);
+            c.noteH = Math.max(40, +c.noteH || 60);
+            c.noteFont = c.noteFont || 'inherit';
+            c.noteFontSize = Math.max(8, +c.noteFontSize || 11);
+          }
         });
         
-        state.sel=null;state.pending=null;render();document.querySelector('#btnFit').click();
+        state.sel=null;state.pending=null;state.pendingWp=[];state.connectCandidate=null;state.trace=null;render();document.querySelector('#btnFit').click();
       }catch{ alert('That file is not a Harness Bench JSON export.'); }
     });
     e.target.value='';
   };
 
   document.querySelector('#btnSvg').onclick=()=>{
-    const prevSel=state.sel, prevPend=state.pending; state.sel=null;state.pending=null;render();
+    const prevSel=state.sel, prevPend=state.pending, prevWp=state.pendingWp; state.sel=null;state.pending=null;state.pendingWp=[];render();
     const inner=wiresL.outerHTML+compsL.outerHTML;
-    state.sel=prevSel;state.pending=prevPend;render();
+    state.sel=prevSel;state.pending=prevPend;state.pendingWp=prevWp;render();
     let x1=1e9,y1=1e9,x2=-1e9,y2=-1e9;
     for(const c of state.comps){
       const d=LIB[c.type];
@@ -168,7 +186,8 @@ export function buildMermaid(){
       case 'ground': return `${D}[\\"⏚ ${c.des}${lbl?' '+lbl:''}"/]:::ground`;
       case 'splice': return `${D}(("${c.des}")):::conn`;
       case 'injector': case 'valve': return `${D}(("⚙️ ${c.des}${lbl?'<br/>'+lbl:''}")):::load`;
-      case 'sensor2': case 'sensor3': return `${D}(["📶 ${c.des}${lbl?'<br/>'+lbl:''}"]):::module`;
+      case 'sensor2': case 'sensor3': case 'o2sensor3': case 'o2sensor4': case 'o2sensor5': return `${D}(["📶 ${c.des}${lbl?'<br/>'+lbl:''}"]):::module`;
+      case 'idleValve2': case 'idleValve3': case 'idleStepper': case 'idleWax': return `${D}(("⚙️ ${c.des}${lbl?'<br/>'+lbl:''}")):::load`;
       case 'ublock': return `${D}["${c.des}${lbl?'<br/>'+lbl:''}"]:::module`;
     }
   };
@@ -182,7 +201,8 @@ export function buildMermaid(){
     return (c.type==='relay'||c.type==='relay5') ? `${mid(c.des)}_${end.pin}` : mid(c.des);
   };
   for(const w of state.wires){
-    const lbl=`${w.gauge}mm² ${w.color}${w.tracer?'/'+w.tracer:''}`;
+    const lenTxt = `${String(w.lengthMm||'').trim()}`;
+    const lbl=`${w.gauge}mm²${lenTxt?` ${lenTxt}mm`:''} ${w.color}${w.tracer?'/'+w.tracer:''}`;
     L.push(`${endName(w,w.a)} ---|${lbl}| ${endName(w,w.b)}`);
     const width=parseFloat(w.gauge)>=2.5?'3px':'2px';
     edgeStyles.push({i:edgeIdx++,css:`stroke:${DIN_MERMAID[w.color]},stroke-width:${width}`});

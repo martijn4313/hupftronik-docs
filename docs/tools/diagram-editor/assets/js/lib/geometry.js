@@ -3,12 +3,26 @@
 import { LIB } from './components.js';
 import { state } from './state.js';
 
+function compSize(c,d=LIB[c.type]){
+  let w=d.w, h=d.h;
+  if(c.type==='ecu'){
+    const pinCount = (c.pins && c.pins.length) || c.pinCount || 4;
+    h = Math.max(80, 20 + pinCount * 16 + 20);
+  }
+  if(c.type==='note'){
+    w = Math.max(80, +c.noteW || d.w);
+    h = Math.max(40, +c.noteH || d.h);
+  }
+  return {w,h};
+}
+
 export function comp(id){
   return state.comps.find(c=>c.id===id);
 }
 
 export function pinPos(c,pinId){
   const d=LIB[c.type];
+  const size = compSize(c,d);
   // For ECU and other components with dynamic pins, use instance pins
   const pins = c.pins || d.pins;
   const p=pins.find(p=>p.id===pinId);
@@ -16,7 +30,7 @@ export function pinPos(c,pinId){
   let px=p.x, py=p.y;
   const r = c.r || 0;
   if(r !== 0){
-    const cx=d.w/2, cy=d.h/2;
+    const cx=size.w/2, cy=size.h/2;
     const dx=px-cx, dy=py-cy;
     const rad=r*Math.PI/180;
     px = cx + (dx * Math.cos(rad) - dy * Math.sin(rad));
@@ -29,9 +43,14 @@ export function snap(v){
   return Math.round(v/10)*10;
 }
 
-export function textAnchor(kind,d){
-  if(kind==='value') return d.valBase || {x:d.w/2,y:d.h/2};
-  return kind==='des' ? {x:d.w/2,y:-12} : {x:d.w/2,y:d.h+18};
+export function textAnchor(kind,d,c){
+  const size = c ? compSize(c,d) : {w:d.w,h:d.h};
+  if(kind==='value' && c && c.type==='fuse'){
+    const rot = ((c.r||0)%360 + 360) % 360;
+    if(rot===90 || rot===270) return {x:size.w/2, y:size.h/2+3};
+  }
+  if(kind==='value') return d.valBase || {x:size.w/2,y:size.h/2};
+  return kind==='des' ? {x:size.w/2,y:-12} : {x:size.w/2,y:size.h+18};
 }
 
 export function textOffset(c,kind){
@@ -39,9 +58,15 @@ export function textOffset(c,kind){
   return offs ? {x:offs.x||0,y:offs.y||0} : {x:0,y:0};
 }
 
-export function pinTextAnchor(d,p){
-  const ty = p.y<d.h/2 ? p.y+3 : p.y+1;
-  return {x:p.x+8,y:ty};
+export function pinTextAnchor(d,p,c){
+  const size = c ? compSize(c,d) : {w:d.w,h:d.h};
+  const ty = p.y<size.h/2 ? p.y+3 : p.y+1;
+  if(c && c.type==='ecu') return {x:8,y:ty,anchor:'end'};
+  const nearLeft = p.x <= 4;
+  const nearRight = p.x >= size.w - 4;
+  if(nearRight) return {x:p.x-8,y:ty,anchor:'end'};
+  if(nearLeft) return {x:p.x+8,y:ty,anchor:'start'};
+  return {x:p.x,y:ty-6,anchor:'middle'};
 }
 
 export function pinTextOffset(c,pinId){
@@ -51,8 +76,9 @@ export function pinTextOffset(c,pinId){
 
 export function localPointFromWorld(c,p){
   const d=LIB[c.type];
+  const size = compSize(c,d);
   let x=p.x-c.x, y=p.y-c.y;
-  const cx=d.w/2, cy=d.h/2;
+  const cx=size.w/2, cy=size.h/2;
   const rad=-(c.r||0)*Math.PI/180;
   const dx=x-cx, dy=y-cy;
   return {

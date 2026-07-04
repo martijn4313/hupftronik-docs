@@ -15,7 +15,7 @@ export function seed(){
   Object.assign(g1,{x:646,y:230,label:'body'});
   Object.assign(g2,{x:560,y:400,label:'engine'});
   const W=(a,ap,b,bp,color,tracer,gauge)=>state.wires.push(
-    {id:uid(),a:{comp:a.id,pin:ap},b:{comp:b.id,pin:bp},color,tracer,gauge,wp:[]});
+    {id:uid(),a:{comp:a.id,pin:ap},b:{comp:b.id,pin:bp},color,tracer,gauge,lengthMm:'',wp:[]});
   W(bat,'plus',f1,'1','RD','','4.0');
   W(f1,'2',k1,'30','RD','BU','4.0');
   W(k1,'87',m1,'1','BU','','4.0');

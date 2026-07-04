@@ -37,7 +37,7 @@ export function buildPalette(){
   const groups=[
     ['Power', ['battery','fuse','ground','splice']],
     ['Control', ['relay','relay5','switch','ecu']],
-    ['Engine Management', ['injector', 'sensor2', 'sensor3', 'valve']],
+    ['Engine Management', ['injector', 'sensor2', 'sensor3', 'o2sensor3', 'o2sensor4', 'o2sensor5', 'valve', 'idleValve2', 'idleValve3', 'idleStepper', 'idleWax']],
     ['Loads', ['motor','pump','lamp']],
     ['Harness', ['connector', 'ublock']],
     ['Annotations', ['note']]
@@ -57,7 +57,9 @@ export function addComp(type){
   const ecuProps=type==='ecu'?{pinCount:4}:{};
   
   // Initialize Note with default properties
-  const noteProps=type==='note'?{noteText:'Note',bgColor:'#1e1a2e',textColor:'#b39ddb',hAlign:'center',vAlign:'middle'}:{};
+  const noteProps=type==='note'
+    ? {noteText:'Note',bgColor:'#1e1a2e',textColor:'#b39ddb',hAlign:'center',vAlign:'middle',noteW:200,noteH:60,noteFont:'inherit',noteFontSize:11}
+    : {};
   
   const c={
     id:uid(), type,
@@ -93,6 +95,92 @@ function worldPt(e){
   return {x:p.x,y:p.y};
 }
 
+function nearestPinCandidate(p,exclude){
+  const maxDist = 20;
+  let best = null;
+  let bestDist = maxDist;
+  for(const c of state.comps){
+    const d = LIB[c.type];
+    const pins = c.pins || d.pins;
+    for(const pin of pins){
+      if(exclude && exclude.compId===c.id && exclude.pinId===pin.id) continue;
+      const pp = pinPos(c,pin.id);
+      const dist = Math.hypot(pp.x-p.x, pp.y-p.y);
+      if(dist < bestDist){
+        bestDist = dist;
+        best = {compId:c.id,pinId:pin.id};
+      }
+    }
+  }
+  return best;
+}
+
+function clearTrace(){
+  if(!state.trace) return;
+  state.trace = null;
+}
+
+function addAdj(map,from,to,wireId){
+  (map[from] ||= []).push({to,wireId});
+}
+
+function key(compId,pinId){
+  return `${compId}:${pinId}`;
+}
+
+function traceFromComponent(c){
+  const sourceTypes = new Set(['battery','relay','relay5']);
+  if(!sourceTypes.has(c.type)) return false;
+
+  const graph = {};
+  for(const w of state.wires){
+    const a = key(w.a.comp,w.a.pin);
+    const b = key(w.b.comp,w.b.pin);
+    addAdj(graph,a,b,w.id);
+    addAdj(graph,b,a,w.id);
+  }
+
+  const pair = (compId,a,b)=>{
+    addAdj(graph,key(compId,a),key(compId,b),null);
+    addAdj(graph,key(compId,b),key(compId,a),null);
+  };
+
+  for(const cc of state.comps){
+    switch(cc.type){
+      case 'fuse': pair(cc.id,'1','2'); break;
+      case 'switch': pair(cc.id,'1','2'); break;
+      case 'connector': pair(cc.id,'a','b'); break;
+      case 'relay': pair(cc.id,'30','87'); break;
+      case 'relay5': pair(cc.id,'30','87a'); break;
+      default: break;
+    }
+  }
+
+  const starts = c.type==='battery' ? [key(c.id,'plus')] : [key(c.id,'30')];
+  const q=[...starts];
+  const seen={};
+  const wireIds={};
+  while(q.length){
+    const n=q.shift();
+    if(seen[n]) continue;
+    seen[n]=true;
+    const edges=graph[n]||[];
+    for(const e of edges){
+      if(e.wireId) wireIds[e.wireId]=true;
+      if(!seen[e.to]) q.push(e.to);
+    }
+  }
+
+  const compIds={};
+  for(const n of Object.keys(seen)){
+    const compId = +String(n).split(':')[0];
+    if(Number.isFinite(compId)) compIds[compId]=true;
+  }
+  compIds[c.id]=true;
+  state.trace = {sourceCompId:c.id,wireIds,compIds};
+  return true;
+}
+
 let drag=null;
 let lastClick = { time: 0, wireId: null, handleIdx: null };
 
@@ -100,11 +188,30 @@ export function setupSVGHandlers(){
   svg.addEventListener('pointerdown',e=>{
   const handle=e.target.closest('.wp-handle');
   const pin=e.target.closest('.pin');
+  const noteHandle=e.target.closest('.note-resize-handle');
   const text=e.target.closest('.comp-text');
   const body=e.target.closest('.comp-body');
   const wire=e.target.closest('.wire-hit');
   const p=worldPt(e);
   const now = Date.now();
+
+  if(state.pending && pin){
+    const compId = +pin.dataset.comp;
+    const pinId = pin.dataset.pin;
+    if(!(state.pending.compId===compId&&state.pending.pinId===pinId)){
+      state.wires.push({id:uid(),
+        a:{comp:state.pending.compId,pin:state.pending.pinId},
+        b:{comp:compId,pin:pinId},
+        color:state.wireDefaults.color,tracer:state.wireDefaults.tracer,gauge:state.wireDefaults.gauge,lengthMm:state.wireDefaults.lengthMm||'',
+        wp:[...(state.pendingWp||[])]});
+      state.sel={kind:'wire',id:state.nextId-1};
+    }
+    state.pending=null;
+    state.pendingWp=[];
+    state.connectCandidate=null;
+    render();
+    return;
+  }
 
   if(handle){
     const w=state.wires.find(w=>w.id===+handle.dataset.wire);
@@ -124,20 +231,32 @@ export function setupSVGHandlers(){
   }
   if(pin){
     const compId=+pin.dataset.comp, pinId=pin.dataset.pin;
-    if(!state.pending){ state.pending={compId,pinId}; }
+    if(!state.pending){ state.pending={compId,pinId}; state.pendingWp=[]; state.connectCandidate=null; clearTrace(); }
     else{
       if(!(state.pending.compId===compId&&state.pending.pinId===pinId)){
         state.wires.push({id:uid(),
           a:{comp:state.pending.compId,pin:state.pending.pinId},
           b:{comp:compId,pin:pinId},
-          color:state.wireDefaults.color,tracer:state.wireDefaults.tracer,gauge:state.wireDefaults.gauge,
-          wp:[]});
+          color:state.wireDefaults.color,tracer:state.wireDefaults.tracer,gauge:state.wireDefaults.gauge,lengthMm:state.wireDefaults.lengthMm||'',
+          wp:[...(state.pendingWp||[])]});
         state.sel={kind:'wire',id:state.nextId-1};
       }
       state.pending=null;
+      state.pendingWp=[];
+      state.connectCandidate=null;
     }
     render();
     return;
+  }
+  if(noteHandle){
+    const c=comp(+noteHandle.dataset.comp);
+    if(c&&c.type==='note'){
+      state.sel={kind:'comp',id:c.id};
+      drag={mode:'note-resize',c,moved:false};
+      svg.setPointerCapture(e.pointerId);
+      render();
+      return;
+    }
   }
   if(text){
     const c=comp(+text.dataset.comp);
@@ -185,37 +304,53 @@ export function setupSVGHandlers(){
     }
     return;
   }
+  if(state.pending){
+    state.pendingWp = [...(state.pendingWp||[]), {x:snap(p.x), y:snap(p.y)}];
+    state.connectCandidate = nearestPinCandidate(p, state.pending);
+    render();
+    return;
+  }
   /* background: pan; click clears selection */
   drag={mode:'pan',sx:e.clientX,sy:e.clientY,vx:state.view.x,vy:state.view.y,moved:false};
   svg.setPointerCapture(e.pointerId);
 });
 
 svg.addEventListener('pointermove',e=>{
-  if(state.pending){renderTemp(worldPt(e));}
+  const pWorld=worldPt(e);
+  if(state.pending){
+    state.connectCandidate = nearestPinCandidate(pWorld, state.pending);
+    if(state.connectCandidate){
+      const c=comp(state.connectCandidate.compId);
+      renderTemp(pinPos(c,state.connectCandidate.pinId));
+    } else {
+      renderTemp(pWorld);
+    }
+    renderComps();
+  }
   if(!drag) return;
   if(drag.mode==='wp'){
-    const p=worldPt(e);
+    const p=pWorld;
     drag.w.wp[drag.idx]={x:snap(p.x),y:snap(p.y)};
     renderWires();renderHandles();
   } else if(drag.mode==='comp'){
-    const p=worldPt(e);
+    const p=pWorld;
     drag.c.x=snap(p.x-drag.dx); drag.c.y=snap(p.y-drag.dy);
     drag.moved=true;
     renderWires();renderComps();
   } else if(drag.mode==='text'){
-    const p=worldPt(e);
+    const p=pWorld;
     const local=localPointFromWorld(drag.c,p);
     if(drag.role==='pin'){
       const d=LIB[drag.c.type];
-      const pin=d.pins.find(pin=>pin.id===drag.pinId);
-      const base=pinTextAnchor(d,pin);
+      const pin=(drag.c.pins||d.pins).find(pin=>pin.id===drag.pinId);
+      const base=pinTextAnchor(d,pin,drag.c);
       drag.c.pinTextOffsets = drag.c.pinTextOffsets || {};
       drag.c.pinTextOffsets[drag.pinId]={
         x:snap(local.x-base.x),
         y:snap(local.y-base.y)
       };
     } else {
-      const base=textAnchor(drag.role,LIB[drag.c.type]);
+      const base=textAnchor(drag.role,LIB[drag.c.type],drag.c);
       drag.c.textOffsets = drag.c.textOffsets || {des:{x:0,y:0},label:{x:0,y:0}};
       drag.c.textOffsets[drag.role]={
         x:snap(local.x-base.x),
@@ -224,6 +359,13 @@ svg.addEventListener('pointermove',e=>{
     }
     drag.moved=true;
     renderComps();
+  } else if(drag.mode==='note-resize'){
+    const local=localPointFromWorld(drag.c,pWorld);
+    drag.c.noteW=Math.max(80,snap(local.x));
+    drag.c.noteH=Math.max(40,snap(local.y));
+    drag.moved=true;
+    renderComps();
+    renderProps();
   } else {
     const r=svg.getBoundingClientRect();
     const dx=(e.clientX-drag.sx)/r.width*state.view.w;
@@ -235,7 +377,15 @@ svg.addEventListener('pointermove',e=>{
 });
 
 svg.addEventListener('pointerup',e=>{
-  if(drag&&drag.mode==='pan'&&!drag.moved){ state.sel=null; state.pending=null; render(); }
+  if(drag&&drag.mode==='comp'&&!drag.moved){
+    if(!state.pending && traceFromComponent(drag.c)){
+      render();
+      drag=null;
+      return;
+    }
+    clearTrace();
+  }
+  if(drag&&drag.mode==='pan'&&!drag.moved){ state.sel=null; state.pending=null; state.pendingWp=[]; state.connectCandidate=null; clearTrace(); render(); }
   drag=null;
 });
 
@@ -251,7 +401,7 @@ svg.addEventListener('wheel',e=>{
 
 window.addEventListener('keydown',e=>{
   if(e.target.matches('input,select,textarea')) return;
-  if(e.key==='Escape'){state.pending=null;render();}
+  if(e.key==='Escape'){state.pending=null;state.pendingWp=[];state.connectCandidate=null;clearTrace();render();}
   if(e.key==='Delete'||e.key==='Backspace'){deleteSelection();render();}
   if(state.sel&&state.sel.kind==='comp'&&e.key.startsWith('Arrow')){
     e.preventDefault();

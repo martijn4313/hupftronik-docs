@@ -3,7 +3,7 @@
 import { DIN, GAUGES } from './constants.js';
 import { LIB } from './components.js';
 import { state, esc, comp, uid } from './state.js';
-import { pinPos, textAnchor, textOffset, wirePath, pinTextAnchor, pinTextOffset } from './geometry.js';
+import { pinPos, textAnchor, textOffset, wirePath, routePoints, pinTextAnchor, pinTextOffset } from './geometry.js';
 
 // DOM references
 export let svg, wiresL, compsL, tempL, handleL;
@@ -32,21 +32,59 @@ export function applyView(){
 }
 
 export function renderWires(){
+  const labelPoint = (pts)=>{
+    if(!pts.length) return {x:0,y:0};
+    if(pts.length===1) return pts[0];
+    let total=0;
+    for(let i=0;i<pts.length-1;i++) total+=Math.hypot(pts[i+1].x-pts[i].x,pts[i+1].y-pts[i].y);
+    if(total<1) return pts[Math.floor(pts.length/2)];
+    let run=0, half=total/2;
+    for(let i=0;i<pts.length-1;i++){
+      const a=pts[i],b=pts[i+1];
+      const seg=Math.hypot(b.x-a.x,b.y-a.y);
+      if(run+seg>=half){
+        const t=(half-run)/seg;
+        return {x:a.x+(b.x-a.x)*t,y:a.y+(b.y-a.y)*t};
+      }
+      run+=seg;
+    }
+    return pts[pts.length-1];
+  };
   wiresL.innerHTML = state.wires.map(w=>{
     const a=pinPos(state.comps.find(c=>c.id===w.a.comp),w.a.pin), b=pinPos(state.comps.find(c=>c.id===w.b.comp),w.b.pin);
-    const d=wirePath(a,b,w.wp);
+    const pts=routePoints(a,b,w.wp);
+    const d='M'+pts.map(p=>`${p.x} ${p.y}`).join(' L');
     const base=DIN[w.color]||'#fff';
     const width = parseFloat(w.gauge)>=2.5?5:3.5;
     const dark = (w.color==='BK'||w.color==='BN');
     const halo = dark?'rgba(255,255,255,.5)':'rgba(0,0,0,.45)';
+    const traceOn = !!state.trace;
+    const traced = !traceOn || !!state.trace.wireIds[w.id];
+    const dimOpacity = traceOn && !traced ? 0.14 : 1;
+    const traceGlow = traceOn && traced
+      ? `<path d="${d}" fill="none" stroke="#66bb6a" stroke-width="${width+6}" opacity=".25"/>`
+      : '';
     const selHalo = (state.sel&&state.sel.kind==='wire'&&state.sel.id===w.id)
       ? `<path d="${d}" fill="none" stroke="#f9a825" stroke-width="${width+5}" opacity=".55"/>`:'';
     const tracer = w.tracer
       ? `<path d="${d}" fill="none" stroke="${DIN[w.tracer]}" stroke-width="${Math.max(width-1.8,1.2)}" stroke-dasharray="9 9" stroke-linecap="butt"/>`:'';
-    return `<g>${selHalo}
+    const lenTxt = `${String(w.lengthMm||'').trim()}`;
+    const parts = [`${w.gauge} mm²`];
+    if(lenTxt) parts.push(`${esc(lenTxt)} mm`);
+    const labelTxt = parts.join(' · ');
+    const p = labelPoint(pts);
+    const lblW = Math.max(56, Math.round(labelTxt.length * 6.2 + 12));
+    const wireLabel = state.showWireLabels
+      ? `<g class="wire-label" opacity="${traceOn&&!traced?0.3:1}">
+          <rect x="${p.x-lblW/2}" y="${p.y-9}" width="${lblW}" height="16" rx="3" fill="rgba(21,24,27,0.9)" stroke="rgba(138,147,156,0.5)" stroke-width="1"/>
+          <text x="${p.x}" y="${p.y+2.8}" fill="#d7dde3" font-size="9" text-anchor="middle" font-family="inherit">${labelTxt}</text>
+        </g>`
+      : '';
+    return `<g opacity="${dimOpacity}">${traceGlow}${selHalo}
       <path d="${d}" fill="none" stroke="${halo}" stroke-width="${width+2}"/>
       <path d="${d}" fill="none" stroke="${base}" stroke-width="${width}" stroke-linecap="round"/>
       ${tracer}
+      ${wireLabel}
       <path class="wire-hit" data-wire="${w.id}" d="${d}" fill="none" stroke="rgba(0,0,0,0)" stroke-width="14"/>
     </g>`;
   }).join('');
@@ -69,41 +107,63 @@ export function renderComps(){
     if(c.type==='ecu'&&c.pins){
       compH = Math.max(80, 20 + c.pins.length * 16 + 20);
     }
+    if(c.type==='note'){
+      compW = Math.max(80, +c.noteW || d.w);
+      compH = Math.max(40, +c.noteH || d.h);
+    }
     
     const isSel = state.sel&&state.sel.kind==='comp'&&state.sel.id===c.id;
+    const traceOn = !!state.trace;
+    const traced = !traceOn || !!state.trace.compIds[c.id];
+    const sourceMark = traceOn && state.trace.sourceCompId===c.id
+      ? `<rect x="-10" y="-10" width="${compW+20}" height="${compH+20}" rx="8" fill="none" stroke="#66bb6a" stroke-width="1.8" stroke-dasharray="6 4"/>`
+      : '';
     const selRect = isSel
       ? `<rect x="-8" y="-8" width="${compW+16}" height="${compH+16}" rx="6" fill="none"
               stroke="#f9a825" stroke-width="1.4" stroke-dasharray="4 4"/>`:'';
     const invR = -(c.r || 0);
-    const desBase = textAnchor('des',d);
+    const desBase = textAnchor('des',d,c);
     const desOff = textOffset(c,'des');
-    const labelBase = textAnchor('label',d);
+    const labelBase = textAnchor('label',d,c);
     const labelOff = textOffset(c,'label');
-    const valBase = textAnchor('value',d);
+    const valBase = textAnchor('value',d,c);
     const valOff = textOffset(c,'value');
+        const rot = ((c.r||0)%360 + 360) % 360;
+        const valAlign = c.type==='fuse' && (rot===90||rot===270) ? 'middle' : (d.valAlign||'middle');
     const valNode = ('value' in c && c.value)
       ? `<text class="comp-text" data-comp="${c.id}" data-role="value" transform="rotate(${invR}, ${valBase.x+valOff.x}, ${valBase.y+valOff.y})"
-            x="${valBase.x+valOff.x}" y="${valBase.y+valOff.y}" fill="${d.valColor||'#8a939c'}" font-size="${d.valSize||10}" text-anchor="${d.valAlign||'middle'}"
+        x="${valBase.x+valOff.x}" y="${valBase.y+valOff.y}" fill="${d.valColor||'#8a939c'}" font-size="${d.valSize||10}" text-anchor="${valAlign}"
             font-family="inherit" pointer-events="all">${esc(c.value)}</text>`
       : '';
     
     const pins = (c.pins||d.pins).map(p=>{
-      const pinBase = pinTextAnchor(d, p);
+      const pinBase = pinTextAnchor(d, p, c);
       const pinOff = pinTextOffset(c, p.id);
+      const pinCandidate = !!(
+        state.pending &&
+        state.connectCandidate &&
+        state.connectCandidate.compId === c.id &&
+        state.connectCandidate.pinId === p.id
+      );
       return `<g>
         <circle class="pin" data-comp="${c.id}" data-pin="${p.id}" cx="${p.x}" cy="${p.y}"
-                r="14" fill="rgba(0,0,0,0)" stroke="rgba(0,0,0,0)" stroke-width="0" pointer-events="all"/>
+                r="16" fill="rgba(0,0,0,0)" stroke="rgba(0,0,0,0)" stroke-width="0" pointer-events="all"/>
         <circle class="pin" data-comp="${c.id}" data-pin="${p.id}" cx="${p.x}" cy="${p.y}"
-                r="${state.pending?6:4.5}" fill="#15181b" stroke="#f9a825" stroke-width="1.6" pointer-events="none"/>
-        ${p.label?`<text class="comp-text" data-comp="${c.id}" data-role="pin" data-pinid="${p.id}" transform="rotate(${invR}, ${pinBase.x+pinOff.x}, ${pinBase.y+pinOff.y})" x="${pinBase.x+pinOff.x}" y="${pinBase.y+pinOff.y}" fill="#8a939c" font-size="8"
+                r="${pinCandidate?7:(state.pending?6:4.5)}" fill="#15181b" stroke="${pinCandidate?'#66bb6a':'#f9a825'}" stroke-width="${pinCandidate?2.2:1.6}" pointer-events="none"/>
+        ${p.label?`<text class="comp-text" data-comp="${c.id}" data-role="pin" data-pinid="${p.id}" transform="rotate(${invR}, ${pinBase.x+pinOff.x}, ${pinBase.y+pinOff.y})" x="${pinBase.x+pinOff.x}" y="${pinBase.y+pinOff.y}" fill="#8a939c" font-size="8" text-anchor="${pinBase.anchor||'start'}"
               font-family="inherit" pointer-events="all">${esc(p.label)}</text>`:''}
       </g>`;
     }).join('');
+    const noteResizeHandle = isSel && c.type==='note'
+      ? `<rect class="note-resize-handle" data-comp="${c.id}" data-handle="se" x="${compW-6}" y="${compH-6}" width="12" height="12" rx="2"
+          fill="#15181b" stroke="#66bb6a" stroke-width="1.8"/>`
+      : '';
     const primaryPin = (c.pins||d.pins)[0];
     const orientDot = primaryPin
       ? `<circle cx="${primaryPin.x}" cy="${primaryPin.y-6}" r="2" fill="#f9a825" opacity="0.95" pointer-events="none"/>`
       : '';
-    return `<g transform="translate(${c.x},${c.y}) rotate(${c.r||0}, ${compW/2}, ${compH/2})">
+    return `<g transform="translate(${c.x},${c.y}) rotate(${c.r||0}, ${compW/2}, ${compH/2})" opacity="${traceOn&&!traced?0.2:1}">
+      ${sourceMark}
       ${selRect}
       <g class="comp-body" data-comp="${c.id}">
         <rect x="-6" y="-6" width="${compW+12}" height="${compH+12}" fill="rgba(0,0,0,0)"/>
@@ -118,6 +178,7 @@ export function renderComps(){
       ${valNode}
       ${orientDot}
       ${pins}
+      ${noteResizeHandle}
     </g>`;
   }).join('');
 }
@@ -127,7 +188,7 @@ export function renderTemp(mouse){
   const c = state.comps.find(c=>c.id===state.pending.compId);
   const a=pinPos(c,state.pending.pinId);
   const b=mouse||a;
-  tempL.innerHTML=`<path d="${wirePath(a,b)}" fill="none" stroke="${DIN[state.wireDefaults.color]}"
+  tempL.innerHTML=`<path d="${wirePath(a,b,state.pendingWp||[])}" fill="none" stroke="${DIN[state.wireDefaults.color]}"
     stroke-width="3" stroke-dasharray="6 6" opacity=".8"/>`;
 }
 
@@ -135,8 +196,8 @@ export function renderStatus(){
   document.querySelector('#stCounts').textContent =
     `${state.comps.length} components · ${state.wires.length} wires`;
   document.querySelector('#stHint').textContent = state.pending
-    ? 'Click a second pin to finish the wire — Esc cancels'
-    : 'Click a palette part to place it · pin → pin runs a wire · double-click a wire to add a guide point · arrows nudge selection';
+    ? 'Click canvas to add guide points, then click a destination pin — Esc cancels'
+    : 'Click a palette part to place it · pin → pin runs a wire · click battery/relay for power trace · arrows nudge selection';
 }
 
 export function renderHandles(){
@@ -180,6 +241,7 @@ export function deleteSelection(){
     state.wires=state.wires.filter(w=>w.id!==state.sel.id);
   }
   state.sel=null;
+  state.trace=null;
 }
 
 export function renderProps(){
@@ -198,7 +260,20 @@ export function renderProps(){
     if(c.type==='note'){
       noteControls=`
       <div class="field"><label for="fNoteText">Text</label>
-        <input type="text" id="fNoteText" value="${esc(c.noteText||'Note')}"></div>
+        <textarea id="fNoteText" rows="5">${esc(c.noteText||'Note')}</textarea></div>
+      <div class="field"><label for="fNoteW">Width</label>
+        <input type="number" id="fNoteW" min="80" max="1200" step="10" value="${Math.max(80,+c.noteW||200)}"></div>
+      <div class="field"><label for="fNoteH">Height</label>
+        <input type="number" id="fNoteH" min="40" max="800" step="10" value="${Math.max(40,+c.noteH||60)}"></div>
+      <div class="field"><label for="fNoteFont">Font family</label>
+        <select id="fNoteFont">
+          <option value="inherit" ${(c.noteFont||'inherit')==='inherit'?'selected':''}>Editor default</option>
+          <option value="ui-monospace, 'Cascadia Code', 'JetBrains Mono', Consolas, monospace" ${c.noteFont==="ui-monospace, 'Cascadia Code', 'JetBrains Mono', Consolas, monospace"?'selected':''}>Monospace</option>
+          <option value="'Segoe UI', 'Noto Sans', Arial, sans-serif" ${c.noteFont==="'Segoe UI', 'Noto Sans', Arial, sans-serif"?'selected':''}>Sans</option>
+          <option value="Georgia, 'Times New Roman', serif" ${c.noteFont==="Georgia, 'Times New Roman', serif"?'selected':''}>Serif</option>
+        </select></div>
+      <div class="field"><label for="fNoteFontSize">Font size</label>
+        <input type="number" id="fNoteFontSize" min="8" max="72" step="1" value="${Math.max(8,+c.noteFontSize||11)}"></div>
       <div class="field"><label for="fNoteBg">Background color</label>
         <input type="color" id="fNoteBg" value="${c.bgColor||'#1e1a2e'}"></div>
       <div class="field"><label for="fNoteTxt">Text color</label>
@@ -245,6 +320,22 @@ export function renderProps(){
     if(fnt){
       fnt.oninput=e=>{c.noteText=e.target.value;renderComps();};
     }
+    const fnw=document.querySelector('#fNoteW');
+    if(fnw){
+      fnw.oninput=e=>{c.noteW=Math.max(80,Math.min(1200,+e.target.value||200));renderComps();};
+    }
+    const fnh=document.querySelector('#fNoteH');
+    if(fnh){
+      fnh.oninput=e=>{c.noteH=Math.max(40,Math.min(800,+e.target.value||60));renderComps();};
+    }
+    const fnf=document.querySelector('#fNoteFont');
+    if(fnf){
+      fnf.onchange=e=>{c.noteFont=e.target.value||'inherit';renderComps();};
+    }
+    const fnfs=document.querySelector('#fNoteFontSize');
+    if(fnfs){
+      fnfs.oninput=e=>{c.noteFontSize=Math.max(8,Math.min(72,+e.target.value||11));renderComps();};
+    }
     const fnb=document.querySelector('#fNoteBg');
     if(fnb){
       fnb.oninput=e=>{c.bgColor=e.target.value;renderComps();};
@@ -272,12 +363,17 @@ export function renderProps(){
       <div class="field"><label>Tracer stripe</label>${swatches(w.tracer,'wt',true)}</div>
       <div class="field"><label for="fGauge">Gauge</label>
         <select id="fGauge">${GAUGES.map(g=>`<option ${g===w.gauge?'selected':''}>${g}</option>`).join('')}</select></div>
+      <div class="field"><label for="fLengthMm">Length (mm)</label>
+        <input type="number" id="fLengthMm" min="0" step="1" value="${esc(w.lengthMm||'')}"></div>
+      <div class="field"><label><input type="checkbox" id="fShowWireLabels" ${state.showWireLabels?'checked':''}> Show wire labels in schematic</label></div>
       <button id="btnStraight" ${w.wp&&w.wp.length?'':'disabled'}>Straighten (${(w.wp||[]).length} guide pts)</button>
       <button id="btnDel" class="danger">Delete wire</button>
       <p class="hint"><b>Routing:</b> double-click the wire to add a guide point, drag the amber squares to steer it around parts, double-click a square to remove it.</p>`;
     el.querySelectorAll('[data-wc]').forEach(b=>b.onclick=()=>{w.color=b.dataset.wc;render();});
     el.querySelectorAll('[data-wt]').forEach(b=>b.onclick=()=>{w.tracer=b.dataset.wt;render();});
     document.querySelector('#fGauge').onchange=e=>{w.gauge=e.target.value;render();};
+    document.querySelector('#fLengthMm').oninput=e=>{w.lengthMm=e.target.value;renderWires();};
+    document.querySelector('#fShowWireLabels').onchange=e=>{state.showWireLabels=!!e.target.checked;renderWires();};
     document.querySelector('#btnStraight').onclick=()=>{w.wp=[];render();};
     document.querySelector('#btnDel').onclick=()=>{deleteSelection();render();};
   } else {
@@ -286,9 +382,19 @@ export function renderProps(){
       <div class="field"><label>Tracer stripe</label>${swatches(state.wireDefaults.tracer,'dt',true)}</div>
       <div class="field"><label for="fGauge">Gauge</label>
         <select id="fGauge">${GAUGES.map(g=>`<option ${g===state.wireDefaults.gauge?'selected':''}>${g}</option>`).join('')}</select></div>
-      <p class="hint"><b>How to wire:</b> click a pin, then click another pin. New wires use these settings; select any wire later to change it.<br><br><b>Routing:</b> double-click a wire to add a draggable guide point.<br><br><b>Keys:</b> Del removes selection · Esc cancels a pending wire · arrow keys nudge the selected part (Shift for 1px steps).</p>`;
+      <div class="field"><label for="fLengthMm">Length (mm)</label>
+        <input type="number" id="fLengthMm" min="0" step="1" value="${esc(state.wireDefaults.lengthMm||'')}"></div>
+      <div class="field"><label><input type="checkbox" id="fShowWireLabels" ${state.showWireLabels?'checked':''}> Show wire labels in schematic</label></div>
+      <p class="hint"><b>How to wire:</b> click a pin, then click canvas to add guide points, then click destination pin. New wires use these settings; select any wire later to change it.<br><br><b>Routing:</b> double-click a wire to add a draggable guide point.<br><br><b>Keys:</b> Del removes selection · Esc cancels a pending wire · arrow keys nudge the selected part (Shift for 1px steps).</p>`;
     el.querySelectorAll('[data-dc]').forEach(b=>b.onclick=()=>{state.wireDefaults.color=b.dataset.dc;renderProps();});
     el.querySelectorAll('[data-dt]').forEach(b=>b.onclick=()=>{state.wireDefaults.tracer=b.dataset.dt;renderProps();});
     document.querySelector('#fGauge').onchange=e=>{state.wireDefaults.gauge=e.target.value;};
+    document.querySelector('#fLengthMm').oninput=e=>{state.wireDefaults.lengthMm=e.target.value;};
+    document.querySelector('#fShowWireLabels').onchange=e=>{state.showWireLabels=!!e.target.checked;renderWires();};
+  }
+  const toolbarToggle = document.querySelector('#chkWireLabels');
+  if(toolbarToggle){
+    toolbarToggle.checked = !!state.showWireLabels;
+    toolbarToggle.onchange = ()=>{state.showWireLabels=toolbarToggle.checked;renderWires();renderProps();};
   }
 }

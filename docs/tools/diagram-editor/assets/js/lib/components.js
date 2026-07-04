@@ -153,6 +153,36 @@ export const LIB = {
       <line x1="50" y1="0" x2="50" y2="14" stroke="#d7dde3" stroke-width="2"/>
       <path d="M4 14 h52 v14 a10 10 0 0 1 -10 10 h-32 a10 10 0 0 1 -10 -10 z" fill="#182529" stroke="#4dd0e1" stroke-width="2"/>
       <circle cx="30" cy="26" r="4" fill="none" stroke="#4dd0e1" stroke-width="1.5"/>`},
+  o2sensor3:{name:'Oxygen Sensor (3-pin)',prefix:'B',w:60,h:52,
+    pins:[{id:'ht+',label:'HT+',x:12,y:0},{id:'sig',label:'S',x:30,y:0},{id:'gnd',label:'G',x:48,y:0}],
+    draw:()=>`
+      <line x1="12" y1="0" x2="12" y2="14" stroke="#d7dde3" stroke-width="2"/>
+      <line x1="30" y1="0" x2="30" y2="14" stroke="#d7dde3" stroke-width="2"/>
+      <line x1="48" y1="0" x2="48" y2="14" stroke="#d7dde3" stroke-width="2"/>
+      <rect x="8" y="14" width="44" height="28" rx="8" fill="#202620" stroke="#a5d6a7" stroke-width="2"/>
+      <path d="M18 30 h24" stroke="#a5d6a7" stroke-width="1.4"/>
+      <circle cx="30" cy="48" r="3.5" fill="#202620" stroke="#a5d6a7" stroke-width="1.4"/>`},
+  o2sensor4:{name:'Oxygen Sensor (4-pin)',prefix:'B',w:74,h:52,
+    pins:[{id:'ht1',label:'H1',x:10,y:0},{id:'ht2',label:'H2',x:28,y:0},{id:'sig',label:'S',x:46,y:0},{id:'gnd',label:'G',x:64,y:0}],
+    draw:()=>`
+      <line x1="10" y1="0" x2="10" y2="14" stroke="#d7dde3" stroke-width="2"/>
+      <line x1="28" y1="0" x2="28" y2="14" stroke="#d7dde3" stroke-width="2"/>
+      <line x1="46" y1="0" x2="46" y2="14" stroke="#d7dde3" stroke-width="2"/>
+      <line x1="64" y1="0" x2="64" y2="14" stroke="#d7dde3" stroke-width="2"/>
+      <rect x="6" y="14" width="62" height="28" rx="8" fill="#202620" stroke="#a5d6a7" stroke-width="2"/>
+      <path d="M18 30 h38" stroke="#a5d6a7" stroke-width="1.4"/>
+      <circle cx="37" cy="48" r="3.5" fill="#202620" stroke="#a5d6a7" stroke-width="1.4"/>`},
+  o2sensor5:{name:'Oxygen Sensor (5-pin)',prefix:'B',w:90,h:52,
+    pins:[{id:'ip+',label:'IP+',x:9,y:0},{id:'ip-',label:'IP-',x:27,y:0},{id:'vm',label:'VM',x:45,y:0},{id:'rc',label:'RC',x:63,y:0},{id:'ht',label:'HT',x:81,y:0}],
+    draw:()=>`
+      <line x1="9" y1="0" x2="9" y2="14" stroke="#d7dde3" stroke-width="2"/>
+      <line x1="27" y1="0" x2="27" y2="14" stroke="#d7dde3" stroke-width="2"/>
+      <line x1="45" y1="0" x2="45" y2="14" stroke="#d7dde3" stroke-width="2"/>
+      <line x1="63" y1="0" x2="63" y2="14" stroke="#d7dde3" stroke-width="2"/>
+      <line x1="81" y1="0" x2="81" y2="14" stroke="#d7dde3" stroke-width="2"/>
+      <rect x="5" y="14" width="80" height="28" rx="8" fill="#202620" stroke="#a5d6a7" stroke-width="2"/>
+      <path d="M18 30 h54" stroke="#a5d6a7" stroke-width="1.4"/>
+      <circle cx="45" cy="48" r="3.5" fill="#202620" stroke="#a5d6a7" stroke-width="1.4"/>`},
   valve:{name:'Solenoid Valve',prefix:'Y',w:60,h:40,
     pins:[{id:'1',label:'1',x:0,y:20},{id:'2',label:'2',x:60,y:20}],
     draw:()=>`
@@ -162,6 +192,42 @@ export const LIB = {
       <path d="M48 10 L34 30 L34 10 L48 30 Z" fill="#2b2620" stroke="#fdd835" stroke-width="1.5" stroke-linejoin="round"/>
       <rect x="22" y="2" width="16" height="16" fill="#1c2024" stroke="#fdd835" stroke-width="1.5"/>
       <line x1="22" y1="18" x2="38" y2="2" stroke="#fdd835" stroke-width="1.5"/>`},
+  idleValve2:{name:'Idle Valve Bosch (2-pin)',prefix:'Y',w:70,h:44,
+    pins:[{id:'1',label:'1',x:0,y:22},{id:'2',label:'2',x:70,y:22}],
+    draw:()=>`
+      <line x1="0" y1="22" x2="14" y2="22" stroke="#d7dde3" stroke-width="2"/>
+      <line x1="56" y1="22" x2="70" y2="22" stroke="#d7dde3" stroke-width="2"/>
+      <rect x="14" y="8" width="42" height="28" rx="7" fill="#2a2220" stroke="#ffb74d" stroke-width="2"/>
+      <line x1="22" y1="22" x2="48" y2="22" stroke="#ffb74d" stroke-width="1.6"/>
+      <rect x="28" y="12" width="14" height="20" fill="#1c2024" stroke="#ffb74d" stroke-width="1.2"/>`},
+  idleValve3:{name:'Idle Valve Bosch (3-pin)',prefix:'Y',w:74,h:52,
+    pins:[{id:'1',label:'1',x:12,y:0},{id:'2',label:'2',x:37,y:0},{id:'3',label:'3',x:62,y:0}],
+    draw:()=>`
+      <line x1="12" y1="0" x2="12" y2="14" stroke="#d7dde3" stroke-width="2"/>
+      <line x1="37" y1="0" x2="37" y2="14" stroke="#d7dde3" stroke-width="2"/>
+      <line x1="62" y1="0" x2="62" y2="14" stroke="#d7dde3" stroke-width="2"/>
+      <rect x="12" y="14" width="50" height="28" rx="7" fill="#2a2220" stroke="#ffb74d" stroke-width="2"/>
+      <line x1="22" y1="22" x2="52" y2="22" stroke="#ffb74d" stroke-width="1.6"/>
+      <line x1="22" y1="30" x2="52" y2="30" stroke="#ffb74d" stroke-width="1.6"/>`},
+  idleStepper:{name:'Idle Valve Stepper',prefix:'Y',w:84,h:54,
+    pins:[{id:'a+',label:'A+',x:8,y:0},{id:'a-',label:'A-',x:28,y:0},{id:'b+',label:'B+',x:56,y:0},{id:'b-',label:'B-',x:76,y:0}],
+    draw:()=>`
+      <line x1="8" y1="0" x2="8" y2="14" stroke="#d7dde3" stroke-width="2"/>
+      <line x1="28" y1="0" x2="28" y2="14" stroke="#d7dde3" stroke-width="2"/>
+      <line x1="56" y1="0" x2="56" y2="14" stroke="#d7dde3" stroke-width="2"/>
+      <line x1="76" y1="0" x2="76" y2="14" stroke="#d7dde3" stroke-width="2"/>
+      <rect x="8" y="14" width="68" height="32" rx="8" fill="#2a2220" stroke="#ffb74d" stroke-width="2"/>
+      <circle cx="42" cy="30" r="10" fill="none" stroke="#ffb74d" stroke-width="1.6"/>
+      <path d="M36 30 L42 24 L48 30 L42 36 Z" fill="none" stroke="#ffb74d" stroke-width="1.4"/>`},
+  idleWax:{name:'Idle Warm-Up Valve (Wax)',prefix:'Y',w:84,h:46,
+    pins:[{id:'1',label:'IN',x:0,y:23},{id:'2',label:'OUT',x:84,y:23}],
+    draw:()=>`
+      <line x1="0" y1="23" x2="18" y2="23" stroke="#d7dde3" stroke-width="2"/>
+      <line x1="66" y1="23" x2="84" y2="23" stroke="#d7dde3" stroke-width="2"/>
+      <rect x="18" y="9" width="48" height="28" rx="8" fill="#2a2220" stroke="#ffb74d" stroke-width="2"/>
+      <circle cx="34" cy="23" r="6" fill="none" stroke="#ffb74d" stroke-width="1.4"/>
+      <path d="M44 16 Q52 23 44 30" fill="none" stroke="#ffb74d" stroke-width="1.4"/>
+      <path d="M52 16 Q60 23 52 30" fill="none" stroke="#ffb74d" stroke-width="1.4"/>`},
   ublock:{name:'Universal Block',prefix:'U',w:80,h:80,
     pins:[{id:'1',label:'1',x:0,y:20},{id:'2',label:'2',x:0,y:60},
           {id:'3',label:'3',x:80,y:20},{id:'4',label:'4',x:80,y:60}],
@@ -174,16 +240,28 @@ export const LIB = {
   note:{name:'Text Note',prefix:'N',w:200,h:60,
     pins:[],
     draw:c=>{
-      const text = c.noteText||'Note';
+      const escXml = s=>String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+      const noteW = Math.max(80, +c.noteW || 200);
+      const noteH = Math.max(40, +c.noteH || 60);
+      const fontFamily = c.noteFont || 'inherit';
+      const fontSize = Math.max(8, +c.noteFontSize || 11);
+      const text = String(c.noteText||'Note');
       const bgColor = c.bgColor||'#1e1a2e';
       const textColor = c.textColor||'#b39ddb';
       const hAlign = c.hAlign||'center';
       const vAlign = c.vAlign||'middle';
-      const textX = hAlign==='left'?10:(hAlign==='right'?190:100);
-      const textY = vAlign==='top'?16:(vAlign==='bottom'?52:32);
+      const pad = 10;
+      const textX = hAlign==='left'?pad:(hAlign==='right'?(noteW-pad):(noteW/2));
       const textAnchor = hAlign==='left'?'start':(hAlign==='right'?'end':'middle');
+      const lines = text.split(/\r?\n/);
+      const lineHeight = Math.max(10, Math.round(fontSize * 1.25 * 10) / 10);
+      const blockHeight = (lines.length - 1) * lineHeight;
+      const textY = vAlign==='top'
+        ? (pad + fontSize)
+        : (vAlign==='bottom' ? (noteH - pad - blockHeight) : ((noteH - blockHeight) / 2));
+      const spans = lines.map((line, i)=>`<tspan x="${textX}" y="${textY + i * lineHeight}">${escXml(line)}</tspan>`).join('');
       return `
-      <rect x="0" y="0" width="200" height="60" rx="3" fill="${bgColor}" stroke="#9575cd" stroke-width="1.5" stroke-dasharray="4 3"/>
-      <text x="${textX}" y="${textY}" fill="${textColor}" font-size="11" text-anchor="${textAnchor}" font-family="inherit" pointer-events="none">${c.noteText||'Note'}</text>`;
+      <rect x="0" y="0" width="${noteW}" height="${noteH}" rx="3" fill="${bgColor}" stroke="#9575cd" stroke-width="1.5" stroke-dasharray="4 3"/>
+      <text x="${textX}" y="${textY}" fill="${textColor}" font-size="${fontSize}" text-anchor="${textAnchor}" font-family="${escXml(fontFamily)}" pointer-events="none">${spans}</text>`;
     }}
 };

@@ -8,7 +8,11 @@ export let state = {
   ...freshState(),
   sel: null,
   pending: null,
-  wireDefaults: {color:'RD', tracer:'', gauge:'1.5'},
+  pendingWp: [],
+  connectCandidate: null,
+  wireDefaults: {color:'RD', tracer:'', gauge:'1.5', lengthMm:''},
+  showWireLabels: true,
+  trace: null,
   view: {x:-60,y:-40,w:1200,h:800},
   cascade: 0
 };
