@@ -213,8 +213,8 @@ export function buildMermaid(){
       case 'sensor2': case 'sensor3': case 'o2sensor3': case 'o2sensor4': case 'o2sensor5': return `${D}(["📶 ${c.des}${lbl?'<br/>'+lbl:''}"]):::module`;
       case 'idleValve2': case 'idleValve3': case 'idleStepper': case 'idleWax': return `${D}(("⚙️ ${c.des}${lbl?'<br/>'+lbl:''}")):::load`;
       case 'ublock': return `${D}["${c.des}${lbl?'<br/>'+lbl:''}"]:::module`;
-      case 'ignAmp1': case 'ignAmp2': return `${D}["⚡ ${c.des}${val?' '+val:''}${lbl?'<br/>'+lbl:''}"]:::module`;
-      case 'coil': case 'coil2x2': case 'cop': return `${D}["⚡ ${c.des}${val?' '+val:''}${lbl?'<br/>'+lbl:''}"]:::power`;
+      case 'ignAmp1': case 'ignAmp2': case 'ignAmp4': return `${D}["⚡ ${c.des}${val?' '+val:''}${lbl?'<br/>'+lbl:''}"]:::module`;
+      case 'coil': case 'coil2x2': case 'cop': case 'copSmart': return `${D}["⚡ ${c.des}${val?' '+val:''}${lbl?'<br/>'+lbl:''}"]:::power`;
       case 'distributor': return `${D}["🔀 ${c.des}${lbl?'<br/>'+lbl:''}"]:::conn`;
       case 'sparkplug': return `${D}(("⚡ ${c.des}${lbl?'<br/>'+lbl:''}")):::load`;
       case 'resistor': return `${D}["${c.des} ${val}${lbl?'<br/>'+lbl:''}"]:::conn`;
