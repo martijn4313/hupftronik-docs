@@ -37,6 +37,7 @@ export function buildPalette(){
   const groups=[
     ['Power', ['battery','fuse','ground','splice']],
     ['Control', ['relay','relay5','switch','ignition','ecu']],
+    ['Ignition', ['ignAmp1','ignAmp2','coil','coil2x2','cop','distributor','sparkplug']],
     ['Engine Management', ['injector', 'sensor2', 'sensor3', 'o2sensor3', 'o2sensor4', 'o2sensor5', 'valve', 'idleValve2', 'idleValve3', 'idleStepper', 'idleWax']],
     ['Loads', ['motor','pump','lamp']],
     ['Harness', ['connector', 'ublock']],
@@ -163,7 +164,7 @@ export function simulate(){
     }
   }
 
-  const pairEdges=energized=>{
+  const pairEdges=dyn=>{
     const pe={};
     const add=(cid,x,y)=>{
       (pe[key(cid,x)] ||= []).push(key(cid,y));
@@ -177,8 +178,16 @@ export function simulate(){
         case 'ignition':
           for(const [x,y] of IGN_CONDUCT[Math.max(0,Math.min(3,+c.keyPos||0))]) add(c.id,x,y);
           break;
-        case 'relay': if(energized[c.id]) add(c.id,'30','87'); break;
-        case 'relay5': if(energized[c.id]) add(c.id,'30','87'); else add(c.id,'30','87a'); break;
+        case 'relay': if(dyn.energized[c.id]) add(c.id,'30','87'); break;
+        case 'relay5': if(dyn.energized[c.id]) add(c.id,'30','87'); else add(c.id,'30','87a'); break;
+        /* a triggered power stage channel pulls its coil output to ground */
+        case 'ignAmp1': if(dyn.ampCh[c.id]&&dyn.ampCh[c.id].a) add(c.id,'1','31'); break;
+        case 'ignAmp2':
+          if(dyn.ampCh[c.id]&&dyn.ampCh[c.id].a) add(c.id,'1a','31');
+          if(dyn.ampCh[c.id]&&dyn.ampCh[c.id].b) add(c.id,'1b','31');
+          break;
+        /* rotor sweeps all towers — bridge them for visualization */
+        case 'distributor': add(c.id,'in','ht1'); add(c.id,'in','ht2'); add(c.id,'in','ht3'); add(c.id,'in','ht4'); break;
       }
     }
     return pe;
@@ -201,22 +210,54 @@ export function simulate(){
   };
 
   const relays=state.comps.filter(c=>c.type==='relay'||c.type==='relay5');
-  let energized={};
+  const amps=state.comps.filter(c=>c.type==='ignAmp1'||c.type==='ignAmp2');
+  const coils=state.comps.filter(c=>c.type==='coil'||c.type==='cop'||c.type==='coil2x2');
+  let dyn={energized:{},ampCh:{},coilCh:{}};
   let plus,minus;
-  for(let i=0;i<8;i++){
-    const pe=pairEdges(energized);
-    plus=bfs(plusStarts,pe);
+  for(let i=0;i<12;i++){
+    const pe=pairEdges(dyn);
+    /* a firing coil channel makes its HT terminal(s) hot */
+    const plusS=plusStarts.slice();
+    for(const t of coils){
+      const ch=dyn.coilCh[t.id];
+      if(!ch) continue;
+      if(t.type==='coil2x2'){
+        if(ch.a) plusS.push(key(t.id,'ht1'),key(t.id,'ht4'));
+        if(ch.b) plusS.push(key(t.id,'ht2'),key(t.id,'ht3'));
+      } else if(ch.a) plusS.push(key(t.id,'4'));
+    }
+    plus=bfs(plusS,pe);
     minus=bfs(minusStarts,pe);
-    const next={};
-    let changed=false;
+    const next={energized:{},ampCh:{},coilCh:{}};
     for(const r of relays){
       const on = (plus.seen[key(r.id,'86')]&&minus.seen[key(r.id,'85')])
               || (plus.seen[key(r.id,'85')]&&minus.seen[key(r.id,'86')]);
-      if(on) next[r.id]=true;
-      if(!!energized[r.id]!==!!on) changed=true;
+      if(on) next.energized[r.id]=true;
     }
-    energized=next;
-    if(!changed) break;
+    for(const a of amps){
+      const powered = plus.seen[key(a.id,'15')]&&minus.seen[key(a.id,'31')];
+      const ch={};
+      if(a.type==='ignAmp1'){
+        if(powered&&plus.seen[key(a.id,'in')]) ch.a=true;
+      } else {
+        if(powered&&plus.seen[key(a.id,'in1')]) ch.a=true;
+        if(powered&&plus.seen[key(a.id,'in2')]) ch.b=true;
+      }
+      if(ch.a||ch.b) next.ampCh[a.id]=ch;
+    }
+    for(const t of coils){
+      const ch={};
+      if(t.type==='coil2x2'){
+        if(plus.seen[key(t.id,'15')]&&minus.seen[key(t.id,'1a')]) ch.a=true;
+        if(plus.seen[key(t.id,'15')]&&minus.seen[key(t.id,'1b')]) ch.b=true;
+      } else {
+        if(plus.seen[key(t.id,'15')]&&minus.seen[key(t.id,'1')]) ch.a=true;
+      }
+      if(ch.a||ch.b) next.coilCh[t.id]=ch;
+    }
+    const stable=JSON.stringify(next)===JSON.stringify(dyn);
+    dyn=next;
+    if(stable) break;
   }
 
   const compIds={}, litCompIds={};
@@ -227,16 +268,20 @@ export function simulate(){
     }
   }
   for(const c of state.comps){
-    if(!SIM_LOADS.has(c.type)) continue;
-    const pins=c.pins||LIB[c.type].pins;
-    const hasPlus=pins.some(p=>plus.seen[key(c.id,p.id)]);
-    const hasMinus=pins.some(p=>minus.seen[key(c.id,p.id)]);
-    if(hasPlus&&hasMinus) litCompIds[c.id]=true;
+    if(SIM_LOADS.has(c.type)){
+      const pins=c.pins||LIB[c.type].pins;
+      const hasPlus=pins.some(p=>plus.seen[key(c.id,p.id)]);
+      const hasMinus=pins.some(p=>minus.seen[key(c.id,p.id)]);
+      if(hasPlus&&hasMinus) litCompIds[c.id]=true;
+    }
+    if(dyn.coilCh[c.id]||dyn.ampCh[c.id]) litCompIds[c.id]=true;
+    /* spark plugs ground through the engine block */
+    if(c.type==='sparkplug'&&plus.seen[key(c.id,'ht')]) litCompIds[c.id]=true;
   }
 
   const src=state.trace?state.trace.sourceCompId:null;
   if(src!=null) compIds[src]=true;
-  state.trace={sourceCompId:src,wireIds:plus.wires,gndWireIds:minus.wires,compIds,litCompIds,energized};
+  state.trace={sourceCompId:src,wireIds:plus.wires,gndWireIds:minus.wires,compIds,litCompIds,energized:dyn.energized};
 }
 hooks.simulate=simulate;
 
