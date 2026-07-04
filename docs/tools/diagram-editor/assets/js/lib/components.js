@@ -123,16 +123,26 @@ export const LIB = {
   ignAmp1:{name:'Power Stage (1-ch)',prefix:'V',w:80,h:60,
     pins:[{id:'in',label:'IN',x:0,y:30},{id:'15',label:'15',x:40,y:0},
           {id:'31',label:'31',x:40,y:60},{id:'1',label:'1',x:80,y:30}],
-    getPins:(variant='generic')=>clonePins(
-      variant==='bosch-0227100124'
-        ? [{id:'in',label:'7',x:0,y:30},{id:'15',label:'15',x:40,y:0},
-           {id:'31',label:'31',x:40,y:60},{id:'1',label:'1',x:80,y:30}]
-        : [{id:'in',label:'IN',x:0,y:30},{id:'15',label:'15',x:40,y:0},
-           {id:'31',label:'31',x:40,y:60},{id:'1',label:'1',x:80,y:30}]
-    ),
+    getPins:(variant='generic')=>{
+      if(variant==='bosch-0227100124')
+        return clonePins([{id:'in',label:'7',x:0,y:30},{id:'15',label:'15',x:40,y:0},
+                          {id:'31',label:'31',x:40,y:60},{id:'1',label:'1',x:80,y:30}]);
+      if(variant==='st-vb921sp')
+        /* VB921SP SIP-4: 1=GND, 2=IN, 3=OUT, 4=VCC */
+        return clonePins([{id:'in',label:'2',x:0,y:30},{id:'15',label:'4',x:40,y:0},
+                          {id:'31',label:'1',x:40,y:60},{id:'1',label:'3',x:80,y:30}]);
+      if(variant==='bip373')
+        /* BIP373 TO-220: 1=Base/IN, 2=Emitter/GND, 3=Collector/OUT (no VCC pin) */
+        return clonePins([{id:'in',label:'1',x:0,y:30},
+                          {id:'31',label:'2',x:40,y:60},{id:'1',label:'3',x:80,y:30}]);
+      return clonePins([{id:'in',label:'IN',x:0,y:30},{id:'15',label:'15',x:40,y:0},
+                        {id:'31',label:'31',x:40,y:60},{id:'1',label:'1',x:80,y:30}]);
+    },
     variants:[
       {id:'generic',name:'Generic single-channel'},
       {id:'bosch-0227100124',name:'Bosch 0 227 100 124'},
+      {id:'st-vb921sp',name:'ST VB921SP'},
+      {id:'bip373',name:'BIP373 (IGBT)'},
       {id:'custom',name:'Custom…'}],
     valBase:{x:88,y:34}, valColor:'#ff8a65', valSize:8, valAlign:'start',
     value:'Generic single-channel',
@@ -183,6 +193,61 @@ export const LIB = {
       <line x1="22" y1="47" x2="30" y2="41" stroke="#ff8a65" stroke-width="1.5"/>
       <line x1="22" y1="53" x2="30" y2="59" stroke="#ff8a65" stroke-width="1.5"/>
       <path d="M42 60 h5 v-8 h5 v8 h5" fill="none" stroke="#ff8a65" stroke-width="1.5"/>`},
+  ignAmp4:{name:'Power Stage (4-ch)',prefix:'V',w:100,h:120,
+    pins:[{id:'in1',label:'IN1',x:0,y:20},{id:'in2',label:'IN2',x:0,y:40},
+          {id:'in3',label:'IN3',x:0,y:60},{id:'in4',label:'IN4',x:0,y:80},
+          {id:'15',label:'15',x:50,y:0},{id:'31',label:'31',x:50,y:120},
+          {id:'1',label:'1',x:100,y:20},{id:'2',label:'2',x:100,y:40},
+          {id:'3',label:'3',x:100,y:60},{id:'4',label:'4',x:100,y:80}],
+    getPins:(variant='generic')=>{
+      if(variant==='bosch-0227100211')
+        /* Bosch 0 227 100 211: trigger pins labelled per module connector */
+        return clonePins([{id:'in1',label:'3',x:0,y:20},{id:'in2',label:'4',x:0,y:40},
+                          {id:'in3',label:'5',x:0,y:60},{id:'in4',label:'6',x:0,y:80},
+                          {id:'15',label:'15',x:50,y:0},{id:'31',label:'31',x:50,y:120},
+                          {id:'1',label:'7',x:100,y:20},{id:'2',label:'8',x:100,y:40},
+                          {id:'3',label:'9',x:100,y:60},{id:'4',label:'10',x:100,y:80}]);
+      return clonePins([{id:'in1',label:'IN1',x:0,y:20},{id:'in2',label:'IN2',x:0,y:40},
+                        {id:'in3',label:'IN3',x:0,y:60},{id:'in4',label:'IN4',x:0,y:80},
+                        {id:'15',label:'15',x:50,y:0},{id:'31',label:'31',x:50,y:120},
+                        {id:'1',label:'1',x:100,y:20},{id:'2',label:'2',x:100,y:40},
+                        {id:'3',label:'3',x:100,y:60},{id:'4',label:'4',x:100,y:80}]);
+    },
+    variants:[
+      {id:'generic',name:'Generic 4-channel'},
+      {id:'bosch-0227100211',name:'Bosch 0 227 100 211'},
+      {id:'custom',name:'Custom…'}],
+    valBase:{x:108,y:64}, valColor:'#ff8a65', valSize:8, valAlign:'start',
+    value:'Generic 4-channel',
+    draw:()=>`
+      <line x1="0" y1="20" x2="10" y2="20" stroke="#d7dde3" stroke-width="2"/>
+      <line x1="0" y1="40" x2="10" y2="40" stroke="#d7dde3" stroke-width="2"/>
+      <line x1="0" y1="60" x2="10" y2="60" stroke="#d7dde3" stroke-width="2"/>
+      <line x1="0" y1="80" x2="10" y2="80" stroke="#d7dde3" stroke-width="2"/>
+      <line x1="50" y1="0" x2="50" y2="10" stroke="#f9a825" stroke-width="2"/>
+      <line x1="50" y1="110" x2="50" y2="120" stroke="#9e9e9e" stroke-width="2"/>
+      <line x1="90" y1="20" x2="100" y2="20" stroke="#d7dde3" stroke-width="2"/>
+      <line x1="90" y1="40" x2="100" y2="40" stroke="#d7dde3" stroke-width="2"/>
+      <line x1="90" y1="60" x2="100" y2="60" stroke="#d7dde3" stroke-width="2"/>
+      <line x1="90" y1="80" x2="100" y2="80" stroke="#d7dde3" stroke-width="2"/>
+      <rect x="10" y="10" width="80" height="100" rx="4" fill="#2e2018" stroke="#ff8a65" stroke-width="2"/>
+      <line x1="16" y1="20" x2="22" y2="20" stroke="#ff8a65" stroke-width="1.5"/>
+      <line x1="22" y1="14" x2="22" y2="26" stroke="#ff8a65" stroke-width="2"/>
+      <line x1="22" y1="17" x2="30" y2="11" stroke="#ff8a65" stroke-width="1.5"/>
+      <line x1="22" y1="23" x2="30" y2="29" stroke="#ff8a65" stroke-width="1.5"/>
+      <line x1="16" y1="40" x2="22" y2="40" stroke="#ff8a65" stroke-width="1.5"/>
+      <line x1="22" y1="34" x2="22" y2="46" stroke="#ff8a65" stroke-width="2"/>
+      <line x1="22" y1="37" x2="30" y2="31" stroke="#ff8a65" stroke-width="1.5"/>
+      <line x1="22" y1="43" x2="30" y2="49" stroke="#ff8a65" stroke-width="1.5"/>
+      <line x1="16" y1="60" x2="22" y2="60" stroke="#ff8a65" stroke-width="1.5"/>
+      <line x1="22" y1="54" x2="22" y2="66" stroke="#ff8a65" stroke-width="2"/>
+      <line x1="22" y1="57" x2="30" y2="51" stroke="#ff8a65" stroke-width="1.5"/>
+      <line x1="22" y1="63" x2="30" y2="69" stroke="#ff8a65" stroke-width="1.5"/>
+      <line x1="16" y1="80" x2="22" y2="80" stroke="#ff8a65" stroke-width="1.5"/>
+      <line x1="22" y1="74" x2="22" y2="86" stroke="#ff8a65" stroke-width="2"/>
+      <line x1="22" y1="77" x2="30" y2="71" stroke="#ff8a65" stroke-width="1.5"/>
+      <line x1="22" y1="83" x2="30" y2="89" stroke="#ff8a65" stroke-width="1.5"/>
+      <path d="M54 80 h5 v-8 h5 v8 h5" fill="none" stroke="#ff8a65" stroke-width="1.5"/>`},
   coil:{name:'Ignition Coil',prefix:'T',w:40,h:60,
     pins:[{id:'15',label:'15',x:10,y:0},{id:'1',label:'1',x:30,y:0},{id:'4',label:'4',x:20,y:60}],
     getPins:(variant='generic')=>clonePins(
@@ -191,6 +256,7 @@ export const LIB = {
     variants:[
       {id:'generic',name:'Generic 12V canister'},
       {id:'bosch-0221119027',name:'Bosch 0 221 119 027'},
+      {id:'bosch-0221122406',name:'Bosch 0 221 122 406'},
       {id:'beru-zs109',name:'BERU ZS109'},
       {id:'custom',name:'Custom…'}],
     valBase:{x:38,y:30}, valColor:'#ff8a65', valSize:8, valAlign:'start',
@@ -255,6 +321,50 @@ export const LIB = {
       <line x1="30" y1="0" x2="30" y2="10" stroke="#d7dde3" stroke-width="2"/>
       <line x1="20" y1="52" x2="20" y2="60" stroke="#e0e0e0" stroke-width="2.6"/>
       <rect x="8" y="10" width="24" height="14" rx="4" fill="#2e2018" stroke="#ff8a65" stroke-width="2"/>
+      <rect x="16" y="24" width="8" height="20" fill="#2e2018" stroke="#ff8a65" stroke-width="1.6"/>
+      <path d="M14 44 h12 v5 a4 4 0 0 1 -4 3 h-4 a4 4 0 0 1 -4 -3 z" fill="#2e2018" stroke="#ff8a65" stroke-width="1.6"/>
+      <line x1="18" y1="28" x2="18" y2="40" stroke="#ff8a65" stroke-width="1"/>
+      <line x1="22" y1="28" x2="22" y2="40" stroke="#ff8a65" stroke-width="1"/>`},
+  copSmart:{name:'Smart COP',prefix:'T',w:40,h:60,
+    /* 3-pin connector (supply + signal + GND) + HV output — integrated IGBT driver */
+    pins:[{id:'15',label:'15',x:5,y:0},{id:'in',label:'IN',x:20,y:0},
+          {id:'31',label:'31',x:35,y:0},{id:'4',label:'4',x:20,y:60}],
+    getPins:(variant='generic')=>{
+      if(variant==='gm-ls-d585')
+        /* GM LS D585 / Delphi 12570616: Metripack A=GND, B=+12V, C=Signal */
+        return clonePins([{id:'15',label:'B',x:5,y:0},{id:'in',label:'C',x:20,y:0},
+                          {id:'31',label:'A',x:35,y:0},{id:'4',label:'4',x:20,y:60}]);
+      if(variant==='ford-dg508')
+        /* Ford DG508 / DG512: 1=+12V, 2=Signal, 3=GND */
+        return clonePins([{id:'15',label:'1',x:5,y:0},{id:'in',label:'2',x:20,y:0},
+                          {id:'31',label:'3',x:35,y:0},{id:'4',label:'4',x:20,y:60}]);
+      if(variant==='bosch-0221504100')
+        /* Bosch 0 221 504 100: DIN 15=supply, 1=signal, 31=GND */
+        return clonePins([{id:'15',label:'15',x:5,y:0},{id:'in',label:'1',x:20,y:0},
+                          {id:'31',label:'31',x:35,y:0},{id:'4',label:'4',x:20,y:60}]);
+      return clonePins([{id:'15',label:'15',x:5,y:0},{id:'in',label:'IN',x:20,y:0},
+                        {id:'31',label:'31',x:35,y:0},{id:'4',label:'4',x:20,y:60}]);
+    },
+    variants:[
+      {id:'generic',name:'Generic smart COP'},
+      {id:'gm-ls-d585',name:'GM LS D585 / Delphi 12570616'},
+      {id:'ford-dg508',name:'Ford DG508 / DG512'},
+      {id:'bosch-0221504100',name:'Bosch 0 221 504 100'},
+      {id:'ngk-u5055',name:'NGK U5055'},
+      {id:'custom',name:'Custom…'}],
+    valBase:{x:38,y:30}, valColor:'#ff8a65', valSize:8, valAlign:'start',
+    value:'Generic smart COP',
+    draw:()=>`
+      <line x1="5" y1="0" x2="5" y2="10" stroke="#f9a825" stroke-width="2"/>
+      <line x1="20" y1="0" x2="20" y2="10" stroke="#d7dde3" stroke-width="2"/>
+      <line x1="35" y1="0" x2="35" y2="10" stroke="#9e9e9e" stroke-width="2"/>
+      <line x1="20" y1="52" x2="20" y2="60" stroke="#e0e0e0" stroke-width="2.6"/>
+      <rect x="2" y="10" width="36" height="14" rx="4" fill="#2e2018" stroke="#ff8a65" stroke-width="2"/>
+      <line x1="6" y1="17" x2="12" y2="17" stroke="#ff8a65" stroke-width="1.4"/>
+      <line x1="12" y1="13" x2="12" y2="21" stroke="#ff8a65" stroke-width="1.4"/>
+      <line x1="12" y1="14" x2="17" y2="12" stroke="#ff8a65" stroke-width="1.2"/>
+      <line x1="12" y1="20" x2="17" y2="22" stroke="#ff8a65" stroke-width="1.2"/>
+      <text x="21" y="20" fill="#ff8a65" font-size="5" font-family="inherit" pointer-events="none">IGN</text>
       <rect x="16" y="24" width="8" height="20" fill="#2e2018" stroke="#ff8a65" stroke-width="1.6"/>
       <path d="M14 44 h12 v5 a4 4 0 0 1 -4 3 h-4 a4 4 0 0 1 -4 -3 z" fill="#2e2018" stroke="#ff8a65" stroke-width="1.6"/>
       <line x1="18" y1="28" x2="18" y2="40" stroke="#ff8a65" stroke-width="1"/>
