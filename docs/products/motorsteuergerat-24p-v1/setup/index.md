@@ -67,7 +67,7 @@ compiled `.bin` or `.hex` file.
 
 ## 5. Wiring and Integration
 
-!!! standpunkt "The Standpunkt: Optimize for Intended Use, Not Potential Abuse"
+!!! info "Optimize for Intended Use, Not Potential Abuse"
     We optimize the board for signal integrity, not user-proofing. Systemic threats—such as EMI, thermal loads, and ground loops—are mitigated by the hardware design. However, incorrect wiring is a user error and remains an **acceptable failure mode**. If you reverse polarity or dead-short a high-side driver, the component will fail. Wiring requires absolute intentionality.
 
 **Quick Scan**

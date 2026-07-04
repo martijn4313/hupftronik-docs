@@ -38,7 +38,7 @@ Firing order for all variants: **1–3–4–2**. Cylinder 1 is at the front of 
 
 ## 3. Engine position sensor
 
-!!! standpunkt "Trigger integrity dictates engine survival"
+!!! info "Trigger integrity dictates engine survival"
     The trigger signal is the heartbeat of the ECU. Take this seriously. Chasing trigger or sync problems later on is a major headache, and a fluctuating timing signal causes immediate engine damage under high load.
 
 ### 3.1. Quick Scan
@@ -98,7 +98,7 @@ While alternative trigger options exist (e.g., front-mounted Hall sensors, after
 
 ## 4. Camshaft position sensor
 
-!!! standpunkt "Batch fueling and wasted spark meet the performance mandate"
+!!! info "Batch fueling and wasted spark meet the performance mandate"
     Adding a cam sync for fully sequential operation yields marginal idle emissions improvements but introduces unnecessary mechanical complexity to a B2xx. We optimize for robust performance, not theoretical perfection. The 24P V1 focuses on batch fueling and wasted spark, rendering a camshaft position sensor obsolete.
 
 ### 4.1. Quick Scan
@@ -120,7 +120,7 @@ The ECU calculates engine phase solely based on the primary crank trigger (60-2)
 
 ## 5. Throttle position sensor
 
-!!! standpunkt "Transient fueling requires intent"
+!!! info "Transient fueling requires intent"
     A MAP sensor alone cannot predict rapid throttle transients; it only reacts to them after the manifold pressure drops. An analog TPS is mandatory for immediate acceleration enrichment. Relying solely on MAP for acceleration is a lazy configuration that compromises drivability.
 
 ### 5.1. Quick Scan
@@ -149,7 +149,7 @@ The Volvo 850 TPS is cheap, widely available, and its signal range perfectly mat
 
 ## 6. Air charge sensing
 
-!!! standpunkt "Speed-density is the correct operating model"
+!!! info "Speed-density is the correct operating model"
     A speed-density tune belongs to the builder, not to the airbox. The OEM hot-wire Air Mass Meter (AMM) restricts airflow and ties fuel delivery to a specific intake geometry; MAP and IAT do not. Switching to speed-density is not a workaround for a missing sensor—it is a conscious engineering choice for a modified engine.
 
 ### 6.1. Quick Scan
@@ -183,7 +183,7 @@ We position the MAP/IAT sensor downstream of the throttle and intercooler, as cl
 
 ## 7. Fueling
 
-!!! standpunkt "Software cannot fix a dry pump"
+!!! info "Software cannot fix a dry pump"
     The fuel system must be mechanically sound before the ECU takes over. We retain high-headroom mechanical setups like twin-pump architectures because physical flow volume and anti-starvation mechanics trump algorithmic fault-tolerance. We do not attempt to patch a failing fuel system with software.
 
 ### 7.1. Quick Scan
