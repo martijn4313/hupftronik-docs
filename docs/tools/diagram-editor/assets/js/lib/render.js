@@ -97,11 +97,11 @@ export function renderComps(){
   compsL.innerHTML = state.comps.map(c=>{
     const d=LIB[c.type];
     
-    // For components with a configurable pin count, ensure pins are generated
-    if(d.getPins){
+    // For components with a configurable pin count (ECU, Schildknappe), regenerate
+    // by count; for all other getPins components regenerate by variant.
+    if(d.getHeight && d.getPins){
       if(!c.pins||!Array.isArray(c.pins)){
-        const count = c.type==='schildknappe' ? (c.ioCount||4) : (c.pinCount||4);
-        c.pins=d.getPins(count);
+        c.pins=d.getPins(c.ioCount ?? c.pinCount ?? 4);
       }
     } else if(d.getPins && !hasPins(c.pins)){
       c.pins=d.getPins(c.variant);
@@ -406,9 +406,16 @@ export function renderProps(){
         const v=d.variants.find(v=>v.id===c.variant);
         if(c.variant!=='custom'){
           c.value=v.name;
-          if(d.getPins) c.pins=d.getPins(c.variant);
+          // Count-based components (ECU, Schildknappe) keep their current pin count
+          // across variant changes — variant is cosmetic for them; other components
+          // derive their pin layout from the selected variant.
+          if(d.getPins){
+            if(d.getHeight) c.pins=d.getPins(c.ioCount ?? c.pinCount ?? 4);
+            else c.pins=d.getPins(c.variant);
+          }
         } else if(d.getPins && !hasPins(c.pins)){
-          c.pins=d.getPins(c.variant);
+          if(d.getHeight) c.pins=d.getPins(c.ioCount ?? c.pinCount ?? 4);
+          else c.pins=d.getPins(c.variant);
         }
         render();
       };
