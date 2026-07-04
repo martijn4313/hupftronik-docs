@@ -1,7 +1,7 @@
 /* ============ rendering layer ============ */
 
 import { DIN, GAUGES } from './constants.js';
-import { LIB, ecuHeight, IGN_POSITIONS, hasPins } from './components.js';
+import { LIB, IGN_POSITIONS, hasPins } from './components.js';
 import { state, esc, comp, uid, hooks } from './state.js';
 import { pinPos, pinAxis, textAnchor, textOffset, wirePath, routePoints, pinTextAnchor, pinTextOffset } from './geometry.js';
 
@@ -97,20 +97,21 @@ export function renderComps(){
   compsL.innerHTML = state.comps.map(c=>{
     const d=LIB[c.type];
     
-    // For ECU, ensure pins are generated
-    if(c.type==='ecu'){
+    // For components with a configurable pin count, ensure pins are generated
+    if(d.getPins){
       if(!c.pins||!Array.isArray(c.pins)){
-        c.pins=d.getPins(c.pinCount||4);
+        const count = c.type==='schildknappe' ? (c.ioCount||4) : (c.pinCount||4);
+        c.pins=d.getPins(count);
       }
     } else if(d.getPins && !hasPins(c.pins)){
       c.pins=d.getPins(c.variant);
     }
-    
+
     // Calculate component dimensions
     let compW = d.w;
     let compH = d.h;
-    if(c.type==='ecu'&&c.pins){
-      compH = ecuHeight(c.pins.length);
+    if(d.getHeight){
+      compH = d.getHeight(c.ioCount ?? c.pinCount ?? 4);
     }
     if(c.type==='note'){
       compW = Math.max(80, +c.noteW || d.w);
@@ -158,7 +159,7 @@ export function renderComps(){
         state.connectCandidate.compId === c.id &&
         state.connectCandidate.pinId === p.id
       );
-      const drive = c.type==='ecu' && c.pinStates ? c.pinStates[p.id] : null;
+      const drive = (c.type==='ecu'||c.type==='schildknappe') && c.pinStates ? c.pinStates[p.id] : null;
       const pinStroke = pinCandidate ? '#66bb6a' : (drive==='12v' ? '#ef5350' : (drive==='gnd' ? '#90a4ae' : '#f9a825'));
       const pinFill = drive==='12v' ? '#3a1d1d' : (drive==='gnd' ? '#20262b' : '#15181b');
       return `<g>
@@ -295,6 +296,29 @@ export function renderProps(){
       <div class="field"><label>Pinout — label · output drive</label>${pinRows}</div>`;
     }
 
+    let schildknappeControls='';
+    if(c.type==='schildknappe'){
+      const fixedRows=(c.pins||[]).filter(p=>!p.io).map(p=>
+        `<div class="pin-row"><span class="pin-row-fixed">${esc(p.label)}</span></div>`).join('');
+      const ioRows=(c.pins||[]).filter(p=>p.io).map(p=>{
+        const drive=(c.pinStates&&c.pinStates[p.id])||'';
+        return `<div class="pin-row">
+          <input type="text" class="ecu-pin-label" data-pin="${p.id}" value="${esc(p.label)}" title="pin label">
+          <select class="ecu-pin-drive" data-pin="${p.id}" title="drive this pin in interactive mode">
+            <option value="" ${drive===''?'selected':''}>off</option>
+            <option value="12v" ${drive==='12v'?'selected':''}>+12V</option>
+            <option value="gnd" ${drive==='gnd'?'selected':''}>GND</option>
+          </select>
+        </div>`;
+      }).join('');
+      schildknappeControls=`
+      <div class="field"><label>CAN / power pins (fixed)</label>${fixedRows}</div>
+      <div class="field"><label for="fPinCount">Number of IO pins</label>
+        <input type="number" id="fPinCount" min="1" max="32" value="${c.ioCount||4}"></div>
+      <div class="field"><label>IO pinout — label · output drive</label>${ioRows}</div>
+      <p class="hint">CANH/CANL/VBAT/GND are fixed protocol pins and can't be driven or relabeled. In interactive mode, only the IO pins respond to clicks.</p>`;
+    }
+
     let switchControls='';
     if(c.type==='switch'){
       switchControls=`
@@ -364,6 +388,7 @@ export function renderProps(){
         <input type="text" id="fValue" value="${esc(c.value)}"></div>`:''}
       ${variantControls}
       ${ecuControls}
+      ${schildknappeControls}
       ${switchControls}
       ${ignControls}
       ${noteControls}
@@ -395,10 +420,20 @@ export function renderProps(){
     const fpc=document.querySelector('#fPinCount');
     if(fpc){
       fpc.oninput=e=>{
-        c.pinCount=Math.max(1,Math.min(32,+e.target.value||4));
+        const n=Math.max(1,Math.min(32,+e.target.value||4));
         const old=c.pins||[];
-        c.pins=d.getPins(c.pinCount);
-        c.pins.forEach((p,i)=>{ if(old[i]&&old[i].label) p.label=old[i].label; });
+        if(c.type==='schildknappe'){
+          c.ioCount=n;
+          c.pins=d.getPins(n);
+          // only IO pins carry user-editable labels; align by their position
+          // within the IO subset (fixed CAN/power pins never change)
+          const oldIo=old.filter(p=>p.io), newIo=c.pins.filter(p=>p.io);
+          newIo.forEach((p,i)=>{ if(oldIo[i]&&oldIo[i].label) p.label=oldIo[i].label; });
+        } else {
+          c.pinCount=n;
+          c.pins=d.getPins(n);
+          c.pins.forEach((p,i)=>{ if(old[i]&&old[i].label) p.label=old[i].label; });
+        }
         if(c.pinStates) for(const k of Object.keys(c.pinStates))
           if(!c.pins.some(p=>p.id===k)) delete c.pinStates[k];
         if(state.trace&&hooks.simulate) hooks.simulate();

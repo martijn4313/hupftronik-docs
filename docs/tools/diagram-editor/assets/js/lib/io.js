@@ -1,7 +1,7 @@
 /* ============ IO, export, and modal layer ============ */
 
 import { DIN, DIN_MERMAID } from './constants.js';
-import { LIB, ecuHeight, IGN_POSITIONS, shouldApplyPresetPins } from './components.js';
+import { LIB, IGN_POSITIONS, shouldApplyPresetPins } from './components.js';
 import { state, esc, comp } from './state.js';
 import { render, svg, wiresL, compsL, renderWires, renderComps, applyView } from './render.js';
 
@@ -29,6 +29,13 @@ export function applyLoadedData(j){
       const old=Array.isArray(c.pins)?c.pins:[];
       c.pins=LIB.ecu.getPins(c.pinCount);
       c.pins.forEach((p,i)=>{ if(old[i]&&old[i].label) p.label=old[i].label; });
+      c.pinStates=c.pinStates&&typeof c.pinStates==='object'?c.pinStates:{};
+    }
+    if(c.type==='schildknappe'){
+      c.ioCount=c.ioCount||4;
+      const old=Array.isArray(c.pins)?c.pins.filter(p=>p.io):[];
+      c.pins=LIB.schildknappe.getPins(c.ioCount);
+      c.pins.filter(p=>p.io).forEach((p,i)=>{ if(old[i]&&old[i].label) p.label=old[i].label; });
       c.pinStates=c.pinStates&&typeof c.pinStates==='object'?c.pinStates:{};
     }
     if(c.type==='switch'){
@@ -88,8 +95,8 @@ export function setupIOButtons(){
     for(const c of state.comps){
       const d=LIB[c.type];
       let h=d.h;
-      if(c.type==='ecu'&&c.pins){
-        h = ecuHeight(c.pins.length);
+      if(d.getHeight){
+        h = d.getHeight(c.ioCount ?? c.pinCount ?? 4);
       }
       x1=Math.min(x1,c.x);y1=Math.min(y1,c.y);
       x2=Math.max(x2,c.x+d.w);y2=Math.max(y2,c.y+h);
@@ -125,8 +132,8 @@ export function setupIOButtons(){
     for(const c of state.comps){
       const d=LIB[c.type];
       let h=d.h;
-      if(c.type==='ecu'&&c.pins){
-        h = ecuHeight(c.pins.length);
+      if(d.getHeight){
+        h = d.getHeight(c.ioCount ?? c.pinCount ?? 4);
       }
       x1=Math.min(x1,c.x-30);y1=Math.min(y1,c.y-30);
       x2=Math.max(x2,c.x+d.w+30);y2=Math.max(y2,c.y+h+30);
@@ -206,6 +213,7 @@ export function buildMermaid(){
       case 'motor': case 'pump': return `${D}(("M${lbl?'<br/>'+lbl:''}")):::load`;
       case 'lamp': return `${D}(("✕ ${c.des}${lbl?'<br/>'+lbl:''}")):::load`;
       case 'ecu': return `${D}["${c.des} ECU${val?'<br/>'+val:''}${lbl?'<br/>'+lbl:''}"]:::module`;
+      case 'schildknappe': return `${D}["🔗 ${c.des} CAN Node${val?'<br/>'+val:''}${lbl?'<br/>'+lbl:''}"]:::module`;
       case 'connector': return `${D}>"${c.des}${lbl?' '+lbl:''}"]:::conn`;
       case 'ground': return `${D}[\\"⏚ ${c.des}${lbl?' '+lbl:''}"/]:::ground`;
       case 'splice': return `${D}(("${c.des}")):::conn`;
