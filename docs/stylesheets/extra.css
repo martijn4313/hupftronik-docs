@@ -227,27 +227,3 @@ img[src*="../assets/icons"] {
   }
 }
 
-/* --- Custom "standpunkt" admonition ---
-   Hüpftronik's opinionated design-rationale callout (why we made a deliberate
-   engineering trade-off), distinct from the standard note/tip/warning/danger set. */
-:root {
-  --md-admonition-icon--standpunkt: url('data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12,2L22,12L12,22L2,12Z"/></svg>');
-}
-
-.md-typeset .admonition.standpunkt,
-.md-typeset details.standpunkt {
-  border-color: #FF5500;
-}
-
-.md-typeset .standpunkt > .admonition-title,
-.md-typeset .standpunkt > summary {
-  background-color: rgba(255, 85, 0, 0.1);
-}
-
-.md-typeset .standpunkt > .admonition-title::before,
-.md-typeset .standpunkt > summary::before {
-  background-color: #FF5500;
-  -webkit-mask-image: var(--md-admonition-icon--standpunkt);
-          mask-image: var(--md-admonition-icon--standpunkt);
-}
-

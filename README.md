@@ -32,15 +32,14 @@ Pushes to `main` are built and published to GitHub Pages automatically by
 - `includes/` — reusable snippet files pulled into pages via `pymdownx.snippets`
   (`--8<-- "filename.md"`)
 - `mkdocs.yml` — site configuration and navigation tree
-- `docs/stylesheets/extra.css` — theme customization, content-status badges, and the custom
-  `standpunkt` admonition
+- `docs/stylesheets/extra.css` — theme customization and content-status badges
 
 ## Content conventions
 
 - Most pages carry a **content-status badge** under the title (`Reviewed` or `AI-drafted — verify
   before use`) — see *About → Open-Source & Community* on the site for what these mean. Set the
   badge honestly on new pages.
-- Design-rationale callouts use the custom `!!! standpunkt` admonition.
+- Design-rationale callouts use the standard `!!! info` admonition.
 - Facts not yet confirmed against real hardware are marked *to be confirmed* rather than guessed.
 
 ## Reporting problems
