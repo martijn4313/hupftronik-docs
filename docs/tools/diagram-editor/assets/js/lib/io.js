@@ -1,7 +1,7 @@
 /* ============ IO, export, and modal layer ============ */
 
 import { DIN, DIN_MERMAID } from './constants.js';
-import { LIB, IGN_POSITIONS } from './components.js';
+import { LIB, IGN_POSITIONS, shouldApplyPresetPins } from './components.js';
 import { state, esc, comp } from './state.js';
 import { render, svg, wiresL, compsL, renderWires, renderComps, applyView } from './render.js';
 
@@ -60,6 +60,9 @@ export function applyLoadedData(j){
       // freeform value text as a custom entry rather than silently
       // overwriting it with the first preset's name
       c.variant='custom';
+    }
+    if(shouldApplyPresetPins(c,LIB[c.type])){
+      c.pins=LIB[c.type].getPins(c.variant);
     }
   });
 
@@ -218,8 +221,8 @@ export function buildMermaid(){
       case 'sensor2': case 'sensor3': case 'o2sensor3': case 'o2sensor4': case 'o2sensor5': return `${D}(["📶 ${c.des}${lbl?'<br/>'+lbl:''}"]):::module`;
       case 'idleValve2': case 'idleValve3': case 'idleStepper': case 'idleWax': return `${D}(("⚙️ ${c.des}${lbl?'<br/>'+lbl:''}")):::load`;
       case 'ublock': return `${D}["${c.des}${lbl?'<br/>'+lbl:''}"]:::module`;
-      case 'ignAmp1': case 'ignAmp2': return `${D}["⚡ ${c.des}${val?' '+val:''}${lbl?'<br/>'+lbl:''}"]:::module`;
-      case 'coil': case 'coil2x2': case 'cop': return `${D}["⚡ ${c.des}${val?' '+val:''}${lbl?'<br/>'+lbl:''}"]:::power`;
+      case 'ignAmp1': case 'ignAmp2': case 'ignAmp4': return `${D}["⚡ ${c.des}${val?' '+val:''}${lbl?'<br/>'+lbl:''}"]:::module`;
+      case 'coil': case 'coil2x2': case 'cop': case 'copSmart': return `${D}["⚡ ${c.des}${val?' '+val:''}${lbl?'<br/>'+lbl:''}"]:::power`;
       case 'distributor': return `${D}["🔀 ${c.des}${lbl?'<br/>'+lbl:''}"]:::conn`;
       case 'sparkplug': return `${D}(("⚡ ${c.des}${lbl?'<br/>'+lbl:''}")):::load`;
       case 'resistor': return `${D}["${c.des} ${val}${lbl?'<br/>'+lbl:''}"]:::conn`;

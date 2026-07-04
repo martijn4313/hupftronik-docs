@@ -38,7 +38,7 @@ export function buildPalette(){
     ['Power', ['battery','fuse','ground','splice']],
     ['Control', ['relay','relay5','switch','ignition','ecu']],
     ['Networking', ['schildknappe']],
-    ['Ignition', ['ignAmp1','ignAmp2','coil','coil2x2','cop','distributor','sparkplug']],
+    ['Ignition', ['ignAmp1','ignAmp2','ignAmp4','coil','coil2x2','cop','copSmart','distributor','sparkplug']],
     ['Electronics', ['resistor','diode','capacitor','npn','pnp','nchannel','pchannel']],
     ['Engine Management', ['injector', 'sensor2', 'sensor3', 'o2sensor3', 'o2sensor4', 'o2sensor5', 'valve', 'idleValve2', 'idleValve3', 'idleStepper', 'idleWax']],
     ['Loads', ['motor','pump','lamp']],
@@ -89,11 +89,14 @@ export function addComp(type){
     ...variantProps,
     ...noteProps
   };
-
+  
   // Generate pins for components with a configurable pin count
-  if(d.getPins){
-    const count = type==='schildknappe' ? c.ioCount : c.pinCount;
-    c.pins = d.getPins(count);
+  if(type==='ecu'){
+    c.pins=d.getPins(c.pinCount);
+  } else if(type==='schildknappe'){
+    c.pins=d.getPins(c.ioCount);
+  } else if(d.getPins){
+    c.pins=d.getPins(c.variant);
   }
 
   state.cascade++;
@@ -201,6 +204,12 @@ export function simulate(){
           if(dyn.ampCh[c.id]&&dyn.ampCh[c.id].a) add(c.id,'1a','31');
           if(dyn.ampCh[c.id]&&dyn.ampCh[c.id].b) add(c.id,'1b','31');
           break;
+        case 'ignAmp4':
+          if(dyn.ampCh[c.id]&&dyn.ampCh[c.id].a) add(c.id,'1','31');
+          if(dyn.ampCh[c.id]&&dyn.ampCh[c.id].b) add(c.id,'2','31');
+          if(dyn.ampCh[c.id]&&dyn.ampCh[c.id].c) add(c.id,'3','31');
+          if(dyn.ampCh[c.id]&&dyn.ampCh[c.id].d) add(c.id,'4','31');
+          break;
         /* rotor sweeps all towers — bridge them for visualization */
         case 'distributor': add(c.id,'in','ht1'); add(c.id,'in','ht2'); add(c.id,'in','ht3'); add(c.id,'in','ht4'); break;
       }
@@ -225,8 +234,8 @@ export function simulate(){
   };
 
   const relays=state.comps.filter(c=>c.type==='relay'||c.type==='relay5');
-  const amps=state.comps.filter(c=>c.type==='ignAmp1'||c.type==='ignAmp2');
-  const coils=state.comps.filter(c=>c.type==='coil'||c.type==='cop'||c.type==='coil2x2');
+  const amps=state.comps.filter(c=>c.type==='ignAmp1'||c.type==='ignAmp2'||c.type==='ignAmp4');
+  const coils=state.comps.filter(c=>c.type==='coil'||c.type==='cop'||c.type==='coil2x2'||c.type==='copSmart');
   let dyn={energized:{},ampCh:{},coilCh:{}};
   let plus,minus;
   for(let i=0;i<12;i++){
@@ -250,21 +259,34 @@ export function simulate(){
       if(on) next.energized[r.id]=true;
     }
     for(const a of amps){
-      const powered = plus.seen[key(a.id,'15')]&&minus.seen[key(a.id,'31')];
+      /* BIP373 is a bare transistor with no VCC pin — powered through the coil load */
+      const isBip373 = a.type==='ignAmp1' && a.variant==='bip373';
+      const powered = isBip373
+        ? minus.seen[key(a.id,'31')]
+        : plus.seen[key(a.id,'15')]&&minus.seen[key(a.id,'31')];
       const ch={};
       if(a.type==='ignAmp1'){
         if(powered&&plus.seen[key(a.id,'in')]) ch.a=true;
+      } else if(a.type==='ignAmp4'){
+        if(powered&&plus.seen[key(a.id,'in1')]) ch.a=true;
+        if(powered&&plus.seen[key(a.id,'in2')]) ch.b=true;
+        if(powered&&plus.seen[key(a.id,'in3')]) ch.c=true;
+        if(powered&&plus.seen[key(a.id,'in4')]) ch.d=true;
       } else {
         if(powered&&plus.seen[key(a.id,'in1')]) ch.a=true;
         if(powered&&plus.seen[key(a.id,'in2')]) ch.b=true;
       }
-      if(ch.a||ch.b) next.ampCh[a.id]=ch;
+      if(ch.a||ch.b||ch.c||ch.d) next.ampCh[a.id]=ch;
     }
     for(const t of coils){
       const ch={};
       if(t.type==='coil2x2'){
         if(plus.seen[key(t.id,'15')]&&minus.seen[key(t.id,'1a')]) ch.a=true;
         if(plus.seen[key(t.id,'15')]&&minus.seen[key(t.id,'1b')]) ch.b=true;
+      } else if(t.type==='copSmart'){
+        /* smart COP has integrated IGBT: fires when supply (15), GND (31),
+           and logic signal (in) are all simultaneously present */
+        if(plus.seen[key(t.id,'15')]&&minus.seen[key(t.id,'31')]&&plus.seen[key(t.id,'in')]) ch.a=true;
       } else {
         if(plus.seen[key(t.id,'15')]&&minus.seen[key(t.id,'1')]) ch.a=true;
       }
