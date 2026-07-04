@@ -197,6 +197,9 @@ We position the MAP/IAT sensor downstream of the throttle and intercooler, as cl
 | B230FT | LH2.4 | `0 280 150 804` | $337\,\text{cc/min}$ |
 | B234F | LH2.4 | `0 280 150 749` | $214\,\text{cc/min}$ |
 
+!!! Warning
+
+
 #### 7.1.2. Fuel Pumps
 
 | Setup | Pump Type | Part Number | Flow Rate |
@@ -209,19 +212,31 @@ We position the MAP/IAT sensor downstream of the throttle and intercooler, as cl
 ### 7.2. Technical Detail
 
 **Injection — Batch**
+<<<<<<< Updated upstream
 Wire the high-impedance EV1 injectors in parallel on each channel. Pair cylinders the same way as the wasted-spark ignition groups below (360° apart in the 720° cycle), not by physical adjacency, so each batch pulse lands evenly spaced across the cycle. Set the injector flow rate in TunerStudio and use a dead time of $1.1\,\text{ms}$ at $14\,\text{V}$ as a starting point.
 *   **INJ1:** Cylinders 1 and 4
 *   **INJ2:** Cylinders 2 and 3
+=======
+You can wire the high-impedance injectors in parallel as pairs on each channel. Set the injector flow rate in TunerStudio and use a dead time of $1.1\,\text{ms}$ at $14\,\text{V}$ as a starting point.
+*   **INJ1:** Cylinders 1 and 2
+*   **INJ2:** Cylinders 3 and 4
+>>>>>>> Stashed changes
 
 **Fuel Pump Logic**
-The ECU does not replicate OEM relay logic directly. Route the ECU fuel pump output to drive an external relay coil; do not run main pump current directly through the low-side driver. 
+Route the ECU fuel pump output to drive an external relay coil; do **not** run the main pump current directly through the low-side driver. 
+
 *   **240 Setups:** Wire both the transfer pre-pump and the inline main pump to run simultaneously from the relay. 
-*   **940 Post-1995:** The fuel hanger easily accepts a modern $255\,\text{L/hr}$ upgrade pump (e.g., Walbro GSS342).
+
+
+
+
+*   **940 Post-1995:** The fuel pickup easily accepts a modern $255\,\text{L/hr}$ pump (e.g., Walbro GSS342) since they are the same size.
 *   **K-Jetronic Conversions:** Utilize a conventional return-line regulator (e.g., $3.0\,\text{bar}$). Do not use a returnless setup, as the massive flow volume of a vane pump will overwhelm it.
 
 ### 7.3. Design Rationale
 
 The 24P V1 injector drivers are discrete, un-limited MOSFETs. The silicon itself is rated far higher than the board can dissipate — the practical on-board limit is about $5\,\text{A}$ peak per channel, set by PCB thermal constraints (see the [output summary table](../../../products/motorsteuergerat-24p-v1/reference.md#44-output-summary-table)). Two high-impedance EV1 injectors wired in parallel draw approximately $2\,\text{A}$, operating well within the thermal limits of the board.
+
 
 We retain K-Jetronic vane pumps on converted cars because their extreme flow headroom is highly beneficial for forced induction. The twin-pump architecture of the 240 prevents cavitation during high-G cornering—a physical reality that no software logic can correct. 
 
@@ -229,9 +244,6 @@ We retain K-Jetronic vane pumps on converted cars because their extreme flow hea
 
 
 ## 8. Ignition
-
-!!! standpunkt "High cylinder pressures demand high spark energy"
-    Relying on a 30-year-old distributor cap and rotor for forced induction is a liability. Wasted spark removes physical wear items and delivers consistent ignition energy at high RPM.
 
 ### 8.1. Quick Scan
 
