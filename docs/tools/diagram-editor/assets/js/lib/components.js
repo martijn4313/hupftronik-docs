@@ -23,6 +23,31 @@ function relayArt(spdt){
   return s;
 }
 
+/* ECU pin layout: fixed 20px pitch so every pin lands on the snap grid */
+export function ecuHeight(pinCount=4){
+  return Math.max(80, (pinCount-1)*20 + 40);
+}
+function ecuPins(pinCount=4){
+  const h=ecuHeight(pinCount);
+  const pins=[];
+  if(pinCount<=0) return pins;
+  if(pinCount===1) return [{id:'p0',label:'1',x:0,y:h/2}];
+  const start=(h-(pinCount-1)*20)/2;
+  for(let i=0;i<pinCount;i++){
+    pins.push({id:'p'+i,label:''+(i+1),x:0,y:start+i*20});
+  }
+  return pins;
+}
+
+/* ignition key positions and which terminals conduct in each */
+export const IGN_POSITIONS = ['OFF','ACC','ON','START'];
+export const IGN_CONDUCT = [
+  [],
+  [['30','acc']],
+  [['30','acc'],['30','15']],
+  [['30','15'],['30','50']]
+];
+
 export const LIB = {
   battery:{name:'Battery',prefix:'BAT',w:80,h:60,
     pins:[{id:'plus',label:'+',x:20,y:0},{id:'minus',label:'−',x:60,y:0}],
@@ -55,12 +80,34 @@ export const LIB = {
     draw:()=>relayArt(true)},
   switch:{name:'Switch',prefix:'S',w:60,h:40,
     pins:[{id:'1',label:'1',x:0,y:20},{id:'2',label:'2',x:60,y:20}],
-    draw:()=>`
+    draw:c=>`
       <line x1="0" y1="20" x2="14" y2="20" stroke="#d7dde3" stroke-width="2"/>
       <line x1="46" y1="20" x2="60" y2="20" stroke="#d7dde3" stroke-width="2"/>
       <circle cx="14" cy="20" r="3" fill="#1c2024" stroke="#d7dde3" stroke-width="2"/>
       <circle cx="46" cy="20" r="3" fill="#1c2024" stroke="#d7dde3" stroke-width="2"/>
-      <line x1="16" y1="19" x2="43" y2="4" stroke="#d7dde3" stroke-width="2"/>`},
+      ${c.on
+        ? `<line x1="17" y1="20" x2="43" y2="20" stroke="#66bb6a" stroke-width="2.4"/>`
+        : `<line x1="16" y1="19" x2="43" y2="4" stroke="#d7dde3" stroke-width="2"/>`}`},
+  ignition:{name:'Ignition Switch',prefix:'S',w:80,h:60,
+    pins:[{id:'acc',label:'ACC',x:10,y:0},{id:'15',label:'15',x:40,y:0},{id:'50',label:'50',x:70,y:0},
+          {id:'30',label:'30',x:40,y:60}],
+    draw:c=>{
+      const pos=Math.max(0,Math.min(3,+c.keyPos||0));
+      const ang=[-50,-17,17,50][pos]*Math.PI/180;
+      const kx=40+Math.sin(ang)*8.5, ky=30-Math.cos(ang)*8.5;
+      return `
+      <line x1="10" y1="0" x2="10" y2="10" stroke="#d7dde3" stroke-width="2"/>
+      <line x1="40" y1="0" x2="40" y2="10" stroke="#d7dde3" stroke-width="2"/>
+      <line x1="70" y1="0" x2="70" y2="10" stroke="#d7dde3" stroke-width="2"/>
+      <line x1="40" y1="50" x2="40" y2="60" stroke="#f9a825" stroke-width="2"/>
+      <rect x="0" y="10" width="80" height="40" rx="5" fill="#2b2620" stroke="#fdd835" stroke-width="2"/>
+      <circle cx="40" cy="30" r="11" fill="#1c2024" stroke="#fdd835" stroke-width="1.6"/>
+      <line x1="40" y1="30" x2="${kx.toFixed(1)}" y2="${ky.toFixed(1)}" stroke="#fdd835" stroke-width="2.4" stroke-linecap="round"/>
+      <circle cx="40" cy="30" r="2" fill="#fdd835"/>
+      <g transform="rotate(${-(c.r||0)}, 65, 30)">
+        <text x="65" y="33" fill="#fdd835" font-size="7" text-anchor="middle" font-family="inherit">${IGN_POSITIONS[pos]}</text>
+      </g>`;
+    }},
   motor:{name:'Motor / fan',prefix:'M',w:60,h:60,
     pins:[{id:'1',label:'+',x:30,y:0},{id:'2',label:'−',x:30,y:60}],
     draw:c=>`
@@ -85,28 +132,16 @@ export const LIB = {
       <line x1="44" y1="16" x2="16" y2="44" stroke="#fdd835" stroke-width="2"/>`},
   ecu:{name:'ECU Block',prefix:'A',w:120,h:60,
     pins:[], // pins will be generated dynamically based on pinCount
-    getPin:(idx)=>({id:'p'+idx,label:''+idx,x:0,y:20}),
-    getHeight:(pinCount=4)=>{
-      return Math.max(80, 20 + pinCount * 16 + 20);
-    },
-    getPins:(pinCount=4)=>{
-      const h = Math.max(80, 20 + pinCount * 16 + 20);
-      const pins=[];
-      if(pinCount===0) return pins;
-      if(pinCount===1){
-        pins.push({id:'p0',label:'1',x:0,y:h/2});
-      } else {
-        const spacing = (h - 40) / (pinCount - 1);
-        for(let i=0;i<pinCount;i++){
-          pins.push({id:'p'+i,label:''+(i+1),x:0,y:20+i*spacing});
-        }
-      }
-      return pins;
-    },
+    getHeight:ecuHeight,
+    getPins:ecuPins,
     draw:c=>{
       const pinCount=c.pinCount||4;
-      const h=Math.max(80, 20 + pinCount * 16 + 20);
+      const h=ecuHeight(pinCount);
+      const pins=(c.pins&&c.pins.length)?c.pins:ecuPins(pinCount);
+      const stubs=pins.map(p=>
+        `<line x1="0" y1="${p.y}" x2="10" y2="${p.y}" stroke="#d7dde3" stroke-width="2"/>`).join('');
       return `
+        ${stubs}
         <rect x="10" y="0" width="110" height="${h}" rx="3" fill="#241f30" stroke="#9575cd" stroke-width="2"/>
         <g transform="rotate(${-(c.r||0)}, 65, ${h/2})">
           <text x="65" y="${h/2+4}" fill="#b39ddb" font-size="12" text-anchor="middle" font-family="inherit">ECU</text>

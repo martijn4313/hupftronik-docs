@@ -17,6 +17,10 @@ export let state = {
   cascade: 0
 };
 
+/* late-bound callbacks, set by the interactions layer, so the render
+   layer can trigger a re-simulation without a circular import */
+export const hooks = { simulate:null };
+
 export function comp(id){
   return state.comps.find(c=>c.id===id);
 }
