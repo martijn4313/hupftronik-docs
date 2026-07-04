@@ -1,7 +1,7 @@
 /* ============ rendering layer ============ */
 
 import { DIN, GAUGES } from './constants.js';
-import { LIB, ecuHeight, IGN_POSITIONS } from './components.js';
+import { LIB, ecuHeight, IGN_POSITIONS, hasPins } from './components.js';
 import { state, esc, comp, uid, hooks } from './state.js';
 import { pinPos, pinAxis, textAnchor, textOffset, wirePath, routePoints, pinTextAnchor, pinTextOffset } from './geometry.js';
 
@@ -102,6 +102,8 @@ export function renderComps(){
       if(!c.pins||!Array.isArray(c.pins)){
         c.pins=d.getPins(c.pinCount||4);
       }
+    } else if(d.getPins && !hasPins(c.pins)){
+      c.pins=d.getPins(c.variant);
     }
     
     // Calculate component dimensions
@@ -315,7 +317,7 @@ export function renderProps(){
         <select id="fVariant">${d.variants.map(v=>
           `<option value="${v.id}" ${v.id===selected?'selected':''}>${esc(v.name)}</option>`).join('')}</select></div>
       ${selected==='custom'?`<div class="field"><label for="fVariantCustom">Custom part number</label>
-        <input type="text" id="fVariantCustom" value="${esc(c.value)}" placeholder="e.g. Bosch 0227200202"></div>`:''}`;
+        <input type="text" id="fVariantCustom" value="${esc(c.value)}" placeholder="e.g. Bosch 0 227 100 200"></div>`:''}`;
     }
 
     let noteControls='';
@@ -377,7 +379,12 @@ export function renderProps(){
       fVariant.onchange=e=>{
         c.variant=e.target.value;
         const v=d.variants.find(v=>v.id===c.variant);
-        if(c.variant!=='custom') c.value=v.name;
+        if(c.variant!=='custom'){
+          c.value=v.name;
+          if(d.getPins) c.pins=d.getPins(c.variant);
+        } else if(d.getPins && !hasPins(c.pins)){
+          c.pins=d.getPins(c.variant);
+        }
         render();
       };
     }
