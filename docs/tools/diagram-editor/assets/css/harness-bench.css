@@ -116,6 +116,7 @@ button.danger:hover{border-color:var(--danger);color:var(--danger)}
 .pin-row{display:flex;gap:4px;margin-bottom:4px}
 #props .pin-row input{flex:1;min-width:0;width:auto}
 #props .pin-row select{width:72px;flex:none}
+.pin-row-fixed{flex:1;padding:5px 6px;color:var(--ink-dim);font-size:12px;letter-spacing:.04em}
 .swatchbar{display:flex;flex-wrap:wrap;gap:4px;margin-top:4px}
 .swatch{
   width:22px;height:22px;border-radius:4px;border:2px solid transparent;cursor:pointer;padding:0;

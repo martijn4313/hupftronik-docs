@@ -1,13 +1,15 @@
 /* ============ geometry and coordinate helpers ============ */
 
-import { LIB, ecuHeight } from './components.js';
+import { LIB } from './components.js';
 import { state } from './state.js';
 
 function compSize(c,d=LIB[c.type]){
   let w=d.w, h=d.h;
-  if(c.type==='ecu'){
-    const pinCount = (c.pins && c.pins.length) || c.pinCount || 4;
-    h = ecuHeight(pinCount);
+  if(d.getHeight){
+    // components with a configurable pin count (ECU's pinCount, Schildknappe's
+    // ioCount) — read the count field directly rather than c.pins.length, since
+    // Schildknappe's pins array also includes fixed CAN/power pins outside that count
+    h = d.getHeight(c.ioCount ?? c.pinCount ?? 4);
   }
   if(c.type==='note'){
     w = Math.max(80, +c.noteW || d.w);
@@ -66,6 +68,7 @@ export function pinTextAnchor(d,p,c){
   /* keep labels clear of the pin ring (r≈4.5) and the wire stub:
      side pins sit above the stub, top/bottom pins sit beside it */
   if(c && c.type==='ecu') return {x:16,y:p.y+3,anchor:'start'};
+  if(c && c.type==='schildknappe' && p.io) return {x:16,y:p.y+3,anchor:'start'};
   const nearLeft = p.x <= 4;
   const nearRight = p.x >= size.w - 4;
   const nearTop = p.y <= 4;

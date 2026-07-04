@@ -39,6 +39,27 @@ function ecuPins(pinCount=4){
   return pins;
 }
 
+/* Schildknappe CAN node: 4 fixed protocol pins along the top edge
+   (CANH/CANL/VBAT/GND) plus a configurable column of IO pins down the
+   left edge, reusing the ECU pin-pitch formula for that column so it
+   stays on the snap grid too. SKN_TOP reserves room for the top row. */
+const SKN_TOP = 20;
+export function sknHeight(ioCount=4){
+  return SKN_TOP + ecuHeight(ioCount);
+}
+function sknPins(ioCount=4){
+  const pins = [
+    {id:'canh', label:'CANH', x:20, y:0},
+    {id:'canl', label:'CANL', x:40, y:0},
+    {id:'vbat', label:'VBAT', x:70, y:0},
+    {id:'gnd',  label:'GND',  x:90, y:0}
+  ];
+  for(const p of ecuPins(ioCount)){
+    pins.push({id:'io'+p.id.slice(1), label:'IO'+p.label, x:0, y:p.y+SKN_TOP, io:true});
+  }
+  return pins;
+}
+
 /* ignition key positions and which terminals conduct in each */
 export const IGN_POSITIONS = ['OFF','ACC','ON','START'];
 export const IGN_CONDUCT = [
@@ -289,6 +310,35 @@ export const LIB = {
         </g>`;
     },
     value:''},
+  schildknappe:{name:'Schildknappe (CAN Node)',prefix:'SKN',w:110,h:80,
+    pins:[], // pins will be generated dynamically based on ioCount
+    getHeight:sknHeight,
+    getPins:sknPins,
+    variants:[
+      {id:'generic',name:'Generic CAN I/O node'},
+      {id:'schildknappe-v1',name:'Schildknappe v1 (planned)'},
+      {id:'custom',name:'Custom…'}],
+    valBase:{x:118,y:70}, valColor:'#26c6da', valSize:8, valAlign:'start',
+    value:'Generic CAN I/O node',
+    draw:c=>{
+      const ioCount=c.ioCount||4;
+      const h=sknHeight(ioCount);
+      const pins=(c.pins&&c.pins.length)?c.pins:sknPins(ioCount);
+      const ioStubs=pins.filter(p=>p.io).map(p=>
+        `<line x1="0" y1="${p.y}" x2="10" y2="${p.y}" stroke="#d7dde3" stroke-width="2"/>`).join('');
+      return `
+        <line x1="20" y1="0" x2="20" y2="${SKN_TOP}" stroke="#4dd0e1" stroke-width="2"/>
+        <line x1="40" y1="0" x2="40" y2="${SKN_TOP}" stroke="#4dd0e1" stroke-width="2"/>
+        <line x1="24" y1="6" x2="36" y2="14" stroke="#4dd0e1" stroke-width="1"/>
+        <line x1="24" y1="14" x2="36" y2="6" stroke="#4dd0e1" stroke-width="1"/>
+        <line x1="70" y1="0" x2="70" y2="${SKN_TOP}" stroke="#f9a825" stroke-width="2"/>
+        <line x1="90" y1="0" x2="90" y2="${SKN_TOP}" stroke="#9e9e9e" stroke-width="2"/>
+        ${ioStubs}
+        <rect x="10" y="${SKN_TOP}" width="100" height="${h-SKN_TOP}" rx="3" fill="#122024" stroke="#26c6da" stroke-width="2"/>
+        <g transform="rotate(${-(c.r||0)}, 60, ${SKN_TOP+(h-SKN_TOP)/2})">
+          <text x="60" y="${SKN_TOP+(h-SKN_TOP)/2+4}" fill="#26c6da" font-size="11" text-anchor="middle" font-family="inherit">SKN</text>
+        </g>`;
+    }},
   connector:{name:'Connector',prefix:'C',w:40,h:20,
     pins:[{id:'a',label:'a',x:0,y:10},{id:'b',label:'b',x:40,y:10}],
     draw:()=>`

@@ -37,6 +37,7 @@ export function buildPalette(){
   const groups=[
     ['Power', ['battery','fuse','ground','splice']],
     ['Control', ['relay','relay5','switch','ignition','ecu']],
+    ['Networking', ['schildknappe']],
     ['Ignition', ['ignAmp1','ignAmp2','coil','coil2x2','cop','distributor','sparkplug']],
     ['Electronics', ['resistor','diode','capacitor','npn','pnp','nchannel','pchannel']],
     ['Engine Management', ['injector', 'sensor2', 'sensor3', 'o2sensor3', 'o2sensor4', 'o2sensor5', 'valve', 'idleValve2', 'idleValve3', 'idleStepper', 'idleWax']],
@@ -57,6 +58,9 @@ export function addComp(type){
   
   // Initialize ECU with default pinCount
   const ecuProps=type==='ecu'?{pinCount:4,pinStates:{}}:{};
+
+  // Initialize Schildknappe with default IO count
+  const sknProps=type==='schildknappe'?{ioCount:4,pinStates:{}}:{};
 
   // Interactive-mode defaults
   const switchProps=type==='switch'?{on:false}:{};
@@ -79,17 +83,19 @@ export function addComp(type){
     x:snap(state.view.x+state.view.w/2-d.w/2+(state.cascade%5)*24),
     y:snap(state.view.y+state.view.h/2-d.h/2+(state.cascade%5)*24),
     ...ecuProps,
+    ...sknProps,
     ...switchProps,
     ...ignProps,
     ...variantProps,
     ...noteProps
   };
-  
-  // Generate pins for ECU
-  if(type==='ecu'){
-    c.pins=d.getPins(c.pinCount);
+
+  // Generate pins for components with a configurable pin count
+  if(d.getPins){
+    const count = type==='schildknappe' ? c.ioCount : c.pinCount;
+    c.pins = d.getPins(count);
   }
-  
+
   state.cascade++;
   state.comps.push(c);
   state.sel={kind:'comp',id:c.id};
@@ -161,12 +167,15 @@ export function simulate(){
   for(const c of state.comps){
     if(c.type==='battery'){ plusStarts.push(key(c.id,'plus')); minusStarts.push(key(c.id,'minus')); }
     if(c.type==='ground') minusStarts.push(key(c.id,'g'));
-    if(c.type==='ecu'&&c.pinStates){
+    if((c.type==='ecu'||c.type==='schildknappe')&&c.pinStates){
       for(const [pid,st] of Object.entries(c.pinStates)){
         if(st==='12v') plusStarts.push(key(c.id,pid));
         if(st==='gnd') minusStarts.push(key(c.id,pid));
       }
     }
+    // Schildknappe's GND is a hardwired protocol pin, not a general-purpose
+    // one — it always sinks to ground, unlike its configurable IO pins
+    if(c.type==='schildknappe') minusStarts.push(key(c.id,'gnd'));
   }
 
   const pairEdges=dyn=>{
@@ -350,8 +359,12 @@ export function setupSVGHandlers(){
     const compId=+pin.dataset.comp, pinId=pin.dataset.pin;
     if(!state.pending && state.trace){
       const c=comp(compId);
-      if(c && c.type==='ecu'){
-        /* interactive mode: clicking an ECU pin cycles off → +12V → GND */
+      const pinObj = c && (c.pins||[]).find(p=>p.id===pinId);
+      const drivable = c && (c.type==='ecu' || (c.type==='schildknappe' && pinObj && pinObj.io));
+      if(drivable){
+        /* interactive mode: clicking a drivable pin cycles off → +12V → GND
+           (ECU: any pin; Schildknappe: only its configurable IO pins — the
+           fixed CANH/CANL/VBAT/GND protocol pins are inert to clicks) */
         c.pinStates=c.pinStates||{};
         const cur=c.pinStates[pinId]||'';
         const next=cur===''?'12v':(cur==='12v'?'gnd':'');
