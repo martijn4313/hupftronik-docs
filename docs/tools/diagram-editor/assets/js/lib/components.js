@@ -43,6 +43,14 @@ function clonePins(pins){
   return pins.map(pin=>({ ...pin }));
 }
 
+export function hasPins(pins){
+  return Array.isArray(pins) && pins.length>0;
+}
+
+export function shouldApplyPresetPins(c,d){
+  return !!d?.getPins && (!hasPins(c.pins) || c.variant!=='custom');
+}
+
 /* ignition key positions and which terminals conduct in each */
 export const IGN_POSITIONS = ['OFF','ACC','ON','START'];
 export const IGN_CONDUCT = [

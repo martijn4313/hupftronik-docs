@@ -1,7 +1,7 @@
 /* ============ rendering layer ============ */
 
 import { DIN, GAUGES } from './constants.js';
-import { LIB, ecuHeight, IGN_POSITIONS } from './components.js';
+import { LIB, ecuHeight, IGN_POSITIONS, hasPins } from './components.js';
 import { state, esc, comp, uid, hooks } from './state.js';
 import { pinPos, pinAxis, textAnchor, textOffset, wirePath, routePoints, pinTextAnchor, pinTextOffset } from './geometry.js';
 
@@ -102,7 +102,7 @@ export function renderComps(){
       if(!c.pins||!Array.isArray(c.pins)){
         c.pins=d.getPins(c.pinCount||4);
       }
-    } else if(d.getPins && (!c.pins || !Array.isArray(c.pins) || !c.pins.length)){
+    } else if(d.getPins && !hasPins(c.pins)){
       c.pins=d.getPins(c.variant);
     }
     
@@ -382,7 +382,7 @@ export function renderProps(){
         if(c.variant!=='custom'){
           c.value=v.name;
           if(d.getPins) c.pins=d.getPins(c.variant);
-        } else if(d.getPins && (!c.pins || !c.pins.length)){
+        } else if(d.getPins && !hasPins(c.pins)){
           c.pins=d.getPins(c.variant);
         }
         render();

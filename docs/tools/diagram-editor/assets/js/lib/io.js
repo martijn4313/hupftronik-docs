@@ -1,7 +1,7 @@
 /* ============ IO, export, and modal layer ============ */
 
 import { DIN, DIN_MERMAID } from './constants.js';
-import { LIB, ecuHeight, IGN_POSITIONS } from './components.js';
+import { LIB, ecuHeight, IGN_POSITIONS, shouldApplyPresetPins } from './components.js';
 import { state, esc, comp } from './state.js';
 import { render, svg, wiresL, compsL, renderWires, renderComps, applyView } from './render.js';
 
@@ -54,7 +54,7 @@ export function applyLoadedData(j){
       // overwriting it with the first preset's name
       c.variant='custom';
     }
-    if(LIB[c.type]?.getPins && (!Array.isArray(c.pins) || !c.pins.length || c.variant!=='custom')){
+    if(shouldApplyPresetPins(c,LIB[c.type])){
       c.pins=LIB[c.type].getPins(c.variant);
     }
   });
