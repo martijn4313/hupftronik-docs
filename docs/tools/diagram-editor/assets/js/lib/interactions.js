@@ -249,7 +249,11 @@ export function simulate(){
       if(on) next.energized[r.id]=true;
     }
     for(const a of amps){
-      const powered = plus.seen[key(a.id,'15')]&&minus.seen[key(a.id,'31')];
+      /* BIP373 is a bare transistor with no VCC pin — powered through the coil load */
+      const isBip373 = a.type==='ignAmp1' && a.variant==='bip373';
+      const powered = isBip373
+        ? minus.seen[key(a.id,'31')]
+        : plus.seen[key(a.id,'15')]&&minus.seen[key(a.id,'31')];
       const ch={};
       if(a.type==='ignAmp1'){
         if(powered&&plus.seen[key(a.id,'in')]) ch.a=true;
@@ -270,7 +274,8 @@ export function simulate(){
         if(plus.seen[key(t.id,'15')]&&minus.seen[key(t.id,'1a')]) ch.a=true;
         if(plus.seen[key(t.id,'15')]&&minus.seen[key(t.id,'1b')]) ch.b=true;
       } else if(t.type==='copSmart'){
-        /* smart COP fires when supply, GND and signal are all present */
+        /* smart COP has integrated IGBT: fires when supply (15), GND (31),
+           and logic signal (in) are all simultaneously present */
         if(plus.seen[key(t.id,'15')]&&minus.seen[key(t.id,'31')]&&plus.seen[key(t.id,'in')]) ch.a=true;
       } else {
         if(plus.seen[key(t.id,'15')]&&minus.seen[key(t.id,'1')]) ch.a=true;

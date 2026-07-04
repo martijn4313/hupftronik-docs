@@ -342,6 +342,10 @@ export const LIB = {
         /* Bosch 0 221 504 100: DIN 15=supply, 1=signal, 31=GND */
         return clonePins([{id:'15',label:'15',x:5,y:0},{id:'in',label:'1',x:20,y:0},
                           {id:'31',label:'31',x:35,y:0},{id:'4',label:'4',x:20,y:60}]);
+      if(variant==='ngk-u5055')
+        /* NGK U5055 3-pin connector: A=+12V, B=Signal, C=GND */
+        return clonePins([{id:'15',label:'A',x:5,y:0},{id:'in',label:'B',x:20,y:0},
+                          {id:'31',label:'C',x:35,y:0},{id:'4',label:'4',x:20,y:60}]);
       return clonePins([{id:'15',label:'15',x:5,y:0},{id:'in',label:'IN',x:20,y:0},
                         {id:'31',label:'31',x:35,y:0},{id:'4',label:'4',x:20,y:60}]);
     },
