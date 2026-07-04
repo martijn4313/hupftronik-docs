@@ -79,6 +79,10 @@ nav:
      - Conversion Guides:
         - MegaSquirt to Motorsteuergerät 24P V1: guides/conversions/ms-to-24p.md
 
+  - Tools:
+    - Overview: tools/index.md
+    - Wiring Diagram Designer: tools/diagram-editor/index.html
+
   - About:
     - Our Philosophy: about/philosophy.md
     - Open-Source & Community: about/community.md

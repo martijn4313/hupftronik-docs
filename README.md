@@ -26,7 +26,9 @@ Pushes to `main` are built and published to GitHub Pages automatically by
 
 ## Repository layout
 
-- `docs/` — all page content (Markdown), organized as products / guides / about
+- `docs/` — all page content (Markdown), organized as products / guides / tools / about
+- `docs/tools/diagram-editor/` — Harness Bench, a browser-based wiring diagram designer (standalone
+  HTML/CSS/JS, no build step)
 - `includes/` — reusable snippet files pulled into pages via `pymdownx.snippets`
   (`--8<-- "filename.md"`)
 - `mkdocs.yml` — site configuration and navigation tree
