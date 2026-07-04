@@ -66,6 +66,18 @@ button.danger:hover{border-color:var(--danger);color:var(--danger)}
 .pal-item:hover{border-color:var(--amber-dim)}
 .pal-item svg{pointer-events:none;display:block}
 
+/* collapsible panel edge tabs */
+.panel-handle{
+  flex:none;width:16px;align-self:stretch;padding:0;
+  background:var(--panel);color:var(--ink-dim);cursor:pointer;
+  border:none;border-left:1px solid var(--panel-edge);border-right:1px solid var(--panel-edge);
+  font-family:var(--mono);font-size:13px;line-height:1;
+  display:flex;align-items:center;justify-content:center;
+}
+.panel-handle:hover{color:var(--amber);border-color:var(--amber-dim)}
+.panel-handle:focus-visible{outline:2px solid var(--amber);outline-offset:-2px}
+#palette.collapsed,#props.collapsed{display:none}
+
 /* canvas */
 #canvasWrap{flex:1;position:relative;min-width:0}
 #canvas{width:100%;height:100%;display:block;background:var(--mat-deep);cursor:crosshair;touch-action:none}
@@ -140,8 +152,11 @@ button.danger:hover{border-color:var(--danger);color:var(--danger)}
 #modal h3{color:var(--amber);letter-spacing:.12em;font-size:12px;text-transform:uppercase;font-weight:400}
 
 @media (max-width:760px){
-  #props{position:absolute;right:0;top:0;bottom:0;z-index:5;box-shadow:-6px 0 18px rgba(0,0,0,.4)}
+  #props{position:absolute;right:0;top:0;bottom:0;z-index:5;box-shadow:-6px 0 18px rgba(0,0,0,.4);padding-right:26px}
   #palette{width:104px}
+  /* props becomes an overlay here, so its edge tab must float above it
+     (rather than sit in normal flow) to stay reachable for closing it */
+  #propsHandle{position:relative;z-index:6}
 }
 @media (prefers-reduced-motion:no-preference){
   .pin{transition:r .1s}
