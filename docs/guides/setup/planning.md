@@ -5,6 +5,12 @@ An ECU can only manage what you have planned for. Before you flash firmware, ter
 
 Every project differs. Each category below has more than one valid solution, and your engine, goals, and budget determine which is right. Work through them in order and **document your choices**. That document becomes the reference you wire and tune against throughout commissioning.
 
+!!! tip "Draw your harness before you wire it"
+    [Harness Bench](../../tools/index.md) is a browser-based wiring diagram designer included in
+    this documentation site. Use it to map out your harness as you work through the sections below.
+    When you are done, export a Mermaid diagram to embed in your own project notes, or save a JSON
+    file as the living source of your harness design.
+
 !!! note "Watch your I/O budget"
     The Motorsteuergerät 24P V1 has a finite number of inputs and outputs. Tally your sensors and actuators against the [pinout documentation](../../products/motorsteuergerat-24p-v1/24p_v1_overview.md#3-io-overview) as you plan. If a build exceeds the onboard I/O—a full sensor suite with an electronic throttle body, for example—a CAN expander node such as the [Schildknappe](../../products/schildknappe/index.md) (a separate Hüpftronik product for offloading extra sensors and outputs onto the CAN bus, **currently in development**) will eventually be able to absorb the overflow. Until it ships, treat the onboard I/O count as a hard limit.
 
