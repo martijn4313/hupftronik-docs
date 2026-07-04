@@ -62,6 +62,9 @@ export function addComp(type){
   const switchProps=type==='switch'?{on:false}:{};
   const ignProps=type==='ignition'?{keyPos:0}:{};
 
+  // Default variant for parts with a model/part-number dropdown
+  const variantProps=d.variants?{variant:d.variants[0].id}:{};
+
   // Initialize Note with default properties
   const noteProps=type==='note'
     ? {noteText:'Note',bgColor:'#1e1a2e',textColor:'#b39ddb',hAlign:'center',vAlign:'middle',noteW:200,noteH:60,noteFont:'inherit',noteFontSize:11}
@@ -78,6 +81,7 @@ export function addComp(type){
     ...ecuProps,
     ...switchProps,
     ...ignProps,
+    ...variantProps,
     ...noteProps
   };
   

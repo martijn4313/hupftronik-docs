@@ -307,6 +307,17 @@ export function renderProps(){
           `<option value="${i}" ${(c.keyPos||0)===i?'selected':''}>${pos}</option>`).join('')}</select></div>`;
     }
     
+    let variantControls='';
+    if(d.variants){
+      const selected = c.variant || d.variants[0].id;
+      variantControls=`
+      <div class="field"><label for="fVariant">Variant / part number</label>
+        <select id="fVariant">${d.variants.map(v=>
+          `<option value="${v.id}" ${v.id===selected?'selected':''}>${esc(v.name)}</option>`).join('')}</select></div>
+      ${selected==='custom'?`<div class="field"><label for="fVariantCustom">Custom part number</label>
+        <input type="text" id="fVariantCustom" value="${esc(c.value)}" placeholder="e.g. Bosch 0227200202"></div>`:''}`;
+    }
+
     let noteControls='';
     if(c.type==='note'){
       noteControls=`
@@ -347,8 +358,9 @@ export function renderProps(){
       <div class="desig">${esc(c.des)} <span style="color:var(--ink-dim);font-size:11px">${d.name}</span></div>
       ${c.type!=='note'?`<div class="field"><label for="fLabel">Label</label>
         <input type="text" id="fLabel" value="${esc(c.label)}" placeholder="cooling fan relay"></div>`:''}
-      ${'value' in c && d.value!==undefined?`<div class="field"><label for="fValue">Value / rating</label>
+      ${'value' in c && d.value!==undefined && !d.variants?`<div class="field"><label for="fValue">Value / rating</label>
         <input type="text" id="fValue" value="${esc(c.value)}"></div>`:''}
+      ${variantControls}
       ${ecuControls}
       ${switchControls}
       ${ignControls}
@@ -360,6 +372,19 @@ export function renderProps(){
       <p class="hint">Wires attached to this part are deleted with it.</p>`;
     if(c.type!=='note') document.querySelector('#fLabel').oninput=e=>{c.label=e.target.value;renderComps();};
     const fv=document.querySelector('#fValue'); if(fv) fv.oninput=e=>{c.value=e.target.value;renderComps();};
+    const fVariant=document.querySelector('#fVariant');
+    if(fVariant){
+      fVariant.onchange=e=>{
+        c.variant=e.target.value;
+        const v=d.variants.find(v=>v.id===c.variant);
+        if(c.variant!=='custom') c.value=v.name;
+        render();
+      };
+    }
+    const fVariantCustom=document.querySelector('#fVariantCustom');
+    if(fVariantCustom){
+      fVariantCustom.oninput=e=>{c.value=e.target.value;renderComps();};
+    }
     const fpc=document.querySelector('#fPinCount');
     if(fpc){
       fpc.oninput=e=>{

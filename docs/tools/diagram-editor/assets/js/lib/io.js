@@ -48,6 +48,12 @@ export function applyLoadedData(j){
       c.noteFont = c.noteFont || 'inherit';
       c.noteFontSize = Math.max(8, +c.noteFontSize || 11);
     }
+    if(LIB[c.type]?.variants && !c.variant){
+      // older saves predate the variant dropdown — treat their existing
+      // freeform value text as a custom entry rather than silently
+      // overwriting it with the first preset's name
+      c.variant='custom';
+    }
   });
 
   state.sel=null;state.pending=null;state.pendingWp=[];state.connectCandidate=null;state.trace=null;
@@ -204,7 +210,7 @@ export function buildMermaid(){
       case 'sensor2': case 'sensor3': case 'o2sensor3': case 'o2sensor4': case 'o2sensor5': return `${D}(["📶 ${c.des}${lbl?'<br/>'+lbl:''}"]):::module`;
       case 'idleValve2': case 'idleValve3': case 'idleStepper': case 'idleWax': return `${D}(("⚙️ ${c.des}${lbl?'<br/>'+lbl:''}")):::load`;
       case 'ublock': return `${D}["${c.des}${lbl?'<br/>'+lbl:''}"]:::module`;
-      case 'ignAmp1': case 'ignAmp2': return `${D}["⚡ ${c.des}${lbl?'<br/>'+lbl:''}"]:::module`;
+      case 'ignAmp1': case 'ignAmp2': return `${D}["⚡ ${c.des}${val?' '+val:''}${lbl?'<br/>'+lbl:''}"]:::module`;
       case 'coil': case 'coil2x2': case 'cop': return `${D}["⚡ ${c.des}${val?' '+val:''}${lbl?'<br/>'+lbl:''}"]:::power`;
       case 'distributor': return `${D}["🔀 ${c.des}${lbl?'<br/>'+lbl:''}"]:::conn`;
       case 'sparkplug': return `${D}(("⚡ ${c.des}${lbl?'<br/>'+lbl:''}")):::load`;
