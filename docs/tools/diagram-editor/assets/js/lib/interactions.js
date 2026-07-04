@@ -88,6 +88,8 @@ export function addComp(type){
   // Generate pins for ECU
   if(type==='ecu'){
     c.pins=d.getPins(c.pinCount);
+  } else if(d.getPins){
+    c.pins=d.getPins(c.variant);
   }
   
   state.cascade++;

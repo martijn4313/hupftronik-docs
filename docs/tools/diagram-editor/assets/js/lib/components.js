@@ -39,6 +39,10 @@ function ecuPins(pinCount=4){
   return pins;
 }
 
+function clonePins(pins){
+  return pins.map(pin=>({ ...pin }));
+}
+
 /* ignition key positions and which terminals conduct in each */
 export const IGN_POSITIONS = ['OFF','ACC','ON','START'];
 export const IGN_CONDUCT = [
@@ -111,9 +115,16 @@ export const LIB = {
   ignAmp1:{name:'Power Stage (1-ch)',prefix:'V',w:80,h:60,
     pins:[{id:'in',label:'IN',x:0,y:30},{id:'15',label:'15',x:40,y:0},
           {id:'31',label:'31',x:40,y:60},{id:'1',label:'1',x:80,y:30}],
+    getPins:(variant='generic')=>clonePins(
+      variant==='bosch-0227100124'
+        ? [{id:'in',label:'7',x:0,y:30},{id:'15',label:'15',x:40,y:0},
+           {id:'31',label:'31',x:40,y:60},{id:'1',label:'1',x:80,y:30}]
+        : [{id:'in',label:'IN',x:0,y:30},{id:'15',label:'15',x:40,y:0},
+           {id:'31',label:'31',x:40,y:60},{id:'1',label:'1',x:80,y:30}]
+    ),
     variants:[
       {id:'generic',name:'Generic single-channel'},
-      {id:'bosch-0227100',name:'Bosch 0227100-series (single)'},
+      {id:'bosch-0227100124',name:'Bosch 0 227 100 124'},
       {id:'custom',name:'Custom…'}],
     valBase:{x:88,y:34}, valColor:'#ff8a65', valSize:8, valAlign:'start',
     value:'Generic single-channel',
@@ -132,9 +143,18 @@ export const LIB = {
     pins:[{id:'in1',label:'IN1',x:0,y:30},{id:'in2',label:'IN2',x:0,y:50},
           {id:'15',label:'15',x:40,y:0},{id:'31',label:'31',x:40,y:80},
           {id:'1a',label:'1a',x:80,y:30},{id:'1b',label:'1b',x:80,y:50}],
+    getPins:(variant='generic')=>clonePins(
+      variant==='bosch-0227100200'
+        ? [{id:'in1',label:'7',x:0,y:30},{id:'in2',label:'6',x:0,y:50},
+           {id:'15',label:'15',x:40,y:0},{id:'31',label:'31',x:40,y:80},
+           {id:'1a',label:'1',x:80,y:30},{id:'1b',label:'2',x:80,y:50}]
+        : [{id:'in1',label:'IN1',x:0,y:30},{id:'in2',label:'IN2',x:0,y:50},
+           {id:'15',label:'15',x:40,y:0},{id:'31',label:'31',x:40,y:80},
+           {id:'1a',label:'1a',x:80,y:30},{id:'1b',label:'1b',x:80,y:50}]
+    ),
     variants:[
       {id:'generic',name:'Generic twin-channel'},
-      {id:'bosch-0227200',name:'Bosch 0227200-series (twin)'},
+      {id:'bosch-0227100200',name:'Bosch 0 227 100 200'},
       {id:'custom',name:'Custom…'}],
     valBase:{x:88,y:44}, valColor:'#ff8a65', valSize:8, valAlign:'start',
     value:'Generic twin-channel',
@@ -157,11 +177,13 @@ export const LIB = {
       <path d="M42 60 h5 v-8 h5 v8 h5" fill="none" stroke="#ff8a65" stroke-width="1.5"/>`},
   coil:{name:'Ignition Coil',prefix:'T',w:40,h:60,
     pins:[{id:'15',label:'15',x:10,y:0},{id:'1',label:'1',x:30,y:0},{id:'4',label:'4',x:20,y:60}],
+    getPins:(variant='generic')=>clonePins(
+      [{id:'15',label:'15',x:10,y:0},{id:'1',label:'1',x:30,y:0},{id:'4',label:'4',x:20,y:60}]
+    ),
     variants:[
       {id:'generic',name:'Generic 12V canister'},
-      {id:'bosch-blue',name:'Bosch "Blue" performance'},
-      {id:'bosch-red',name:'Bosch "Red" performance'},
-      {id:'bosch-stock',name:'Bosch stock replacement'},
+      {id:'bosch-0221119027',name:'Bosch 0 221 119 027'},
+      {id:'beru-zs109',name:'BERU ZS109'},
       {id:'custom',name:'Custom…'}],
     valBase:{x:38,y:30}, valColor:'#ff8a65', valSize:8, valAlign:'start',
     value:'Generic 12V canister',
@@ -178,9 +200,18 @@ export const LIB = {
     pins:[{id:'1a',label:'1a',x:10,y:0},{id:'15',label:'15',x:40,y:0},{id:'1b',label:'1b',x:70,y:0},
           {id:'ht1',label:'1',x:10,y:60},{id:'ht2',label:'2',x:30,y:60},
           {id:'ht3',label:'3',x:50,y:60},{id:'ht4',label:'4',x:70,y:60}],
+    getPins:(variant='generic')=>clonePins(
+      variant==='bosch-0221503407'
+        ? [{id:'1a',label:'1',x:10,y:0},{id:'15',label:'15',x:40,y:0},{id:'1b',label:'2',x:70,y:0},
+           {id:'ht1',label:'4',x:10,y:60},{id:'ht2',label:'1',x:30,y:60},
+           {id:'ht3',label:'2',x:50,y:60},{id:'ht4',label:'3',x:70,y:60}]
+        : [{id:'1a',label:'1a',x:10,y:0},{id:'15',label:'15',x:40,y:0},{id:'1b',label:'1b',x:70,y:0},
+           {id:'ht1',label:'1',x:10,y:60},{id:'ht2',label:'2',x:30,y:60},
+           {id:'ht3',label:'3',x:50,y:60},{id:'ht4',label:'4',x:70,y:60}]
+    ),
     variants:[
       {id:'generic',name:'Generic 2×2 wasted-spark'},
-      {id:'bosch-0221503',name:'Bosch 0221503-series (VAG)'},
+      {id:'bosch-0221503407',name:'Bosch 0 221 503 407'},
       {id:'custom',name:'Custom…'}],
     valBase:{x:82,y:34}, valColor:'#ff8a65', valSize:8, valAlign:'start',
     value:'Generic 2×2 wasted-spark',
@@ -202,12 +233,15 @@ export const LIB = {
       <line x1="40" y1="14" x2="40" y2="46" stroke="#ff8a65" stroke-width="1" stroke-dasharray="3 3"/>`},
   cop:{name:'COP Coil',prefix:'T',w:40,h:60,
     pins:[{id:'15',label:'15',x:10,y:0},{id:'1',label:'1',x:30,y:0},{id:'4',label:'4',x:20,y:60}],
+    getPins:(variant='generic')=>clonePins(
+      [{id:'15',label:'15',x:10,y:0},{id:'1',label:'1',x:30,y:0},{id:'4',label:'4',x:20,y:60}]
+    ),
     variants:[
-      {id:'generic',name:'Generic COP'},
-      {id:'bosch-cop',name:'Bosch COP'},
+      {id:'generic',name:'Generic 2-pin pencil coil'},
+      {id:'beru-zs052',name:'BERU ZS052'},
       {id:'custom',name:'Custom…'}],
     valBase:{x:38,y:30}, valColor:'#ff8a65', valSize:8, valAlign:'start',
-    value:'Generic COP',
+    value:'Generic 2-pin pencil coil',
     draw:()=>`
       <line x1="10" y1="0" x2="10" y2="10" stroke="#f9a825" stroke-width="2"/>
       <line x1="30" y1="0" x2="30" y2="10" stroke="#d7dde3" stroke-width="2"/>

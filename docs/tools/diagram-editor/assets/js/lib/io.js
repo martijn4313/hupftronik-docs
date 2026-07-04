@@ -54,6 +54,9 @@ export function applyLoadedData(j){
       // overwriting it with the first preset's name
       c.variant='custom';
     }
+    if(LIB[c.type]?.getPins && (!Array.isArray(c.pins) || !c.pins.length || c.variant!=='custom')){
+      c.pins=LIB[c.type].getPins(c.variant);
+    }
   });
 
   state.sel=null;state.pending=null;state.pendingWp=[];state.connectCandidate=null;state.trace=null;
