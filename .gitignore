@@ -1,0 +1,9 @@
+.venv/
+__pycache__/
+*.pyc
+site/
+build-site/
+.cursor
+scripts/
+build-site.zip
+*.zip

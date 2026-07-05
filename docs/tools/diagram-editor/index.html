@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Harness Bench — automotive wiring diagram designer</title>
+<link rel="stylesheet" href="assets/css/harness-bench.css">
+</head>
+<body>
+
+<div id="toolbar">
+  <div class="brand">HARNESS·BENCH<small>wiring diagram designer</small></div>
+  <button id="btnNew" class="danger">New</button>
+  <button id="btnLoad">Load JSON</button>
+  <button id="btnSave">Save JSON</button>
+  <button id="btnSvg">Export SVG</button>
+  <button id="btnMermaid">Export Mermaid</button>
+  <label class="toolbar-check"><input type="checkbox" id="chkWireLabels" checked> Show wire labels</label>
+  <div class="spacer"></div>
+  <button id="btnFit">Fit view</button>
+  <input type="file" id="fileIn" accept=".json,application/json" hidden>
+</div>
+
+<div id="main">
+  <nav id="palette" aria-label="Component palette"></nav>
+  <button id="paletteHandle" class="panel-handle" aria-label="Toggle parts panel" aria-expanded="true" title="Hide parts panel">‹</button>
+  <div id="canvasWrap">
+    <svg id="canvas" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <pattern id="grid" width="20" height="20" patternUnits="userSpaceOnUse">
+          <circle cx="1" cy="1" r="1" fill="#2b3138"/>
+        </pattern>
+      </defs>
+      <rect id="bg" x="-5000" y="-5000" width="10000" height="10000" fill="url(#grid)"/>
+      <g id="wiresLayer"></g>
+      <g id="compsLayer"></g>
+      <g id="handleLayer"></g>
+      <g id="tempLayer"></g>
+    </svg>
+  </div>
+  <button id="propsHandle" class="panel-handle" aria-label="Toggle properties panel" aria-expanded="true" title="Hide properties panel">›</button>
+  <aside id="props" aria-label="Properties"></aside>
+</div>
+
+<div id="status">
+  <span id="stHint">Click a palette part to place it · click pin → pin to run a wire · drag body to move · wheel or pinch zooms, drag background pans</span>
+  <span class="spacer"></span>
+  <span id="stCounts"></span>
+  <span id="stZoom" class="amber"></span>
+</div>
+
+<div id="modal" role="dialog" aria-modal="true">
+  <div class="box">
+    <h3 id="modalTitle">Export</h3>
+    <textarea id="modalText" spellcheck="false"></textarea>
+    <div class="row">
+      <button id="btnCopy">Copy to clipboard</button>
+      <button id="btnDlTxt">Download file</button>
+      <span class="spacer"></span>
+      <button id="btnClose">Close</button>
+    </div>
+  </div>
+</div>
+
+<script type="module" src="assets/js/main.js"></script>
+</body>
+</html>

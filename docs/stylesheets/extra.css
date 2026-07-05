@@ -1,0 +1,244 @@
+:root [data-md-color-scheme="slate"] {
+  /* Core Backgrounds */
+  --md-default-bg-color: #0F141C;
+  --md-default-bg-color--light: #1A212D;
+  --md-code-bg-color: #1A212D;
+
+  /* Navigation & Sidebars */
+  --md-primary-fg-color: #1A212D;
+  --md-primary-fg-color--dark: #0F141C;
+  --md-primary-bg-color: #EAEFF8;
+
+  /* Accents & Typography */
+  --md-accent-fg-color: #FF5500;
+  --md-accent-fg-color--transparent: rgba(255, 85, 0, 0.1);
+  --md-typeset-color: #EAEFF8;
+  --md-typeset-a-color: #0099FF;
+
+  /* Custom borders and structural lines */
+  --md-footer-bg-color: #0F141C;
+  --md-footer-bg-color--dark: #0A0D14;
+}
+
+/* Custom UI Polish to match the mockup */
+
+/* Active/Hover Sidebar Item highlights - CURRENT PAGE (orange) */
+.md-nav__link--active {
+  color: var(--md-accent-fg-color) !important;
+  font-weight: bold;
+  background: rgba(255, 85, 0, 0.3) !important;
+  border: 1px solid #FF5500 !important;
+  border-left: 4px solid #FF5500 !important;
+  border-radius: 4px;
+  padding: 8px 8px 8px 6px !important;
+  box-shadow: 0 0 12px rgba(255, 85, 0, 0.4), inset 0 0 4px rgba(255, 85, 0, 0.1) !important;
+  margin: 6px 0 !important;
+}
+
+/* Parent items in the navigation path (blue - less prominent) */
+.md-nav__item--active > .md-nav__link:not(.md-nav__link--active) {
+  background: rgba(0, 153, 255, 0.1);
+  border: 1px solid rgba(0, 153, 255, 0.3);
+  border-left: 3px solid rgba(0, 153, 255, 0.6);
+  border-radius: 4px;
+  padding: 6px 8px;
+  padding-left: 7px;
+  box-shadow: 0 0 4px rgba(0, 153, 255, 0.15);
+  margin: 4px 0;
+}
+
+/* Sidebar section/category labels - both the nav title and inactive section headers */
+.md-nav__title,
+.md-nav__item--section > .md-nav__link,
+.md-nav__item--nested > label.md-nav__link {
+  color: #0099FF !important;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  opacity: 1 !important;
+  margin-top: 1em;
+  padding-bottom: 0.25em;
+  border-bottom: 1px solid rgba(0, 153, 255, 0.25);
+}
+
+.md-nav__item--section > .md-nav__link:hover,
+.md-nav__item--nested > label.md-nav__link:hover,
+.md-nav__title:hover {
+  color: var(--md-accent-fg-color) !important;
+  background: none !important;
+  border-bottom-color: rgba(255, 85, 0, 0.35);
+}
+
+/* Code blocks styling */
+code {
+  color: #0099FF;
+}
+
+pre code {
+  color: #EAEFF8;
+}
+
+/* Scrollbar customization to keep it stealthy */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-thumb {
+  background: #1A212D;
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #0099FF;
+}
+
+/* --- Hüpftronik Header Customization --- */
+
+.md-typeset h1,
+.md-typeset h2,
+.md-typeset h3,
+.md-typeset h4 {
+  color: #0099FF;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+/* Optional: Add a subtle orange underline accent to the main H1 page title */
+.md-typeset h1 {
+  border-bottom: 2px solid #FF5500;
+  padding-bottom: 0.3em;
+  margin-bottom: 1em;
+}
+
+/* Tooltip positioned inline with header - wrapper flex container */
+h1 + .tooltip,
+h1 + .content-status,
+.tooltip + .content-status {
+  display: inline-flex;
+  margin-left: 0.5em;
+  vertical-align: middle;
+}
+
+/* Optional: Keep the hover permalink icon matching the cyber blue theme */
+.md-typeset h1:hover .headerlink,
+.md-typeset h2:hover .headerlink,
+.md-typeset h3:hover .headerlink {
+  color: #FF5500;
+}
+
+.tooltip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: rgba(255, 85, 0, 0.08);
+  border: 1px solid rgba(255, 85, 0, 0.25);
+  border-radius: 4px;
+  padding: 2px 8px;
+  font-size: 1em;
+  vertical-align: middle;
+}
+
+.tooltip img {
+  width: 20px;
+  height: auto;
+  vertical-align: middle;
+}
+
+/* --- Content-status badges ---
+   Tells the reader whether a page's technical claims were checked for internal
+   consistency this session ("Reviewed") or are freshly AI-drafted and still need
+   verification against the reader's own hardware ("AI-drafted"). See
+   about/community.md#content-status-labels for the full explanation. */
+.content-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  border-radius: 4px;
+  padding: 2px 8px;
+  font-size: 1em;
+  border: 1px solid;
+  vertical-align: middle;
+}
+
+.content-status::before {
+  content: "";
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  flex: none;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-size: contain;
+  mask-size: contain;
+  -webkit-mask-position: center;
+  mask-position: center;
+}
+
+.content-status.status-reviewed {
+  background: rgba(0, 153, 255, 0.08);
+  border-color: rgba(0, 153, 255, 0.3);
+  color: #0099FF;
+}
+
+.content-status.status-reviewed::before {
+  background-color: #0099FF;
+  -webkit-mask-image: url('data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12,2C6.5,2,2,6.5,2,12s4.5,10,10,10s10-4.5,10-10S17.5,2,12,2z M10,17l-5-5l1.41-1.41L10,14.17l7.59-7.59L19,8L10,17z"/></svg>');
+  mask-image: url('data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12,2C6.5,2,2,6.5,2,12s4.5,10,10,10s10-4.5,10-10S17.5,2,12,2z M10,17l-5-5l1.41-1.41L10,14.17l7.59-7.59L19,8L10,17z"/></svg>');
+}
+
+.content-status.status-ai-draft {
+  background: rgba(255, 190, 0, 0.1);
+  border-color: rgba(255, 190, 0, 0.4);
+  color: #FFBE00;
+}
+
+.content-status.status-ai-draft::before {
+  background-color: #FFBE00;
+  -webkit-mask-image: url('data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12,2L14,9L21,11L14,13L12,20L10,13L3,11L10,9Z"/></svg>');
+  mask-image: url('data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12,2L14,9L21,11L14,13L12,20L10,13L3,11L10,9Z"/></svg>');
+}
+
+.content-status.status-in-review {
+  background: rgba(255, 153, 0, 0.1);
+  border-color: rgba(255, 153, 0, 0.4);
+  color: #FF9900;
+}
+
+.content-status.status-in-review::before {
+  background-color: #FF9900;
+  -webkit-mask-image: url('data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3,17.25V21h3.75L17.81,9.94l-3.75-3.75L3,17.25Z M20.71,7.04c.39-.39.39-1.02,0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41,0l-1.83,1.83l3.75,3.75l1.83-1.83Z"/></svg>');
+  mask-image: url('data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3,17.25V21h3.75L17.81,9.94l-3.75-3.75L3,17.25Z M20.71,7.04c.39-.39.39-1.02,0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41,0l-1.83,1.83l3.75,3.75l1.83-1.83Z"/></svg>');
+}
+
+/* Make expandable sections easier to spot */
+.md-typeset summary {
+  position: relative;
+}
+
+.md-typeset summary:after {
+  width: 1.2rem;
+  height: 1.2rem;
+  top: 0.55em;
+  right: 0.45rem;
+  background-color: #FF5500;
+  box-shadow: 0 0 0 2px rgba(255, 85, 0, 0.15), 0 0 8px rgba(255, 85, 0, 0.25);
+  border-radius: 999px;
+  opacity: 1;
+}
+
+details[open] > summary:after {
+  transform: rotate(90deg);
+}
+
+img[src*="../assets/icons"] {
+  vertical-align: middle;
+  display: inline;
+}
+
+/* Slightly widen the main content area on desktop screens */
+@media screen and (min-width: 76.25em) {
+  .md-grid {
+    max-width: 72rem;
+  }
+}
+
