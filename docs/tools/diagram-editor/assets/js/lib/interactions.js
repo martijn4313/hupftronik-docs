@@ -332,8 +332,31 @@ function startSim(c){
 let drag=null;
 let lastClick = { time: 0, wireId: null, handleIdx: null };
 
+/* ---- two-finger pinch-to-zoom (mobile) ---- */
+const activePointers = new Map(); // pointerId → {clientX, clientY}
+let pinchLastDist = null;
+
+function getPinchState(){
+  const pts = [...activePointers.values()];
+  if(pts.length < 2) return null;
+  const [p1, p2] = pts;
+  return {
+    dist: Math.hypot(p1.clientX - p2.clientX, p1.clientY - p2.clientY),
+    mid:  { clientX: (p1.clientX + p2.clientX) / 2,
+            clientY: (p1.clientY + p2.clientY) / 2 }
+  };
+}
+
 export function setupSVGHandlers(){
   svg.addEventListener('pointerdown',e=>{
+  activePointers.set(e.pointerId, {clientX: e.clientX, clientY: e.clientY});
+  if(activePointers.size >= 2){
+    /* second finger: cancel any active drag and switch to pinch-zoom mode */
+    drag = null;
+    const ps = getPinchState();
+    pinchLastDist = ps ? ps.dist : null;
+    return;
+  }
   const handle=e.target.closest('.wp-handle');
   const pin=e.target.closest('.pin');
   const noteHandle=e.target.closest('.note-resize-handle');
@@ -482,6 +505,24 @@ export function setupSVGHandlers(){
 });
 
 svg.addEventListener('pointermove',e=>{
+  /* update live position for this pointer */
+  if(activePointers.has(e.pointerId)){
+    activePointers.set(e.pointerId, {clientX: e.clientX, clientY: e.clientY});
+  }
+  /* two-finger pinch-to-zoom */
+  if(activePointers.size >= 2 && pinchLastDist !== null){
+    const ps = getPinchState();
+    if(ps && ps.dist > 0){
+      const f = pinchLastDist / ps.dist; // <1 = zoom in, >1 = zoom out
+      const mid = worldPt(ps.mid);
+      state.view.w *= f; state.view.h *= f;
+      state.view.x = mid.x - (mid.x - state.view.x) * f;
+      state.view.y = mid.y - (mid.y - state.view.y) * f;
+      applyView();
+      pinchLastDist = ps.dist;
+    }
+    return;
+  }
   const pWorld=worldPt(e);
   if(state.pending){
     state.connectCandidate = nearestPinCandidate(pWorld, state.pending);
@@ -543,6 +584,8 @@ svg.addEventListener('pointermove',e=>{
 });
 
 svg.addEventListener('pointerup',e=>{
+  activePointers.delete(e.pointerId);
+  if(activePointers.size < 2) pinchLastDist = null;
   if(drag&&drag.mode==='comp'&&!drag.moved){
     const c=drag.c;
     if(state.trace && c.type==='switch'){
@@ -567,6 +610,12 @@ svg.addEventListener('pointerup',e=>{
     if(state.trace){ clearTrace(); render(); }
   }
   if(drag&&drag.mode==='pan'&&!drag.moved){ state.sel=null; state.pending=null; state.pendingWp=[]; state.connectCandidate=null; clearTrace(); render(); }
+  drag=null;
+});
+
+svg.addEventListener('pointercancel',e=>{
+  activePointers.delete(e.pointerId);
+  if(activePointers.size < 2) pinchLastDist = null;
   drag=null;
 });
 
