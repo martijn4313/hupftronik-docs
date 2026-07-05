@@ -14,6 +14,9 @@ the [product documentation](../../../products/motorsteuergerat-24p-v1/setup/inde
 | [Peugeot TU Series](peugeot-tu.md) | Wide variation across the production run — identifying your exact variant is most of the work |
 | [Mini A-Series](mini-a-series.md) | Full EFI retrofit on a carbureted engine — the largest fabrication scope in this list |
 
+Running a Volvo B230? The [B230 example builds](b230-examples/index.md) layer three concrete
+recipes — OEM cam swap, raised compression, and the classic Holset "+T" — on top of the B2xx guide.
+
 !!! note "Check each page's content-status badge"
     Guides differ in how much scrutiny they've had — see
     [content status labels](../../../about/community.md#5-content-status-labels) for what the badges

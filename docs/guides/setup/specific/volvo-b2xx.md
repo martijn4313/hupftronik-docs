@@ -178,6 +178,25 @@ If a T-MAP is unavailable, use an Audi `06B905379D` push-in IAT sensor paired wi
 
 We position the MAP/IAT sensor downstream of the throttle and intercooler, as close to the plenum as practical. Measuring air temperature before the intercooler provides false data to the speed-density algorithm, leaning out the engine under thermal load. The T-MAP is chosen because it minimizes wiring runs and eliminates a potential vacuum leak point by combining two critical sensors into one robust OEM housing.
 
+### 6.4. Running the stock AMM (optional)
+
+!!! note "AI-drafted section — not yet verified"
+    Unlike the rest of this page, this subsection is AI-drafted and has not been verified against
+    a running engine. Treat pinouts and part numbers as starting points to confirm against your
+    car's wiring diagram.
+
+Speed-density remains our recommendation, but rusEFI does support fueling from a Mass Air Flow (MAF) sensor, and the LH2.4 hot-wire AMM (Bosch `0 280 212 016` on the NA B230F) outputs an analog $0-5\,\text{V}$ signal the 24P V1 can read directly. Running it is a legitimate choice in two cases: a near-stock engine with an unmodified intake tract where you want factory-like load sensing, or as a *logged cross-check* while dialing in a speed-density tune.
+
+To wire it:
+
+*   **Supply:** switched $+12\,\text{V}$ and ground per your model-year wiring diagram
+*   **Signal:** the $0-5\,\text{V}$ output to any free analog input
+*   **Burn-off wire:** leave disconnected. The LH ECU pulsed it after shutdown to glow contamination off the wire; without it, expect the sensor to drift sooner and clean it periodically with electronics cleaner
+
+In TunerStudio, select the MAF-based airflow mode and enter a transfer curve (voltage → air mass) for the AMM. No trustworthy factory curve circulates for these units, so calibrate pragmatically: log AMM voltage against the speed-density airflow estimate on a working tune and build the curve from the logs.
+
+Be honest about the trade: a three-decade-old hot-wire element is a drift-prone, airflow-restricting single point of failure, its reading is only valid with the intake geometry it was calibrated in, and good used units cost real money. Any porting, cam, or boost change invalidates it — which is why the rest of this guide assumes MAP and IAT.
+
 ---
 
 
@@ -197,8 +216,11 @@ We position the MAP/IAT sensor downstream of the throttle and intercooler, as cl
 | B230FT | LH2.4 | `0 280 150 804` | $337\,\text{cc/min}$ |
 | B234F | LH2.4 | `0 280 150 749` | $214\,\text{cc/min}$ |
 
-!!! Warning
-
+!!! warning "Nominal figures for new injectors"
+    The flow rates above are nominal values for new injectors at $3.0\,\text{bar}$. Decades-old
+    injectors drift, clog, and mismatch across the set. Measure the actual flow before entering a
+    value in TunerStudio — see
+    [Injector Flow Rate Testing](../../workshop/injector-flow-testing.md).
 
 #### 7.1.2. Fuel Pumps
 
@@ -209,27 +231,19 @@ We position the MAP/IAT sensor downstream of the throttle and intercooler, as cl
 | 940 Post-1995 | In-tank | Walbro GSS342 / DW200 | $255\,\text{L/hr}$ |
 | K-Jetronic | Inline | Bosch `0 580 254 911` | $\sim 180\,\text{L/hr}$ |
 
+Ratings assume a healthy pump at charging voltage. Qualify a used or unknown pump on the bench first — see [Fuel Pump Pressure and Flow Testing](../../workshop/fuel-pump-testing.md).
+
 ### 7.2. Technical Detail
 
 **Injection — Batch**
-<<<<<<< Updated upstream
 Wire the high-impedance EV1 injectors in parallel on each channel. Pair cylinders the same way as the wasted-spark ignition groups below (360° apart in the 720° cycle), not by physical adjacency, so each batch pulse lands evenly spaced across the cycle. Set the injector flow rate in TunerStudio and use a dead time of $1.1\,\text{ms}$ at $14\,\text{V}$ as a starting point.
 *   **INJ1:** Cylinders 1 and 4
 *   **INJ2:** Cylinders 2 and 3
-=======
-You can wire the high-impedance injectors in parallel as pairs on each channel. Set the injector flow rate in TunerStudio and use a dead time of $1.1\,\text{ms}$ at $14\,\text{V}$ as a starting point.
-*   **INJ1:** Cylinders 1 and 2
-*   **INJ2:** Cylinders 3 and 4
->>>>>>> Stashed changes
 
 **Fuel Pump Logic**
 Route the ECU fuel pump output to drive an external relay coil; do **not** run the main pump current directly through the low-side driver. 
 
 *   **240 Setups:** Wire both the transfer pre-pump and the inline main pump to run simultaneously from the relay. 
-
-
-
-
 *   **940 Post-1995:** The fuel pickup easily accepts a modern $255\,\text{L/hr}$ pump (e.g., Walbro GSS342) since they are the same size.
 *   **K-Jetronic Conversions:** Utilize a conventional return-line regulator (e.g., $3.0\,\text{bar}$). Do not use a returnless setup, as the massive flow volume of a vane pump will overwhelm it.
 

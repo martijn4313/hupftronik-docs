@@ -68,9 +68,18 @@ nav:
      - CAN Bus Basics: guides/setup/canbus-basics.md
      - Troubleshooting: guides/setup/troubleshooting.md
 
+     - Workshop & Bench Testing:
+        - Injector Flow Rate Testing: guides/workshop/injector-flow-testing.md
+        - Fuel Pump Pressure & Flow Testing: guides/workshop/fuel-pump-testing.md
+
      - Vehicle specific setup guides:
         - Overview: guides/setup/specific/index.md
         - Volvo B2xx Redblock: guides/setup/specific/volvo-b2xx.md
+        - B230 Example Builds:
+           - Overview: guides/setup/specific/b230-examples/index.md
+           - B230F + OEM Camshaft: guides/setup/specific/b230-examples/b230f-oem-cam.md
+           - B230F Higher Compression + Mild Cam: guides/setup/specific/b230-examples/b230f-higher-compression.md
+           - B230F+T with Holset: guides/setup/specific/b230-examples/b230ft-holset.md
         - Peugeot TU Series: guides/setup/specific/peugeot-tu.md
         - Renault F4R: guides/setup/specific/renault-f4r.md
         - Mini A-Series: guides/setup/specific/mini-a-series.md
