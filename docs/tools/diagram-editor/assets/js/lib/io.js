@@ -1,10 +1,10 @@
 /* ============ IO, export, and modal layer ============ */
 
-import { DIN, DIN_MERMAID } from './constants.js';
-import { LIB, IGN_POSITIONS, shouldApplyPresetPins } from './components.js';
-import { state, esc, comp } from './state.js';
+import { LIB, shouldApplyPresetPins } from './components.js';
+import { state } from './state.js';
 import { render, svg, wiresL, compsL, renderWires, renderComps, applyView } from './render.js';
 import { historyInit, historyUndo, historyRedo } from './history.js';
+import { buildMermaid } from './mermaid.js';
 
 let modalFile='export.txt';
 
@@ -168,97 +168,3 @@ export function setupIOButtons(){
   document.querySelector('#modal').addEventListener('click',e=>{if(e.target.id==='modal')document.querySelector('#modal').classList.remove('open');});
 }
 
-function mid(s){return String(s).replace(/[^A-Za-z0-9_]/g,'_');}
-
-export function buildMermaid(){
-  const L=[];
-  L.push(`%%{init: {"theme":"base","themeVariables":{"primaryColor":"#f5f5f5","primaryBorderColor":"#616161","primaryTextColor":"#000000","lineColor":"#9e9e9e","edgeLabelBackground":"#ffffff","clusterBkg":"#fdf6ec","clusterBorder":"#8d6e63","titleColor":"#000000","fontSize":"14px"},"flowchart":{"curve":"linear","rankSpacing":80,"nodeSpacing":40}}}%%`);
-  L.push('flowchart LR');
-  L.push('classDef power fill:#fff3c4,stroke:#b8860b,stroke-width:2px,color:#000');
-  L.push('classDef battery fill:#263238,stroke:#f9a825,stroke-width:2.5px,color:#ffd600');
-  L.push('classDef fuse fill:#ffe3e3,stroke:#c62828,stroke-width:2px,color:#000');
-  L.push('classDef switch fill:#e3f2fd,stroke:#1565c0,stroke-width:2px,color:#000');
-  L.push('classDef load fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px,color:#000');
-  L.push('classDef ground fill:#eceff1,stroke:#37474f,stroke-width:2px,color:#000');
-  L.push('classDef relay fill:#fdf6ec,stroke:#8d6e63,stroke-width:2px,color:#000');
-  L.push('classDef conn fill:#f3e5f5,stroke:#6a1b9a,stroke-width:1.5px,color:#000');
-  L.push('classDef module fill:#ede7f6,stroke:#4527a0,stroke-width:2px,color:#000');
-  L.push('classDef pinCoil fill:#fff8e1,stroke:#ef6c00,stroke-width:1.5px,color:#000');
-  L.push('classDef pinCom fill:#eceff1,stroke:#37474f,stroke-width:1.5px,color:#000');
-  L.push('classDef pinNO fill:#e8f5e9,stroke:#2e7d32,stroke-width:1.5px,color:#000');
-  L.push('classDef pinNC fill:#ffebee,stroke:#c62828,stroke-width:1.5px,color:#000');
-
-  const edgeStyles=[]; let edgeIdx=0;
-  const relays=state.comps.filter(c=>c.type==='relay'||c.type==='relay5');
-
-  for(const r of relays){
-    const D=mid(r.des), spdt=r.type==='relay5';
-    L.push(`subgraph ${D}["${r.des}${r.label?' — '+r.label:''} (${spdt?'SPDT':'SPST'})"]`);
-    L.push('  direction TB');
-    L.push(`  ${D}_86(("86")):::pinCoil`);
-    L.push(`  ${D}_85(("85")):::pinCoil`);
-    L.push(`  ${D}_30(("30")):::pinCom`);
-    L.push(`  ${D}_87(("87")):::pinNO`);
-    if(spdt) L.push(`  ${D}_87a(("87a")):::pinNC`);
-    L.push(`  ${D}_86 -.- ${D}_85`);
-    edgeStyles.push({i:edgeIdx++,css:'stroke:#ef6c00,stroke-width:1.5px'});
-    L.push(`  ${D}_30 === ${D}_87`);
-    edgeStyles.push({i:edgeIdx++,css:'stroke:#455a64,stroke-width:2px'});
-    if(spdt){L.push(`  ${D}_30 --- ${D}_87a`);
-      edgeStyles.push({i:edgeIdx++,css:'stroke:#455a64,stroke-width:2px'});}
-    L.push('end');
-    L.push(`class ${D} relay`);
-  }
-
-  const nodeName=c=>{
-    const D=mid(c.des), lbl=esc(c.label), val=esc(c.value||'');
-    switch(c.type){
-      case 'battery': return `${D}[("🔋 ${c.des} ${val}")]:::battery`;
-      case 'fuse': return `${D}{{"${c.des} ${val}${lbl?'<br/>'+lbl:''}"}}:::fuse`;
-      case 'switch': return `${D}(["${c.des}${lbl?'<br/>'+lbl:''}"]):::switch`;
-      case 'ignition': return `${D}(["🔑 ${c.des} ${IGN_POSITIONS[Math.max(0,Math.min(3,+c.keyPos||0))]}${lbl?'<br/>'+lbl:''}"]):::switch`;
-      case 'motor': case 'pump': return `${D}(("M${lbl?'<br/>'+lbl:''}")):::load`;
-      case 'lamp': return `${D}(("✕ ${c.des}${lbl?'<br/>'+lbl:''}")):::load`;
-      case 'ecu': return `${D}["${c.des} ECU${val?'<br/>'+val:''}${lbl?'<br/>'+lbl:''}"]:::module`;
-      case 'schildknappe': return `${D}["🔗 ${c.des} CAN Node${val?'<br/>'+val:''}${lbl?'<br/>'+lbl:''}"]:::module`;
-      case 'connector': return `${D}>"${c.des}${lbl?' '+lbl:''}"]:::conn`;
-      case 'ground': return `${D}[\\"⏚ ${c.des}${lbl?' '+lbl:''}"/]:::ground`;
-      case 'splice': return `${D}(("${c.des}")):::conn`;
-      case 'injector': case 'valve': return `${D}(("⚙️ ${c.des}${lbl?'<br/>'+lbl:''}")):::load`;
-      case 'sensor2': case 'sensor3': case 'o2sensor3': case 'o2sensor4': case 'o2sensor5': return `${D}(["📶 ${c.des}${lbl?'<br/>'+lbl:''}"]):::module`;
-      case 'idleValve2': case 'idleValve3': case 'idleStepper': case 'idleWax': return `${D}(("⚙️ ${c.des}${lbl?'<br/>'+lbl:''}")):::load`;
-      case 'ublock': return `${D}["${c.des}${lbl?'<br/>'+lbl:''}"]:::module`;
-      case 'ignAmp1': case 'ignAmp2': case 'ignAmp4': return `${D}["⚡ ${c.des}${val?' '+val:''}${lbl?'<br/>'+lbl:''}"]:::module`;
-      case 'coil': case 'coil2x2': case 'cop': case 'copSmart': return `${D}["⚡ ${c.des}${val?' '+val:''}${lbl?'<br/>'+lbl:''}"]:::power`;
-      case 'distributor': return `${D}["🔀 ${c.des}${lbl?'<br/>'+lbl:''}"]:::conn`;
-      case 'sparkplug': return `${D}(("⚡ ${c.des}${lbl?'<br/>'+lbl:''}")):::load`;
-      case 'resistor': return `${D}["${c.des} ${val}${lbl?'<br/>'+lbl:''}"]:::conn`;
-      case 'diode': return `${D}{"${c.des}${lbl?'<br/>'+lbl:''}"}:::conn`;
-      case 'capacitor': return `${D}["${c.des} ${val}${lbl?'<br/>'+lbl:''}"]:::conn`;
-      case 'npn': case 'pnp': case 'nchannel': case 'pchannel': return `${D}["${c.des}${lbl?'<br/>'+lbl:''}"]:::module`;
-    }
-  };
-  for(const c of state.comps){
-    if(c.type==='relay'||c.type==='relay5') continue;
-    L.push(nodeName(c));
-  }
-
-  const endName=(w,end)=>{
-    const c=comp(end.comp);
-    return (c.type==='relay'||c.type==='relay5') ? `${mid(c.des)}_${end.pin}` : mid(c.des);
-  };
-  for(const w of state.wires){
-    const lenTxt = `${String(w.lengthMm||'').trim()}`;
-    const lbl=`${w.gauge}mm²${lenTxt?` ${lenTxt}mm`:''} ${w.color}${w.tracer?'/'+w.tracer:''}`;
-    L.push(`${endName(w,w.a)} ---|${lbl}| ${endName(w,w.b)}`);
-    const width=parseFloat(w.gauge)>=2.5?'3px':'2px';
-    edgeStyles.push({i:edgeIdx++,css:`stroke:${DIN_MERMAID[w.color]},stroke-width:${width}`});
-  }
-
-  const byCss={};
-  for(const e of edgeStyles)(byCss[e.css]??=[]).push(e.i);
-  for(const [css,idxs] of Object.entries(byCss))
-    L.push(`linkStyle ${idxs.join(',')} ${css}`);
-
-  return L.join('\n');
-}
