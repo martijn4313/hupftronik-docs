@@ -2,9 +2,10 @@
 
 import { LIB, IGN_CONDUCT } from './components.js';
 import { GAUGES, DIN } from './constants.js';
-import { state, uid, comp, esc, hooks } from './state.js';
+import { state, uid, comp, esc, hooks, clipboard, setClipboard } from './state.js';
 import { snap, pinPos, localPointFromWorld, textAnchor, pinTextAnchor, pinTextOffset } from './geometry.js';
 import { render, renderWires, renderComps, renderHandles, renderStatus, renderTemp, svg, applyView, deleteSelection, renderProps } from './render.js';
+import { historyPush, historyUndo, historyRedo } from './history.js';
 
 // palette rendering
 export function paletteIcon(type){
@@ -102,6 +103,7 @@ export function addComp(type){
   state.cascade++;
   state.comps.push(c);
   state.sel={kind:'comp',id:c.id};
+  historyPush();
   render();
 }
 
@@ -357,6 +359,13 @@ export function setupSVGHandlers(){
     pinchLastDist = ps ? ps.dist : null;
     return;
   }
+  /* middle button (button===1): pan only, never select/interact */
+  if(e.button === 1){
+    e.preventDefault();
+    drag={mode:'pan',sx:e.clientX,sy:e.clientY,vx:state.view.x,vy:state.view.y,moved:false};
+    svg.setPointerCapture(e.pointerId);
+    return;
+  }
   const handle=e.target.closest('.wp-handle');
   const pin=e.target.closest('.pin');
   const noteHandle=e.target.closest('.note-resize-handle');
@@ -376,6 +385,7 @@ export function setupSVGHandlers(){
         color:state.wireDefaults.color,tracer:state.wireDefaults.tracer,gauge:state.wireDefaults.gauge,lengthMm:state.wireDefaults.lengthMm||'',
         wp:[...(state.pendingWp||[])]});
       state.sel={kind:'wire',id:state.nextId-1};
+      historyPush();
     }
     state.pending=null;
     state.pendingWp=[];
@@ -390,6 +400,7 @@ export function setupSVGHandlers(){
 
     if (now - lastClick.time < 300 && lastClick.handleIdx === idx && lastClick.wireId === w.id) {
       w.wp.splice(idx,1);
+      historyPush();
       render();
       lastClick.time = 0;
       return;
@@ -428,6 +439,7 @@ export function setupSVGHandlers(){
           color:state.wireDefaults.color,tracer:state.wireDefaults.tracer,gauge:state.wireDefaults.gauge,lengthMm:state.wireDefaults.lengthMm||'',
           wp:[...(state.pendingWp||[])]});
         state.sel={kind:'wire',id:state.nextId-1};
+        historyPush();
       }
       state.pending=null;
       state.pendingWp=[];
@@ -479,6 +491,7 @@ export function setupSVGHandlers(){
       }
       w.wp.splice(best,0,snapP);
       state.sel={kind:'wire',id:w.id};
+      historyPush();
       render();
       lastClick.time = 0;
       return;
@@ -609,6 +622,10 @@ svg.addEventListener('pointerup',e=>{
     }
     if(state.trace){ clearTrace(); render(); }
   }
+  /* push undo snapshot when a drag that actually moved something ends */
+  if(drag&&drag.moved&&(drag.mode==='comp'||drag.mode==='wp'||drag.mode==='text'||drag.mode==='note-resize')){
+    historyPush();
+  }
   if(drag&&drag.mode==='pan'&&!drag.moved){ state.sel=null; state.pending=null; state.pendingWp=[]; state.connectCandidate=null; clearTrace(); render(); }
   drag=null;
 });
@@ -631,6 +648,54 @@ svg.addEventListener('wheel',e=>{
 
 window.addEventListener('keydown',e=>{
   if(e.target.matches('input,select,textarea')) return;
+
+  /* Undo / Redo */
+  if((e.ctrlKey||e.metaKey) && e.key.toLowerCase()==='z' && !e.shiftKey){
+    e.preventDefault();
+    historyUndo(render);
+    return;
+  }
+  if((e.ctrlKey||e.metaKey) && (e.key.toLowerCase()==='y' || (e.key.toLowerCase()==='z' && e.shiftKey))){
+    e.preventDefault();
+    historyRedo(render);
+    return;
+  }
+
+  /* Copy */
+  if((e.ctrlKey||e.metaKey) && e.key.toLowerCase()==='c'){
+    if(state.sel&&state.sel.kind==='comp'){
+      const c = comp(state.sel.id);
+      if(c) setClipboard({comps:[JSON.parse(JSON.stringify(c))], wires:[]});
+    }
+    return;
+  }
+
+  /* Paste */
+  if((e.ctrlKey||e.metaKey) && e.key.toLowerCase()==='v'){
+    if(!clipboard) return;
+    e.preventDefault();
+    const offset = 30;
+    /* remap ids: old → new */
+    const idMap = {};
+    const newComps = clipboard.comps.map(c=>{
+      const newId = uid();
+      idMap[c.id] = newId;
+      return {...JSON.parse(JSON.stringify(c)), id:newId, x:c.x+offset, y:c.y+offset};
+    });
+    const newWires = (clipboard.wires||[]).map(w=>({
+      ...JSON.parse(JSON.stringify(w)),
+      id: uid(),
+      a: {comp: idMap[w.a.comp]??w.a.comp, pin: w.a.pin},
+      b: {comp: idMap[w.b.comp]??w.b.comp, pin: w.b.pin}
+    })).filter(w=>w.a.comp!=null&&w.b.comp!=null);
+    state.comps.push(...newComps);
+    state.wires.push(...newWires);
+    if(newComps.length) state.sel={kind:'comp', id:newComps[newComps.length-1].id};
+    historyPush();
+    render();
+    return;
+  }
+
   if(e.key==='Escape'){state.pending=null;state.pendingWp=[];state.connectCandidate=null;clearTrace();render();}
   if(e.key==='Delete'||e.key==='Backspace'){
     if(state.pending){
@@ -640,7 +705,10 @@ window.addEventListener('keydown',e=>{
       render();
       return;
     }
-    deleteSelection();render();
+    const hadSel = !!state.sel;
+    deleteSelection();
+    if(hadSel) historyPush();
+    render();
   }
   if(state.sel&&state.sel.kind==='comp'&&e.key.startsWith('Arrow')){
     e.preventDefault();
@@ -649,15 +717,20 @@ window.addEventListener('keydown',e=>{
     if(e.key==='ArrowRight')c.x+=step;
     if(e.key==='ArrowUp')c.y-=step;
     if(e.key==='ArrowDown')c.y+=step;
+    historyPush();
     renderWires();renderComps();
   }
   if(state.sel&&state.sel.kind==='comp'&&e.key.toLowerCase()==='r'){
     e.preventDefault();
     const c=comp(state.sel.id);
     c.r = ((c.r||0)+90)%360;
+    historyPush();
     render();
   }
 });
+
+/* suppress the browser default paste-popup and auto-scroll on middle-click */
+svg.addEventListener('auxclick',e=>{ if(e.button===1) e.preventDefault(); });
 }
 
 document.querySelector('#palette').addEventListener('click',e=>{

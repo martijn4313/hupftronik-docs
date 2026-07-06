@@ -21,6 +21,10 @@ export let state = {
    layer can trigger a re-simulation without a circular import */
 export const hooks = { simulate:null };
 
+/* in-memory copy/paste clipboard — holds {comps:[…], wires:[…]} */
+export let clipboard = null;
+export function setClipboard(val){ clipboard = val; }
+
 export function comp(id){
   return state.comps.find(c=>c.id===id);
 }

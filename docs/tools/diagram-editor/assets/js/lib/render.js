@@ -4,6 +4,7 @@ import { DIN, GAUGES } from './constants.js';
 import { LIB, IGN_POSITIONS, hasPins } from './components.js';
 import { state, esc, comp, uid, hooks } from './state.js';
 import { pinPos, pinAxis, textAnchor, textOffset, wirePath, routePoints, pinTextAnchor, pinTextOffset } from './geometry.js';
+import { historyPush } from './history.js';
 
 // DOM references
 export let svg, wiresL, compsL, tempL, handleL;
@@ -186,7 +187,7 @@ export function renderComps(){
       ${selRect}
       <g class="comp-body" data-comp="${c.id}">
         <rect x="-6" y="-6" width="${compW+12}" height="${compH+12}" fill="rgba(0,0,0,0)"/>
-        ${d.draw(c)}
+        ${c.customDraw != null ? c.customDraw : d.draw(c)}
       </g>
       <text class="comp-text" data-comp="${c.id}" data-role="des" transform="rotate(${invR}, ${desBase.x+desOff.x}, ${desBase.y+desOff.y})"
             x="${desBase.x+desOff.x}" y="${desBase.y+desOff.y}" fill="#f9a825" font-size="11" text-anchor="middle"
@@ -270,6 +271,79 @@ export function deleteSelection(){
   }
   state.sel=null;
   state.trace=null;
+}
+
+/* ============ Symbol editor modal ============ */
+function openSymbolEditor(c){
+  const d = LIB[c.type];
+  /* get the current SVG fragment — either the custom override or the library default */
+  const currentSvg = c.customDraw != null ? c.customDraw : d.draw(c);
+
+  /* inject the symbol-editor modal if it doesn't exist yet */
+  let symModal = document.querySelector('#symModal');
+  if(!symModal){
+    symModal = document.createElement('div');
+    symModal.id = 'symModal';
+    symModal.setAttribute('role','dialog');
+    symModal.setAttribute('aria-modal','true');
+    symModal.innerHTML = `<div class="box">
+      <h3>Edit symbol SVG</h3>
+      <p class="sym-hint">Edit the inner SVG of this component symbol. The origin is its top-left corner. Pin positions are defined separately and are not affected here.</p>
+      <div class="sym-layout">
+        <textarea id="symText" spellcheck="false"></textarea>
+        <div id="symPreviewWrap">
+          <svg id="symPreview" xmlns="http://www.w3.org/2000/svg"></svg>
+        </div>
+      </div>
+      <div class="row">
+        <button id="btnSymApply">Apply</button>
+        <button id="btnSymReset">Reset to default</button>
+        <span class="spacer"></span>
+        <button id="btnSymClose">Close</button>
+      </div>
+    </div>`;
+    document.body.appendChild(symModal);
+  }
+
+  const ta = symModal.querySelector('#symText');
+  const preview = symModal.querySelector('#symPreview');
+  const wrap = symModal.querySelector('#symPreviewWrap');
+
+  /* set up preview sizing from component dimensions */
+  const cw = d.w, ch = d.h;
+  const maxPrev = 200;
+  const scale = Math.min(maxPrev / cw, maxPrev / ch, 1);
+  const pw = Math.round(cw * scale), ph = Math.round(ch * scale);
+  preview.setAttribute('width', pw);
+  preview.setAttribute('height', ph);
+  preview.setAttribute('viewBox', `0 0 ${cw} ${ch}`);
+  wrap.style.width = pw + 'px';
+  wrap.style.height = ph + 'px';
+
+  ta.value = currentSvg;
+  preview.innerHTML = currentSvg;
+  symModal.classList.add('open');
+
+  /* live preview on input */
+  ta.oninput = ()=>{ preview.innerHTML = ta.value; };
+
+  symModal.querySelector('#btnSymApply').onclick = ()=>{
+    c.customDraw = ta.value;
+    historyPush();
+    renderComps();
+  };
+
+  symModal.querySelector('#btnSymReset').onclick = ()=>{
+    c.customDraw = null;
+    ta.value = d.draw(c);
+    preview.innerHTML = ta.value;
+    historyPush();
+    renderComps();
+  };
+
+  const close = ()=>symModal.classList.remove('open');
+  symModal.querySelector('#btnSymClose').onclick = close;
+  symModal.onclick = e=>{ if(e.target === symModal) close(); };
 }
 
 export function renderProps(){
@@ -395,6 +469,7 @@ export function renderProps(){
       <div class="field"><label for="fDes">Designator</label>
         <input type="text" id="fDes" value="${esc(c.des)}"></div>
       <button id="btnRot">Rotate 90° (R)</button>
+      <button id="btnEditSym">Edit symbol SVG</button>
       <button id="btnDel" class="danger">Delete component</button>
       <p class="hint">Wires attached to this part are deleted with it.</p>`;
     if(c.type!=='note') document.querySelector('#fLabel').oninput=e=>{c.label=e.target.value;renderComps();};
@@ -417,6 +492,7 @@ export function renderProps(){
           if(d.getHeight) c.pins=d.getPins(c.ioCount ?? c.pinCount ?? 4);
           else c.pins=d.getPins(c.variant);
         }
+        historyPush();
         render();
       };
     }
@@ -516,8 +592,9 @@ export function renderProps(){
       fnva.onchange=e=>{c.vAlign=e.target.value;renderComps();};
     }
     document.querySelector('#fDes').oninput=e=>{c.des=e.target.value;renderComps();};
-    document.querySelector('#btnRot').onclick=()=>{c.r=((c.r||0)+90)%360;render();};
-    document.querySelector('#btnDel').onclick=()=>{deleteSelection();render();};
+    document.querySelector('#btnRot').onclick=()=>{c.r=((c.r||0)+90)%360;historyPush();render();};
+    document.querySelector('#btnEditSym').onclick=()=>openSymbolEditor(c);
+    document.querySelector('#btnDel').onclick=()=>{deleteSelection();historyPush();render();};
   } else if(state.sel&&state.sel.kind==='wire'){
     const w=state.wires.find(w=>w.id===state.sel.id);
     el.innerHTML=`<h2>Wire</h2>
@@ -532,13 +609,13 @@ export function renderProps(){
       <button id="btnStraight" ${w.wp&&w.wp.length?'':'disabled'}>Straighten (${(w.wp||[]).length} guide pts)</button>
       <button id="btnDel" class="danger">Delete wire</button>
       <p class="hint"><b>Routing:</b> double-click the wire to add a guide point, drag the amber squares to steer it around parts, double-click a square to remove it.</p>`;
-    el.querySelectorAll('[data-wc]').forEach(b=>b.onclick=()=>{w.color=b.dataset.wc;render();});
-    el.querySelectorAll('[data-wt]').forEach(b=>b.onclick=()=>{w.tracer=b.dataset.wt;render();});
-    document.querySelector('#fGauge').onchange=e=>{w.gauge=e.target.value;render();};
+    el.querySelectorAll('[data-wc]').forEach(b=>b.onclick=()=>{w.color=b.dataset.wc;historyPush();render();});
+    el.querySelectorAll('[data-wt]').forEach(b=>b.onclick=()=>{w.tracer=b.dataset.wt;historyPush();render();});
+    document.querySelector('#fGauge').onchange=e=>{w.gauge=e.target.value;historyPush();render();};
     document.querySelector('#fLengthMm').oninput=e=>{w.lengthMm=e.target.value;renderWires();};
     document.querySelector('#fShowWireLabels').onchange=e=>{state.showWireLabels=!!e.target.checked;renderWires();};
-    document.querySelector('#btnStraight').onclick=()=>{w.wp=[];render();};
-    document.querySelector('#btnDel').onclick=()=>{deleteSelection();render();};
+    document.querySelector('#btnStraight').onclick=()=>{w.wp=[];historyPush();render();};
+    document.querySelector('#btnDel').onclick=()=>{deleteSelection();historyPush();render();};
   } else {
     el.innerHTML=`<h2>Next wire</h2>
       <div class="field"><label>Base color</label>${swatches(state.wireDefaults.color,'dc',false)}</div>
@@ -548,7 +625,7 @@ export function renderProps(){
       <div class="field"><label for="fLengthMm">Length (mm)</label>
         <input type="number" id="fLengthMm" min="0" step="1" value="${esc(state.wireDefaults.lengthMm||'')}"></div>
       <div class="field"><label><input type="checkbox" id="fShowWireLabels" ${state.showWireLabels?'checked':''}> Show wire labels in schematic</label></div>
-      <p class="hint"><b>How to wire:</b> click a pin, then click canvas to add guide points, then click destination pin. New wires use these settings; select any wire later to change it.<br><br><b>Routing:</b> double-click a wire to add a draggable guide point.<br><br><b>Keys:</b> Del removes selection · Esc cancels a pending wire · arrow keys nudge the selected part (Shift for 1px steps).</p>`;
+      <p class="hint"><b>How to wire:</b> click a pin, then click canvas to add guide points, then click destination pin. New wires use these settings; select any wire later to change it.<br><br><b>Routing:</b> double-click a wire to add a draggable guide point.<br><br><b>Keys:</b> Del removes selection · Esc cancels a pending wire · arrow keys nudge the selected part (Shift for 1px steps) · Ctrl+Z undo · Ctrl+Y redo · Ctrl+C/V copy/paste · middle-drag pans.</p>`;
     el.querySelectorAll('[data-dc]').forEach(b=>b.onclick=()=>{state.wireDefaults.color=b.dataset.dc;renderProps();});
     el.querySelectorAll('[data-dt]').forEach(b=>b.onclick=()=>{state.wireDefaults.tracer=b.dataset.dt;renderProps();});
     document.querySelector('#fGauge').onchange=e=>{state.wireDefaults.gauge=e.target.value;};
