@@ -4,6 +4,7 @@ import { DIN, DIN_MERMAID } from './constants.js';
 import { LIB, IGN_POSITIONS, shouldApplyPresetPins } from './components.js';
 import { state, esc, comp } from './state.js';
 import { render, svg, wiresL, compsL, renderWires, renderComps, applyView } from './render.js';
+import { historyInit, historyUndo, historyRedo } from './history.js';
 
 let modalFile='export.txt';
 
@@ -86,8 +87,13 @@ function openModal(title,text,fname){
 export function setupIOButtons(){
   document.querySelector('#btnNew').onclick=()=>{
     if(state.comps.length&&!confirm('Clear the whole diagram?'))return;
-    state.comps=[];state.wires=[];state.counters={};state.nextId=1;state.sel=null;state.pending=null;state.pendingWp=[];state.connectCandidate=null;state.trace=null;state.cascade=0;render();
+    state.comps=[];state.wires=[];state.counters={};state.nextId=1;state.sel=null;state.pending=null;state.pendingWp=[];state.connectCandidate=null;state.trace=null;state.cascade=0;
+    historyInit();
+    render();
   };
+
+  document.querySelector('#btnUndo').onclick=()=>historyUndo(render);
+  document.querySelector('#btnRedo').onclick=()=>historyRedo(render);
   
   document.querySelector('#btnFit').onclick=()=>{
     if(!state.comps.length)return;
@@ -118,6 +124,7 @@ export function setupIOButtons(){
     f.text().then(t=>{
       try{
         applyLoadedData(JSON.parse(t));
+        historyInit();
         render();document.querySelector('#btnFit').click();
       }catch{ alert('That file is not a Harness Bench JSON export.'); }
     });
@@ -165,7 +172,7 @@ function mid(s){return String(s).replace(/[^A-Za-z0-9_]/g,'_');}
 
 export function buildMermaid(){
   const L=[];
-  L.push(`%%{init: {"theme":"base","themeVariables":{"primaryColor":"#f5f5f5","primaryBorderColor":"#616161","primaryTextColor":"#000000","lineColor":"#9e9e9e","edgeLabelBackground":"#ffffff","clusterBkg":"#fdf6ec","clusterBorder":"#8d6e63","titleColor":"#000000","fontSize":"14px"}}}%%`);
+  L.push(`%%{init: {"theme":"base","themeVariables":{"primaryColor":"#f5f5f5","primaryBorderColor":"#616161","primaryTextColor":"#000000","lineColor":"#9e9e9e","edgeLabelBackground":"#ffffff","clusterBkg":"#fdf6ec","clusterBorder":"#8d6e63","titleColor":"#000000","fontSize":"14px"},"flowchart":{"curve":"linear","rankSpacing":80,"nodeSpacing":40}}}%%`);
   L.push('flowchart LR');
   L.push('classDef power fill:#fff3c4,stroke:#b8860b,stroke-width:2px,color:#000');
   L.push('classDef battery fill:#263238,stroke:#f9a825,stroke-width:2.5px,color:#ffd600');

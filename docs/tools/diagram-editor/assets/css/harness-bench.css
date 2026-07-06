@@ -152,6 +152,31 @@ button.danger:hover{border-color:var(--danger);color:var(--danger)}
 #modal .row{display:flex;gap:8px;align-items:center}
 #modal h3{color:var(--amber);letter-spacing:.12em;font-size:12px;text-transform:uppercase;font-weight:400}
 
+/* symbol editor modal */
+#symModal{
+  position:fixed;inset:0;background:rgba(0,0,0,.6);
+  display:none;align-items:center;justify-content:center;z-index:11;
+}
+#symModal.open{display:flex}
+#symModal .box{
+  width:min(820px,94vw);max-height:90vh;display:flex;flex-direction:column;
+  background:var(--panel);border:1px solid var(--panel-edge);border-radius:6px;padding:14px;gap:10px;
+}
+#symModal h3{color:var(--amber);letter-spacing:.12em;font-size:12px;text-transform:uppercase;font-weight:400}
+.sym-hint{color:var(--ink-dim);font-size:11px;line-height:1.5}
+.sym-layout{display:flex;gap:12px;flex:1;min-height:0}
+#symText{
+  flex:1;min-height:260px;background:var(--mat-deep);color:var(--ink);
+  border:1px solid var(--panel-edge);border-radius:4px;
+  font-family:var(--mono);font-size:11px;padding:8px;white-space:pre;resize:none;
+}
+#symPreviewWrap{
+  flex:none;background:var(--mat-deep);border:1px solid var(--panel-edge);border-radius:4px;
+  display:flex;align-items:center;justify-content:center;padding:8px;
+}
+#symPreview{display:block;object-fit:contain}
+#symModal .row{display:flex;gap:8px;align-items:center}
+
 @media (max-width:760px){
   #props{position:absolute;right:0;top:0;bottom:0;z-index:5;box-shadow:-6px 0 18px rgba(0,0,0,.4);padding-right:26px}
   #palette{width:104px}

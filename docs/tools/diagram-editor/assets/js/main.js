@@ -4,6 +4,7 @@ import { buildPalette, setupSVGHandlers } from './lib/interactions.js';
 import { seed } from './lib/seed.js';
 import { render, initRenderRefs, applyView } from './lib/render.js';
 import { setupIOButtons } from './lib/io.js';
+import { historyInit } from './lib/history.js';
 
 /* palette/properties panels can be hidden via their edge tabs to
    reclaim canvas width — most useful on narrow (phone) screens,
@@ -57,6 +58,7 @@ function boot(){
 
   // Load and render demo circuit
   seed();
+  historyInit();
   render();
   applyView();
   document.querySelector('#btnFit').click();
