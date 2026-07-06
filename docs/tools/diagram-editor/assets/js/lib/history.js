@@ -49,7 +49,7 @@ export function historyPush(){
 }
 
 export function historyUndo(renderFn){
-  if(ptr <= 0) return false;   // nothing to undo past the initial snapshot
+  if(ptr <= 0) return false;   // ptr=0 is the initial snapshot; nothing further to undo
   ptr--;
   restore(stack[ptr]);
   renderFn();

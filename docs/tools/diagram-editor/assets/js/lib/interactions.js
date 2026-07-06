@@ -695,6 +695,10 @@ window.addEventListener('keydown',e=>{
       /* only include wires whose endpoints have been remapped to new IDs */
       cloned.a = {comp: idMap[w.a.comp] ?? null, pin: w.a.pin};
       cloned.b = {comp: idMap[w.b.comp] ?? null, pin: w.b.pin};
+      /* offset absolute guide-point coordinates to match the pasted position */
+      if(cloned.wp && cloned.wp.length){
+        cloned.wp = cloned.wp.map(p=>({x: p.x+offset, y: p.y+offset}));
+      }
       return cloned;
     }).filter(w=>w.a.comp !== null && w.b.comp !== null);
     state.comps.push(...newComps);
