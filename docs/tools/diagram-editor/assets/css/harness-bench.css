@@ -174,7 +174,7 @@ button.danger:hover{border-color:var(--danger);color:var(--danger)}
   flex:none;background:var(--mat-deep);border:1px solid var(--panel-edge);border-radius:4px;
   display:flex;align-items:center;justify-content:center;padding:8px;
 }
-#symPreview{display:block;overflow:visible}
+#symPreview{display:block;object-fit:contain}
 #symModal .row{display:flex;gap:8px;align-items:center}
 
 @media (max-width:760px){
