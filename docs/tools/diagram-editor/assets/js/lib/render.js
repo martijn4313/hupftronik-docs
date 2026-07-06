@@ -187,7 +187,7 @@ export function renderComps(){
       ${selRect}
       <g class="comp-body" data-comp="${c.id}">
         <rect x="-6" y="-6" width="${compW+12}" height="${compH+12}" fill="rgba(0,0,0,0)"/>
-        ${c.customDraw != null ? c.customDraw : d.draw(c)}
+        ${c.customDraw !== null && c.customDraw !== undefined ? c.customDraw : d.draw(c)}
       </g>
       <text class="comp-text" data-comp="${c.id}" data-role="des" transform="rotate(${invR}, ${desBase.x+desOff.x}, ${desBase.y+desOff.y})"
             x="${desBase.x+desOff.x}" y="${desBase.y+desOff.y}" fill="#f9a825" font-size="11" text-anchor="middle"
@@ -277,7 +277,7 @@ export function deleteSelection(){
 function openSymbolEditor(c){
   const d = LIB[c.type];
   /* get the current SVG fragment — either the custom override or the library default */
-  const currentSvg = c.customDraw != null ? c.customDraw : d.draw(c);
+  const currentSvg = c.customDraw !== null && c.customDraw !== undefined ? c.customDraw : d.draw(c);
 
   /* inject the symbol-editor modal if it doesn't exist yet */
   let symModal = document.querySelector('#symModal');
@@ -321,10 +321,15 @@ function openSymbolEditor(c){
   wrap.style.height = ph + 'px';
 
   /* Safely update the preview SVG using DOMParser so that script elements
-     in the user-supplied fragment are never executed. */
+     in the user-supplied fragment are never executed.
+     As defence-in-depth, also strip <script> tags and on* event attributes. */
   function safeSetPreview(svgFragment){
+    /* remove script tags and on* event attributes from the raw text first */
+    const stripped = svgFragment
+      .replace(/<script[\s\S]*?<\/script>/gi, '')
+      .replace(/\bon\w+\s*=/gi, 'data-removed=');
     const doc = new DOMParser().parseFromString(
-      `<svg xmlns="http://www.w3.org/2000/svg">${svgFragment}</svg>`, 'image/svg+xml');
+      `<svg xmlns="http://www.w3.org/2000/svg">${stripped}</svg>`, 'image/svg+xml');
     /* DOMParser returns a parsing-error document on failure — check for it */
     if(doc.querySelector('parsererror')){ return; }
     while(preview.firstChild) preview.removeChild(preview.firstChild);

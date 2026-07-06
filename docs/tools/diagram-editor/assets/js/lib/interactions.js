@@ -692,10 +692,11 @@ window.addEventListener('keydown',e=>{
     const newWires = (clipboard.wires||[]).map(w=>{
       const cloned = structuredClone(w);
       cloned.id = uid();
-      cloned.a = {comp: idMap[w.a.comp]??w.a.comp, pin: w.a.pin};
-      cloned.b = {comp: idMap[w.b.comp]??w.b.comp, pin: w.b.pin};
+      /* only include wires whose endpoints have been remapped to new IDs */
+      cloned.a = {comp: idMap[w.a.comp] ?? null, pin: w.a.pin};
+      cloned.b = {comp: idMap[w.b.comp] ?? null, pin: w.b.pin};
       return cloned;
-    }).filter(w=>w.a.comp!=null&&w.b.comp!=null);
+    }).filter(w=>w.a.comp !== null && w.b.comp !== null);
     state.comps.push(...newComps);
     state.wires.push(...newWires);
     if(newComps.length) state.sel={kind:'comp', id:newComps[newComps.length-1].id};
