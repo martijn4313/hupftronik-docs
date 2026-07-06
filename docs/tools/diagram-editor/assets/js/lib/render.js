@@ -320,12 +320,25 @@ function openSymbolEditor(c){
   wrap.style.width = pw + 'px';
   wrap.style.height = ph + 'px';
 
+  /* Safely update the preview SVG using DOMParser so that script elements
+     in the user-supplied fragment are never executed. */
+  function safeSetPreview(svgFragment){
+    const doc = new DOMParser().parseFromString(
+      `<svg xmlns="http://www.w3.org/2000/svg">${svgFragment}</svg>`, 'image/svg+xml');
+    /* DOMParser returns a parsing-error document on failure — check for it */
+    if(doc.querySelector('parsererror')){ return; }
+    while(preview.firstChild) preview.removeChild(preview.firstChild);
+    for(const node of doc.documentElement.childNodes){
+      preview.appendChild(document.importNode(node, true));
+    }
+  }
+
   ta.value = currentSvg;
-  preview.innerHTML = currentSvg;
+  safeSetPreview(currentSvg);
   symModal.classList.add('open');
 
   /* live preview on input */
-  ta.oninput = ()=>{ preview.innerHTML = ta.value; };
+  ta.oninput = ()=>{ safeSetPreview(ta.value); };
 
   symModal.querySelector('#btnSymApply').onclick = ()=>{
     c.customDraw = ta.value;
@@ -336,7 +349,7 @@ function openSymbolEditor(c){
   symModal.querySelector('#btnSymReset').onclick = ()=>{
     c.customDraw = null;
     ta.value = d.draw(c);
-    preview.innerHTML = ta.value;
+    safeSetPreview(ta.value);
     historyPush();
     renderComps();
   };

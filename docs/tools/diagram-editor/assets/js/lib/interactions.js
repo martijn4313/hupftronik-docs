@@ -349,6 +349,11 @@ function getPinchState(){
   };
 }
 
+function startPan(e){
+  drag={mode:'pan',sx:e.clientX,sy:e.clientY,vx:state.view.x,vy:state.view.y,moved:false};
+  svg.setPointerCapture(e.pointerId);
+}
+
 export function setupSVGHandlers(){
   svg.addEventListener('pointerdown',e=>{
   activePointers.set(e.pointerId, {clientX: e.clientX, clientY: e.clientY});
@@ -362,8 +367,7 @@ export function setupSVGHandlers(){
   /* middle button (button===1): pan only, never select/interact */
   if(e.button === 1){
     e.preventDefault();
-    drag={mode:'pan',sx:e.clientX,sy:e.clientY,vx:state.view.x,vy:state.view.y,moved:false};
-    svg.setPointerCapture(e.pointerId);
+    startPan(e);
     return;
   }
   const handle=e.target.closest('.wp-handle');
@@ -513,8 +517,7 @@ export function setupSVGHandlers(){
     return;
   }
   /* background: pan; click clears selection */
-  drag={mode:'pan',sx:e.clientX,sy:e.clientY,vx:state.view.x,vy:state.view.y,moved:false};
-  svg.setPointerCapture(e.pointerId);
+  startPan(e);
 });
 
 svg.addEventListener('pointermove',e=>{
@@ -665,7 +668,7 @@ window.addEventListener('keydown',e=>{
   if((e.ctrlKey||e.metaKey) && e.key.toLowerCase()==='c'){
     if(state.sel&&state.sel.kind==='comp'){
       const c = comp(state.sel.id);
-      if(c) setClipboard({comps:[JSON.parse(JSON.stringify(c))], wires:[]});
+      if(c) setClipboard({comps:[structuredClone(c)], wires:[]});
     }
     return;
   }
@@ -678,16 +681,21 @@ window.addEventListener('keydown',e=>{
     /* remap ids: old → new */
     const idMap = {};
     const newComps = clipboard.comps.map(c=>{
+      const cloned = structuredClone(c);
       const newId = uid();
       idMap[c.id] = newId;
-      return {...JSON.parse(JSON.stringify(c)), id:newId, x:c.x+offset, y:c.y+offset};
+      cloned.id = newId;
+      cloned.x = c.x + offset;
+      cloned.y = c.y + offset;
+      return cloned;
     });
-    const newWires = (clipboard.wires||[]).map(w=>({
-      ...JSON.parse(JSON.stringify(w)),
-      id: uid(),
-      a: {comp: idMap[w.a.comp]??w.a.comp, pin: w.a.pin},
-      b: {comp: idMap[w.b.comp]??w.b.comp, pin: w.b.pin}
-    })).filter(w=>w.a.comp!=null&&w.b.comp!=null);
+    const newWires = (clipboard.wires||[]).map(w=>{
+      const cloned = structuredClone(w);
+      cloned.id = uid();
+      cloned.a = {comp: idMap[w.a.comp]??w.a.comp, pin: w.a.pin};
+      cloned.b = {comp: idMap[w.b.comp]??w.b.comp, pin: w.b.pin};
+      return cloned;
+    }).filter(w=>w.a.comp!=null&&w.b.comp!=null);
     state.comps.push(...newComps);
     state.wires.push(...newWires);
     if(newComps.length) state.sel={kind:'comp', id:newComps[newComps.length-1].id};

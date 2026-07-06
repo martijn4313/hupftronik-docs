@@ -10,9 +10,10 @@ const MAX_HISTORY = 80;
 let stack = [];   // array of JSON strings (serialised snapshots)
 let ptr   = -1;   // current position within stack
 
-/* Serialise just the diagram-content fields */
+/* Capture just the diagram-content fields as a deep clone.
+   structuredClone avoids JSON round-trips and handles all data types. */
 function snapshot(){
-  return JSON.stringify({
+  return structuredClone({
     comps:    state.comps,
     wires:    state.wires,
     nextId:   state.nextId,
@@ -20,13 +21,12 @@ function snapshot(){
   });
 }
 
-/* Restore diagram content from a snapshot string */
+/* Restore diagram content from a snapshot */
 function restore(snap){
-  const s = JSON.parse(snap);
-  state.comps    = s.comps;
-  state.wires    = s.wires;
-  state.nextId   = s.nextId;
-  state.counters = s.counters;
+  state.comps    = structuredClone(snap.comps);
+  state.wires    = structuredClone(snap.wires);
+  state.nextId   = snap.nextId;
+  state.counters = structuredClone(snap.counters);
   /* clear transient selection/pending so we don't reference stale IDs */
   state.sel  = null;
   state.pending   = null;
@@ -49,7 +49,7 @@ export function historyPush(){
 }
 
 export function historyUndo(renderFn){
-  if(ptr <= 0) return false;   // nothing to undo (ptr 0 = initial state)
+  if(ptr <= 0) return false;   // nothing to undo past the initial snapshot
   ptr--;
   restore(stack[ptr]);
   renderFn();
