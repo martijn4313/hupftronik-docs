@@ -364,6 +364,14 @@ export function setupSVGHandlers(){
     pinchLastDist = ps ? ps.dist : null;
     return;
   }
+  /* right button (button===2): cancel an in-progress wire connection */
+  if(e.button === 2){
+    e.preventDefault();
+    if(state.pending){
+      state.pending=null;state.pendingWp=[];state.connectCandidate=null;render();
+    }
+    return;
+  }
   /* middle button (button===1): pan only, never select/interact */
   if(e.button === 1){
     e.preventDefault();
@@ -637,6 +645,10 @@ svg.addEventListener('pointercancel',e=>{
   activePointers.delete(e.pointerId);
   if(activePointers.size < 2) pinchLastDist = null;
   drag=null;
+});
+
+svg.addEventListener('contextmenu',e=>{
+  e.preventDefault();
 });
 
 svg.addEventListener('wheel',e=>{

@@ -135,17 +135,26 @@ export function setupIOButtons(){
     const prevSel=state.sel, prevPend=state.pending, prevWp=state.pendingWp; state.sel=null;state.pending=null;state.pendingWp=[];render();
     const inner=wiresL.outerHTML+compsL.outerHTML;
     state.sel=prevSel;state.pending=prevPend;state.pendingWp=prevWp;render();
-    let x1=1e9,y1=1e9,x2=-1e9,y2=-1e9;
-    for(const c of state.comps){
-      const d=LIB[c.type];
-      let h=d.h;
-      if(d.getHeight){
-        h = d.getHeight(c.ioCount ?? c.pinCount ?? 4);
-      }
-      x1=Math.min(x1,c.x-30);y1=Math.min(y1,c.y-30);
-      x2=Math.max(x2,c.x+d.w+30);y2=Math.max(y2,c.y+h+30);
+
+    // Measure the actual rendered content so labels, pin text and wire
+    // routes are included in the export bounds (the old component-box
+    // approximation cropped some of them).
+    let x1,y1,x2,y2;
+    const measureG=document.createElementNS('http://www.w3.org/2000/svg','g');
+    try{
+      measureG.innerHTML=inner;
+      svg.appendChild(measureG);
+      const bbox=measureG.getBBox();
+      svg.removeChild(measureG);
+      const pad=20;
+      x1=bbox.x-pad; y1=bbox.y-pad;
+      x2=bbox.x+bbox.width+pad; y2=bbox.y+bbox.height+pad;
+    }catch(e){
+      if(measureG.parentNode) svg.removeChild(measureG);
+      x1=0;y1=0;x2=800;y2=600;
     }
-    if(x1>x2){x1=0;y1=0;x2=800;y2=600;}
+    if(x1>=x2||y1>=y2||!isFinite(x1)){x1=0;y1=0;x2=800;y2=600;}
+
     const out=`<svg xmlns="http://www.w3.org/2000/svg" viewBox="${x1} ${y1} ${x2-x1} ${y2-y1}"
   font-family="ui-monospace,Consolas,monospace">
   <rect x="${x1}" y="${y1}" width="${x2-x1}" height="${y2-y1}" fill="#15181b"/>
