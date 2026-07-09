@@ -96,7 +96,7 @@ To protect the switching MOSFETs from the high-voltage inductive "kickback" gene
 
 *   **How it Works:** When the driver turns off, the magnetic field in the injector coil collapses, generating a high-voltage spike. Once this voltage exceeds the Zener diode threshold, current flows back into the MOSFET's Gate. This turns the MOSFET slightly back on (into its linear region) to dissipate the inductive energy safely across its silicon channel.
 
-*  **Fast Injector Closing:** By clamping the inductive spike at a relatively high voltage ($36\text{V}$ in the case of the Motorsteuergerät 24P V1), the magnetic field is forced to collapse rapidly. This results in fast and repeatable injector closing times, minimizing injector lag.
+*  **Fast Injector Closing:** By clamping the inductive spike at a relatively high voltage (settling to $\approx 49\ \text{V}$ on the Motorsteuergerät 24P V1), the magnetic field is forced to collapse rapidly. This results in fast and repeatable injector closing times, minimizing injector lag.
 
 *  **Thermal Distribution:** The robust MOSFET silicon absorbs the bulk of the thermal energy spike, preventing small, discrete diodes on the board from overheating.
 
@@ -106,6 +106,60 @@ Unlike the injectors, the Idle Air Control (`IAC`) channel operates under contin
 *  **The Continuous Duty Challenge:** Because the `IAC` switch cycle repeats thousands of times per minute, using active clamping would dump continuous thermal energy into the MOSFET, leading to rapid overheating.
 
 *  **The Solution:** The `IAC` channel features a dedicated **Freewheeling Diode** routed to $+12\ \text{V}$. When the channel switches off, the inductive current recirculates through this diode at a low voltage drop ($\approx 0.7\ \text{V}$). This shifts the thermal dissipation away from the MOSFET, keeping the driver cool during sustained PWM operation.
+
+#### 4.3.3. Clamp & Switching Verification
+The active clamp circuit and turn-on performance have been verified using an oscilloscope.
+
+![Active Clamp & Switching Scope Capture](./active_clamp_scope.png)
+
+The scope capture shows the MOSFET Drain voltage ($V_{\mathrm{DS}}$, blue) and Gate drive
+($V_{\mathrm{GS}}$, yellow) as the injector turns off. During the brief Zener turn-on delay the
+Drain briefly spikes to about $77\ \text{V}$ before the active clamp settles to a stable
+$\approx 49\ \text{V}$ plateau. This is expected behavior and is safe for the IRLR2905.
+
+??? tip "Why a 77 V spike is safe for the MOSFET"
+    Although the $77\ \text{V}$ peak exceeds the IRLR2905's rated Drain-to-Source breakdown
+    voltage ($V_{\mathrm{DSS}} = 55\ \text{V}$), the MOSFET is not harmed. Under this ultra-short
+    sub-microsecond transient, the device enters its rated **avalanche breakdown** region. Modern
+    power MOSFETs are fully avalanche-rated, and the tiny amount of energy transferred during this
+    $276\ \text{ns}$ window is orders of magnitude below the transistor's single-pulse avalanche
+    energy limit ($E_{\mathrm{AS}} = 210\ \text{mJ}$), repetitive avalanche limit
+    ($E_{\mathrm{AR}} = 11\ \text{mJ}$), and peak avalanche current ($I_{\mathrm{AR}} = 25\ \text{A}$),
+    allowing it to safely absorb the spike.
+
+    ??? note "Show avalanche energy calculation"
+        The exact avalanche energy is $E = \int V_{\mathrm{DS}}(t) I_{\mathrm{D}}(t)\,\mathrm{d}t$
+        and requires the Drain-current waveform. The $25\ \text{A}$ figure is the MOSFET's
+        maximum rated avalanche current ($I_{\mathrm{AR}}$), not the actual injector current.
+        A far more realistic upper-bound is the peak injector-bank current from §A.1.1,
+        $4.67\ \text{A}$ (four injectors in parallel at $14\ \text{V}$). Assuming the full
+        $77\ \text{V}$ peak and that $4.67\ \text{A}$ persist throughout the complete
+        $276\ \text{ns}$ interval:
+
+        $$E_{\mathrm{avalanche}} \leq V \cdot I \cdot t = 77\ \text{V} \cdot 4.67\ \text{A} \cdot 276\ \text{ns} \approx 0.099\ \text{mJ} = 9.9 \times 10^{-5}\ \text{J}$$
+
+        So the energy deposited in the MOSFET during the 276 ns Zener turn-on delay is at most
+        **about $0.1\ \text{mJ}$** — roughly **one tenth of a millijoule**, or
+        **$1 \times 10^{-4}\ \text{J}$**. The real energy is lower because both voltage and
+        current vary during the transient, and the actual turn-off current is usually below the
+        $4.67\ \text{A}$ peak. Even this conservative estimate is far below the
+        $210\ \text{mJ}$ single-pulse avalanche-energy rating.
+
+??? note "Scope capture walkthrough"
+    *   **Active Clamping in Action:** The blue trace represents the MOSFET Drain voltage
+        ($V_{\mathrm{DS}}$), and the yellow trace is the Gate drive ($V_{\mathrm{GS}}$). When the
+        Gate drive switches to $0\ \text{V}$ and the injector turns off, the inductive "kickback"
+        causes the Drain voltage to spike.
+    *   **Zener Turn-On Delay ($276\ \text{ns}$):** There is a short transient period of
+        **$276\ \text{ns}$** representing the duration it takes for the feedback $36\ \text{V}$
+        Zener diode (in series with a 1N4148 blocking diode) to fully turn on and start conducting.
+        During this brief delay, the Drain voltage temporarily spikes to **$\approx 77\ \text{V}$**.
+    *   **Clamping Plateau:** Once the Zener diode fully activates and delivers charge back to the
+        MOSFET Gate, the active clamp settles neatly to a stable plateau of **$\approx 49\ \text{V}$**.
+        The actual clamp voltage is higher than the $36\ \text{V}$ Zener rating because of the low
+        gate resistor value and the additional voltage drop across the 1N4148 blocking diode. This
+        high-voltage clamp minimizes injector closing times and safely dissipates the magnetic
+        energy across the silicon channel.
 
 ---
 
