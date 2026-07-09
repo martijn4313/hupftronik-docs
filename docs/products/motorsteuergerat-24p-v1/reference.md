@@ -112,10 +112,12 @@ The active clamp circuit and turn-on performance have been verified using an osc
 
 ![Active Clamp & Switching Scope Capture](./active_clamp_scope.png)
 
-The scope capture shows the MOSFET Drain voltage ($V_{\mathrm{DS}}$, blue) and Gate drive
-($V_{\mathrm{GS}}$, yellow) as the injector turns off. During the brief Zener turn-on delay the
-Drain briefly spikes to about $77\ \text{V}$ before the active clamp settles to a stable
-$\approx 49\ \text{V}$ plateau. This is expected behavior and is safe for the IRLR2905.
+The scope capture shows the MOSFET Drain voltage ($V_{\mathrm{DS}}$, blue) and the buffer
+output that drives the gate (yellow) as the injector turns off. The yellow trace is measured
+*before* the gate resistor, so it shows the logic-side Gate-drive command rather than the exact
+$V_{\mathrm{GS}}$ at the MOSFET pin. During the brief Zener turn-on delay the Drain briefly
+spikes to about $77\ \text{V}$ before the active clamp settles to a stable $\approx 49\ \text{V}$
+plateau. This is expected behavior and is safe for the IRLR2905.
 
 ??? tip "Why a 77 V spike is safe for the MOSFET"
     Although the $77\ \text{V}$ peak exceeds the IRLR2905's rated Drain-to-Source breakdown
@@ -147,9 +149,11 @@ $\approx 49\ \text{V}$ plateau. This is expected behavior and is safe for the IR
 
 ??? note "Scope capture walkthrough"
     *   **Active Clamping in Action:** The blue trace represents the MOSFET Drain voltage
-        ($V_{\mathrm{DS}}$), and the yellow trace is the Gate drive ($V_{\mathrm{GS}}$). When the
-        Gate drive switches to $0\ \text{V}$ and the injector turns off, the inductive "kickback"
-        causes the Drain voltage to spike.
+        ($V_{\mathrm{DS}}$), and the yellow trace is the buffer output that drives the gate
+        (measured *before* the gate resistor, so it represents the logic-side Gate-drive command
+        rather than the exact $V_{\mathrm{GS}}$ at the MOSFET pin). When the Gate drive switches
+        to $0\ \text{V}$ and the injector turns off, the inductive "kickback" causes the Drain
+        voltage to spike.
     *   **Zener Turn-On Delay ($276\ \text{ns}$):** There is a short transient period of
         **$276\ \text{ns}$** representing the duration it takes for the feedback $36\ \text{V}$
         Zener diode (in series with a 1N4148 blocking diode) to fully turn on and start conducting.
