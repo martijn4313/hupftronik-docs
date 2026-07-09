@@ -91,18 +91,19 @@ throttle-position sensor (TPS) / potentiometer connected as the source.
 | Measured ripple ($V_\mathrm{r}$) | $0.953\ \text{mV}$ |
 | DC average | $0.00\ \text{mV}$ |
 
-The trace shows the residual noise after the resistor divider and $100\ \text{nF}$ shunt capacitor.
-The ripple is well under $1\ \text{mV}_\mathrm{RMS}$ and appears as random broadband noise rather
+The trace shows the residual noise at the MCU pin *after* the voltage-divider drops the 0–5 V sensor level down to the 0–3.24 V processor-friendly input range (with an active signal span of $\approx 3.15\ \text{V}$). 
+
+Because the noise is measured at this scaled-down node, the Signal-to-Noise Ratio (SNR) compared to the active span is incredibly high:
+
+$$\text{SNR} = 20 \log_{10}\left(\frac{3.15\ \text{V}}{0.953\ \text{mV}}\right) \approx 70.4\ \text{dB}$$
+
+The peak-to-peak ripple is well under $1\ \text{mV}$ and appears as random broadband noise rather
 than coherent interference. For the MCU's $3.3\ \text{V}$ ADC, a 12-bit conversion has roughly
-$0.8\ \text{mV/LSB}$, so this residual noise sits at about one LSB — low enough that normal
+$0.806\ \text{mV/LSB}$, so this residual noise sits at just about one LSB — low enough that normal
 oversampling or firmware filtering keeps the sensor reading stable.
 
 !!! tip "What this means in practice"
-    A TPS typically swings from $\sim 0.5\ \text{V}$ to $\sim 4.5\ \text{V}$, giving the ECU a
-    $\sim 4\ \text{V}$ usable range. Sub-millivolt noise is therefore negligible for throttle
-    position and similarly sized sensor signals. If you see much larger ripple in your own build,
-    check sensor ground routing, the $+5\ \text{V}$ reference return path, and whether the input
-    is picking up switching noise from injector or ignition wiring.
+    A TPS typically swings from $\sim 0.5\ \text{V}$ to $\sim 4.5\ \text{V}$ at the board's connector, which corresponds to $\sim 0.32\ \text{V}$ to $\sim 2.92\ \text{V}$ at the MCU pin after the divider, giving a $\approx 2.6\ \text{V}$ active signal span. Sub-millivolt noise is entirely negligible for this throttle position signal. If you see much larger ripple in your own build, check sensor ground routing, the $+5\ \text{V}$ reference return path, and whether the input is picking up switching noise from injector or ignition wiring.
 
 ---
 
