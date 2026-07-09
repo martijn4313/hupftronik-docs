@@ -77,6 +77,33 @@ Analog inputs are used to read sensors (like temperature or pressure). Because e
 
 *(For a detailed circuit breakdown, see **§A.3 Analog Input Topology** in the Technical Appendix)*
 
+### 3.3. Measured Noise at the MCU Pin
+
+The RC filter's effectiveness can be seen on a real scope capture taken at the MCU pin with a
+throttle-position sensor (TPS) / potentiometer connected as the source.
+
+![TPS Input Noise at MCU Pin](./input_noise_tps_pin_%20with_potentiometer.bmp)
+
+| Scope Setting | Value |
+| :--- | :--- |
+| Horizontal | $2.0\ \text{µs/div}$ (@ $1\ \text{GS/s}$) |
+| Channel 1 | $2.00\ \text{mV/div}$, BW limited, DC coupled |
+| Measured ripple ($V_\mathrm{r}$) | $0.953\ \text{mV}$ |
+| DC average | $0.00\ \text{mV}$ |
+
+The trace shows the residual noise after the resistor divider and $100\ \text{nF}$ shunt capacitor.
+The ripple is well under $1\ \text{mV}_\mathrm{RMS}$ and appears as random broadband noise rather
+than coherent interference. For the MCU's $3.3\ \text{V}$ ADC, a 12-bit conversion has roughly
+$0.8\ \text{mV/LSB}$, so this residual noise sits at about one LSB — low enough that normal
+oversampling or firmware filtering keeps the sensor reading stable.
+
+!!! tip "What this means in practice"
+    A TPS typically swings from $\sim 0.5\ \text{V}$ to $\sim 4.5\ \text{V}$, giving the ECU a
+    $\sim 4\ \text{V}$ usable range. Sub-millivolt noise is therefore negligible for throttle
+    position and similarly sized sensor signals. If you see much larger ripple in your own build,
+    check sensor ground routing, the $+5\ \text{V}$ reference return path, and whether the input
+    is picking up switching noise from injector or ignition wiring.
+
 ---
 
 ## 4. Outputs (Low-Side Drivers)
@@ -124,12 +151,11 @@ plateau. This is expected behavior and is safe for the IRLR2905.
     voltage ($V_{\mathrm{DSS}} = 55\ \text{V}$), the MOSFET is not harmed. Under this ultra-short
     sub-microsecond transient, the device enters its rated **avalanche breakdown** region. Modern
     power MOSFETs are fully avalanche-rated, and the tiny amount of energy transferred during this
-    $276\ \text{ns}$ window is orders of magnitude below the transistor's single-pulse avalanche
-    energy limit ($E_{\mathrm{AS}} = 210\ \text{mJ}$), repetitive avalanche limit
-    ($E_{\mathrm{AR}} = 11\ \text{mJ}$), and peak avalanche current ($I_{\mathrm{AR}} = 25\ \text{A}$),
-    allowing it to safely absorb the spike.
+    $276\ \text{ns}$ window is orders of magnitude below the transistor's avalanche ratings
+    ($E_{\mathrm{AS}} = 210\ \text{mJ}$, $E_{\mathrm{AR}} = 11\ \text{mJ}$,
+    $I_{\mathrm{AR}} = 25\ \text{A}$), allowing it to safely absorb the spike.
 
-    ??? note "Show avalanche energy calculation"
+    ??? example "Show avalanche energy calculation"
         The exact avalanche energy is $E = \int V_{\mathrm{DS}}(t) I_{\mathrm{D}}(t)\,\mathrm{d}t$
         and requires the Drain-current waveform. The $25\ \text{A}$ figure is the MOSFET's
         maximum rated avalanche current ($I_{\mathrm{AR}}$), not the actual injector current.
@@ -165,6 +191,7 @@ plateau. This is expected behavior and is safe for the IRLR2905.
         high-voltage clamp minimizes injector closing times and safely dissipates the magnetic
         energy across the silicon channel.
 
+
 ---
 
 ### 4.4. Output Summary Table
@@ -173,19 +200,19 @@ All low-side channels are rated for automotive voltage levels. Due to heat dissi
 
 | Channel | Controls | MOSFET Used | Datasheet Max ($I_D$ @ 25°C) | Board Design Limit |
 | :--- | :--- | :--- | :--- | :--- |
-| `INJ1` & `INJ2` | Fuel Injectors | `IRLR2905` (D-PAK) | `42 A` | **Thermally Limited** <br> Recommended **`< 5 A`** peak |
-| `IAC` | Idle Air Control (PWM) | `NCE6005AS` (SOIC-8) | `5 A` | **`< 2.0 A`** peak |
-| `BOOST` | Boost Solenoid | `NCE6005AS` (SOIC-8) | `5 A` | **`< 2.0 A`** peak |
-| `FAN_RELAY` | Cooling Fan Relay | `NCE6005AS` (SOIC-8) | `5 A` | **`< 2.0 A`** peak |
-| `FP_RELAY` | Fuel Pump Relay | `NCE6005AS` (SOIC-8) | `5 A` | **`< 2.0 A`** peak |
+| `INJ1` & `INJ2` | Fuel Injectors | `IRLR2905` (D-PAK) | `42 A` | **Heatsink-Dependent** <br> Recommended **`< 5 A`** peak |
+| `IAC` | Idle Air Control (PWM) | `NCE6005AS` (SOIC-8) | `5 A` | **Heatsink-Dependent** <br> **`< 2.0 A`** peak |
+| `BOOST` | Boost Solenoid | `NCE6005AS` (SOIC-8) | `5 A` | **Heatsink-Dependent** <br> **`< 2.0 A`** peak |
+| `FAN_RELAY` | Cooling Fan Relay | `NCE6005AS` (SOIC-8) | `5 A` | **Heatsink-Dependent** <br> **`< 2.0 A`** peak |
+| `FP_RELAY` | Fuel Pump Relay | `NCE6005AS` (SOIC-8) | `5 A` | **Heatsink-Dependent** <br> **`< 2.0 A`** peak |
 
 <small>\* *Note: The IRLR2905's silicon capability is high, but thermal performance on the PCB restricts actual continuous current. Refer to the thermal calculations in the Technical Appendix (§A.1–A.2) for multi-injector bank limit details.*</small>
 
-<small>\* *The `NCE6005AS` channels carry the same PCB-thermal-limit logic, scaled down: the SOIC-8
-package has a much smaller footprint and lower thermal mass than the IRLR2905's D-PAK, so its
-board-mounted derating is tighter in proportion. We haven't published a worked calculation for this
-package the way we have for the injector drivers (§A.1–A.2) — treat `< 2.0 A` as the practical
-continuous limit and avoid running it near the 5 A datasheet maximum on the PCB.*</small>
+<small>\* *The `NCE6005AS` channels are also heatsink-dependent, scaled down: the SOIC-8 package has
+a much smaller footprint and lower thermal mass than the IRLR2905's D-PAK, so its board-mounted
+derating is tighter in proportion. We haven't published a worked calculation for this package the
+way we have for the injector drivers (§A.1–A.2) — treat `< 2.0 A` as the practical continuous
+limit and avoid running it near the 5 A datasheet maximum on the PCB.*</small>
 
 ---
 
@@ -203,16 +230,11 @@ trigger line, keeping the edge clean over a real-world harness run into the engi
 
 | Specification | Value |
 | :--- | :--- |
-| Output type | $+5\ \text{V}$ logic-level trigger (push) |
+| Output type | $+5\ \text{V}$ logic-level trigger (push/pull) |
 | Driver | `NSG4437` |
 | Series resistance | $330\ \Omega$ per channel |
 | Intended load | External igniter input or smart-coil trigger input |
 | Channels | 2 (`IGN1`, `IGN2`) |
-
-!!! danger "Never connect a coil primary directly to IGN1/IGN2"
-    An ignition coil primary draws amps and generates a flyback spike of several hundred volts —
-    both far beyond what a logic-level output survives. Always switch the coil through an external
-    igniter (e.g. a Bosch 2-channel power stage) or use smart coils with integrated power stages.
 
 ### 5.2. Design Rationale
 
