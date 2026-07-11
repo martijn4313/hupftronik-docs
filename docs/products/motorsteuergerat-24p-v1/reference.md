@@ -82,25 +82,25 @@ Analog inputs are used to read sensors (like temperature or pressure). Because e
 The RC filter's effectiveness can be seen on a real scope capture taken at the MCU pin with a
 throttle-position sensor (TPS) / potentiometer connected as the source.
 
-![TPS Input Noise at MCU Pin](./input_noise_tps_pin_%20with_potentiometer.bmp)
+![TPS Input Noise at MCU Pin](measurements/input_noise.png)
 
 | Scope Setting | Value |
 | :--- | :--- |
 | Horizontal | $2.0\ \text{µs/div}$ (@ $1\ \text{GS/s}$) |
-| Channel 1 | $2.00\ \text{mV/div}$, BW limited, DC coupled |
-| Measured ripple ($V_\mathrm{r}$) | $0.953\ \text{mV}$ |
+| Channel 1 | $200\ \text{µV/div}$, BW limited, DC coupled |
+| Measured ripple-RMS ($V_\mathrm{r}$) | $506\ \text{µV}$ ($0.506\ \text{mV}$) |
 | DC average | $0.00\ \text{mV}$ |
 
 The trace shows the residual noise at the MCU pin *after* the voltage-divider drops the 0–5 V sensor level down to the 0–3.24 V processor-friendly input range (with an active signal span of $\approx 3.15\ \text{V}$). 
 
 Because the noise is measured at this scaled-down node, the Signal-to-Noise Ratio (SNR) compared to the active span is incredibly high:
 
-$$\text{SNR} = 20 \log_{10}\left(\frac{3.15\ \text{V}}{0.953\ \text{mV}}\right) \approx 70.4\ \text{dB}$$
+$$\text{SNR} = 20 \log_{10}\left(\frac{3.15\ \text{V}}{0.506\ \text{mV}}\right) \approx 75.9\ \text{dB}$$
 
-The peak-to-peak ripple is well under $1\ \text{mV}$ and appears as random broadband noise rather
+The RMS ripple is around $506\ \text{µV}$ and appears as random broadband noise rather
 than coherent interference. For the MCU's $3.3\ \text{V}$ ADC, a 12-bit conversion has roughly
-$0.806\ \text{mV/LSB}$, so this residual noise sits at just about one LSB — low enough that normal
-oversampling or firmware filtering keeps the sensor reading stable.
+$0.806\ \text{mV/LSB}$ ($806\ \text{µV/LSB}$), so this residual RMS noise sits at just about $0.63\ \text{LSB}$ — low enough that normal
+oversampling or firmware filtering keeps the sensor reading incredibly stable.
 
 !!! tip "What this means in practice"
     A TPS typically swings from $\sim 0.5\ \text{V}$ to $\sim 4.5\ \text{V}$ at the board's connector, which corresponds to $\sim 0.32\ \text{V}$ to $\sim 2.92\ \text{V}$ at the MCU pin after the divider, giving a $\approx 2.6\ \text{V}$ active signal span. Sub-millivolt noise is entirely negligible for this throttle position signal. If you see much larger ripple in your own build, check sensor ground routing, the $+5\ \text{V}$ reference return path, and whether the input is picking up switching noise from injector or ignition wiring.
@@ -138,14 +138,29 @@ Unlike the injectors, the Idle Air Control (`IAC`) channel operates under contin
 #### 4.3.3. Clamp & Switching Verification
 The active clamp circuit and turn-on performance have been verified using an oscilloscope.
 
-![Active Clamp & Switching Scope Capture](./active_clamp_scope.png)
+##### A. Injector Turn-Off (Active Clamping Transition)
+The active clamping transient has been captured under two oscilloscope setups to document both the high-detail channel resolution and the logic-input timing correlation.
 
-The scope capture shows the MOSFET Drain voltage ($V_{\mathrm{DS}}$, blue) and the buffer
-output that drives the gate (yellow) as the injector turns off. The yellow trace is measured
-*before* the gate resistor, so it shows the logic-side Gate-drive command rather than the exact
-$V_{\mathrm{GS}}$ at the MOSFET pin. During the brief Zener turn-on delay the Drain briefly
-spikes to about $67\ \text{V}$ for approximately $200\ \text{ns}$ before the active clamp settles to a stable $\approx 40\ \text{V}$
-plateau. This is expected behavior and is safe for the IRLR2905.
+=== "Detailed Verification Capture"
+    ![Active Clamp & Switching Scope Capture](measurements/active_clamp_scope.png)
+
+    *In this high-detail single-channel capture of the active clamping transition, only the MOSFET Drain voltage ($V_{\mathrm{DS}}$, yellow trace) is measured.* 
+    During the brief Zener turn-on delay, the Drain briefly spikes to about $67\ \text{V}$ for approximately $200\ \text{ns}$ before the feedback via the $36\ \text{V}$ Zener diode activates and the active clamp settles to a stable $\approx 40\ \text{V}$ plateau. This safely dissipates the coil's inductive energy in the MOSFET silicon.
+
+=== "Logic Signal Correlation"
+    ![Injector Closing & Clamping Logic Signal](measurements/injector_closing_clamping_logic_signal.png)
+
+    *This capture depicts the exact timing relationship between the gate drive signal (CH1, yellow trace, 2.00V/div) and the resulting Drain voltage transition ($V_{\mathrm{DS}}$, CH2, blue trace, 10.0V/div) as the injector closes.*
+    It confirms that as soon as the gate drive transitions low, current conduction ceases, causing the Drain voltage (blue) to pull up to the active clamping level of $\approx 40\ \text{V}$ where it remains clamped until the inductive field collapses and it settles back to the $+12\ \text{V}$—$+14\ \text{V}$ battery rail.
+
+##### B. Injector Turn-On (Charging Transition)
+To verify the speed and efficiency of the gate drive, the opening transition was captured to evaluate switching speed.
+
+![Injector Opening Drain & Logic Signal](measurements/injector_opening_drain_logic_signal.png)
+
+*The scope capture shows the opening transient of the injector: gate drive signal transitioning from 0V to 5V (CH1, yellow trace, 2.00V/div) and the corresponding rapid drop of the MOSFET Drain voltage ($V_{\mathrm{DS}}$, CH2, blue trace, 10.0V/div) from the battery supply level to 0V.*
+
+The extremely steep falling edge of the Drain voltage (blue trace) indicates that the IRLR2905 switches ON rapidly. This fast transition minimizes the time the MOSFET spends in its highly resistive linear region, eliminating switching losses and preventing heat rise, while ensuring a highly consistent and linear injector dead-time.
 
 ??? tip "Why a 67 V spike is safe for the MOSFET"
     Although the $67\ \text{V}$ peak exceeds the IRLR2905's rated Drain-to-Source breakdown
@@ -175,12 +190,8 @@ plateau. This is expected behavior and is safe for the IRLR2905.
         $210\ \text{mJ}$ single-pulse avalanche-energy rating.
 
 ??? note "Scope capture walkthrough"
-    *   **Active Clamping in Action:** The blue trace represents the MOSFET Drain voltage
-        ($V_{\mathrm{DS}}$), and the yellow trace is the buffer output that drives the gate
-        (measured *before* the gate resistor, so it represents the logic-side Gate-drive command
-        rather than the exact $V_{\mathrm{GS}}$ at the MOSFET pin). When the Gate drive switches
-        to $0\ \text{V}$ and the injector turns off, the inductive "kickback" causes the Drain
-        voltage to spike.
+    *   **Gate Drive and Drain Roles:** In the dual-channel timing correlation screenshots (turn-on and turn-off logic/drain views), the blue trace is the MOSFET Drain voltage ($V_{\mathrm{DS}}$) and the yellow trace is the gate-drive signal.
+    *   **Single-Channel Clamping Detail:** In the high-detail active clamping zoom-in Capture, Only the Drain voltage ($V_{\mathrm{DS}}$) is plotted, represented by the yellow trace because it's the sole active measurement channel.
     *   **Zener Turn-On Delay ($200\ \text{ns}$):** There is a short transient period of
         **$200\ \text{ns}$** representing the duration it takes for the feedback $36\ \text{V}$
         Zener diode (in series with a 1N4148 blocking diode) to fully turn on and start conducting.

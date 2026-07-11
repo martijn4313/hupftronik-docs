@@ -41,6 +41,8 @@ markdown_extensions:
       base_path: [includes]
       check_paths: true
   - attr_list
+  - pymdownx.tabbed:
+      alternate_style: true
   - pymdownx.arithmatex:
       generic: true
 
