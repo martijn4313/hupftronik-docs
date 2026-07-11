@@ -124,7 +124,7 @@ To protect the switching MOSFETs from the high-voltage inductive "kickback" gene
 
 *   **How it Works:** When the driver turns off, the magnetic field in the injector coil collapses, generating a high-voltage spike. Once this voltage exceeds the Zener diode threshold, current flows back into the MOSFET's Gate. This turns the MOSFET slightly back on (into its linear region) to dissipate the inductive energy safely across its silicon channel.
 
-*  **Fast Injector Closing:** By clamping the inductive spike at a relatively high voltage (settling to $\approx 49\ \text{V}$ on the Motorsteuergerät 24P V1), the magnetic field is forced to collapse rapidly. This results in fast and repeatable injector closing times, minimizing injector lag.
+*  **Fast Injector Closing:** By clamping the inductive spike at a relatively high voltage (settling to $\approx 40\ \text{V}$ on the Motorsteuergerät 24P V1), the magnetic field is forced to collapse rapidly. This results in fast and repeatable injector closing times, minimizing injector lag.
 
 *  **Thermal Distribution:** The robust MOSFET silicon absorbs the bulk of the thermal energy spike, preventing small, discrete diodes on the board from overheating.
 
@@ -144,15 +144,15 @@ The scope capture shows the MOSFET Drain voltage ($V_{\mathrm{DS}}$, blue) and t
 output that drives the gate (yellow) as the injector turns off. The yellow trace is measured
 *before* the gate resistor, so it shows the logic-side Gate-drive command rather than the exact
 $V_{\mathrm{GS}}$ at the MOSFET pin. During the brief Zener turn-on delay the Drain briefly
-spikes to about $77\ \text{V}$ before the active clamp settles to a stable $\approx 49\ \text{V}$
+spikes to about $67\ \text{V}$ for approximately $200\ \text{ns}$ before the active clamp settles to a stable $\approx 40\ \text{V}$
 plateau. This is expected behavior and is safe for the IRLR2905.
 
-??? tip "Why a 77 V spike is safe for the MOSFET"
-    Although the $77\ \text{V}$ peak exceeds the IRLR2905's rated Drain-to-Source breakdown
+??? tip "Why a 67 V spike is safe for the MOSFET"
+    Although the $67\ \text{V}$ peak exceeds the IRLR2905's rated Drain-to-Source breakdown
     voltage ($V_{\mathrm{DSS}} = 55\ \text{V}$), the MOSFET is not harmed. Under this ultra-short
     sub-microsecond transient, the device enters its rated **avalanche breakdown** region. Modern
     power MOSFETs are fully avalanche-rated, and the tiny amount of energy transferred during this
-    $276\ \text{ns}$ window is orders of magnitude below the transistor's avalanche ratings
+    $200\ \text{ns}$ window is orders of magnitude below the transistor's avalanche ratings
     ($E_{\mathrm{AS}} = 210\ \text{mJ}$, $E_{\mathrm{AR}} = 11\ \text{mJ}$,
     $I_{\mathrm{AR}} = 25\ \text{A}$), allowing it to safely absorb the spike.
 
@@ -162,14 +162,14 @@ plateau. This is expected behavior and is safe for the IRLR2905.
         maximum rated avalanche current ($I_{\mathrm{AR}}$), not the actual injector current.
         A far more realistic upper-bound is the peak injector-bank current from §A.1.1,
         $4.67\ \text{A}$ (four injectors in parallel at $14\ \text{V}$). Assuming the full
-        $77\ \text{V}$ peak and that $4.67\ \text{A}$ persist throughout the complete
-        $276\ \text{ns}$ interval:
+        $67\ \text{V}$ peak and that $4.67\ \text{A}$ persist throughout the complete
+        $200\ \text{ns}$ interval:
 
-        $$E_{\mathrm{avalanche}} \leq V \cdot I \cdot t = 77\ \text{V} \cdot 4.67\ \text{A} \cdot 276\ \text{ns} \approx 0.099\ \text{mJ} = 9.9 \times 10^{-5}\ \text{J}$$
+        $$E_{\mathrm{avalanche}} \leq V \cdot I \cdot t = 67\ \text{V} \cdot 4.67\ \text{A} \cdot 200\ \text{ns} \approx 0.063\ \text{mJ} = 6.3 \times 10^{-5}\ \text{J}$$
 
-        So the energy deposited in the MOSFET during the 276 ns Zener turn-on delay is at most
-        **about $0.1\ \text{mJ}$** — roughly **one tenth of a millijoule**, or
-        **$1 \times 10^{-4}\ \text{J}$**. The real energy is lower because both voltage and
+        So the energy deposited in the MOSFET during the 200 ns Zener turn-on delay is at most
+        **about $0.06\ \text{mJ}$** — roughly **0.06 millijoule**, or
+        **$6 \times 10^{-5}\ \text{J}$**. The real energy is lower because both voltage and
         current vary during the transient, and the actual turn-off current is usually below the
         $4.67\ \text{A}$ peak. Even this conservative estimate is far below the
         $210\ \text{mJ}$ single-pulse avalanche-energy rating.
@@ -181,12 +181,12 @@ plateau. This is expected behavior and is safe for the IRLR2905.
         rather than the exact $V_{\mathrm{GS}}$ at the MOSFET pin). When the Gate drive switches
         to $0\ \text{V}$ and the injector turns off, the inductive "kickback" causes the Drain
         voltage to spike.
-    *   **Zener Turn-On Delay ($276\ \text{ns}$):** There is a short transient period of
-        **$276\ \text{ns}$** representing the duration it takes for the feedback $36\ \text{V}$
+    *   **Zener Turn-On Delay ($200\ \text{ns}$):** There is a short transient period of
+        **$200\ \text{ns}$** representing the duration it takes for the feedback $36\ \text{V}$
         Zener diode (in series with a 1N4148 blocking diode) to fully turn on and start conducting.
-        During this brief delay, the Drain voltage temporarily spikes to **$\approx 77\ \text{V}$**.
+        During this brief delay, the Drain voltage temporarily spikes to **$\approx 67\ \text{V}$**.
     *   **Clamping Plateau:** Once the Zener diode fully activates and delivers charge back to the
-        MOSFET Gate, the active clamp settles neatly to a stable plateau of **$\approx 49\ \text{V}$**.
+        MOSFET Gate, the active clamp settles neatly to a stable plateau of **$\approx 40\ \text{V}$**.
         The actual clamp voltage is higher than the $36\ \text{V}$ Zener rating because of the low
         gate resistor value and the additional voltage drop across the 1N4148 blocking diode. This
         high-voltage clamp minimizes injector closing times and safely dissipates the magnetic
