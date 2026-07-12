@@ -75,7 +75,7 @@ Analog inputs are used to read sensors (like temperature or pressure). Because e
 2. **Cleaning:** A small network of resistors and a capacitor (an RC filter) smooths out the signal.
 3. **Scaling:** The processor can only handle up to 3.3 V. The circuit scales the standard 5 V sensor signal down so it fits safely.
 
-*(For a detailed circuit breakdown, see **§A.3 Analog Input Topology** in the Technical Appendix)*
+*(For a detailed circuit breakdown, see **§A.3 Analog Input Topology** in the Technical Appendix; for why this signal is fed straight into the MCU instead of through an op-amp buffer, see **§A.3.1 Why Direct-to-MCU Instead of Op-Amp Buffering**)*
 
 ### 3.3. Measured Noise at the MCU Pin
 
@@ -441,6 +441,193 @@ Corner Frequency
 
 !!! info "Fault Tolerance"
     The TVS diode is designed to sacrifice itself if 12 V is accidentally applied to an input, maintaining signal purity for normal 0–5V operation.
+
+!!! note "These values are for ratiometric channels (TPS, MAP/T-MAP)"
+    The R/C values above are tuned for fast, ratiometric sensors whose signal already spans a wide
+    voltage range and needs reasonable bandwidth. The thermistor-based `CLT`/`IAT` channels use a
+    different, higher-impedance network with a larger capacitor — see **§A.3.2 Thermistor Channels
+    (CLT/IAT)** below for why.
+
+#### 9.3.1. A.3.1. Why Direct-to-MCU Instead of Op-Amp Buffering
+
+A reasonable question when looking at this schematic is: why feed the divider node straight into the
+MCU pin, rather than adding an op-amp (e.g. an `MCP6002`) as a unity-gain buffer for level shifting
+and isolation? The short answer is that the divider's own source impedance is already low enough for
+the ADC to sample directly, so a buffer stage would add cost, board space, and new failure modes
+without fixing a problem that exists here.
+
+**1. The divider's Thevenin impedance is already low.**
+What matters for direct ADC connection is not the individual resistor values but the impedance the
+ADC's sample-and-hold capacitor actually sees, looking back into the node between $R_{\mathrm{series}}$
+and $R_{\mathrm{shunt}}$ with the source shorted to AC ground:
+
+$$R_{\mathrm{source}} = R_{\mathrm{series}} \parallel R_{\mathrm{shunt}} = \frac{1.8\ \text{k}\Omega \cdot 3.3\ \text{k}\Omega}{1.8\ \text{k}\Omega + 3.3\ \text{k}\Omega} \approx 1.16\ \text{k}\Omega$$
+
+This is comfortably under the source-impedance figures typically recommended for STM32-class ADCs to
+fully charge their internal sampling capacitor within one acquisition phase — see **§A.3.3 ADC
+Settling Time Budget** for the worked derivation of that limit on this board's `STM32F405` MCU.
+$C_{\mathrm{shunt}}$ also helps: it acts as a small local charge reservoir sitting right at the ADC
+pin, supplying the brief burst of charge the sampling capacitor demands so the resistor network
+doesn't have to do all the work on its own.
+
+**2. The divider is doing double duty.**
+A unity-gain buffer only isolates impedance — it does not scale voltage. The 5 V→3.3 V-range scaling
+still has to happen somewhere, either before the buffer (as a divider feeding the buffer's input) or
+after it (as a second resistive stage). Either way you keep the resistor network *and* add an active
+stage on top of it, rather than replacing one with the other.
+
+**3. What a buffer would actually change.**
+
+| Aspect | Passive divider + RC (used here) | Buffered (e.g. `MCP6002` follower) |
+| :--- | :--- | :--- |
+| Output impedance at MCU pin | $\approx 1.16\ \text{k}\Omega$ (Thevenin) | $\approx 0\ \Omega$ (op-amp output) |
+| Extra supply rail needed | No | Yes — clean rail-to-rail supply per chip |
+| Parts per channel | 2 resistors + 1 cap | Same, plus one op-amp channel (2 channels/`MCP6002`) |
+| Tolerant of long/high-Z sensor wiring | Only if source impedance stays low | Yes — buffer absorbs it |
+| Immune to ADC-mux charge-injection kickback | Only as good as $C_{\mathrm{shunt}}$ + source impedance | Yes — low-Z output soaks up the transient instantly |
+| New failure modes | None beyond the existing TVS/passive network | Op-amp output can fail shorted to a rail; offset voltage error (a few mV); potential instability driving $C_{\mathrm{shunt}}$ directly without a series isolation resistor |
+| Bill of materials / board space | Minimal | Higher — extra IC, decoupling, routing per channel |
+
+**4. Why it doesn't matter here.**
+The ratiometric sensors on this board (TPS, MAP/T-MAP) are moderate-bandwidth signals with modest
+source impedance (potentiometers and resistive dividers in the low-kΩ range), read by a single-ended
+ADC that samples channels sequentially rather than a fast simultaneous mux bank. Charge-injection
+kickback and cable-length-driven source impedance — the two scenarios where a buffer earns its keep —
+simply aren't in play. Given that, the passive divider is the simpler, cheaper, and more reliable
+choice: fewer parts, no extra supply rail to sequence and decouple, and no new active-component failure
+mode sitting between the sensor and the MCU.
+
+The thermistor channels (`CLT`, `IAT`) run a higher Thevenin impedance than TPS/MAP (§A.3.2), but the
+same logic still holds: firmware groups them with TPS on the same lower-rate ADC conversion group
+(§A.3.3), which already gives them a longer sample time than a design would need to add a buffer for.
+
+!!! tip "When you *would* want a buffer"
+    If you're adapting this front-end for a sensor with much higher source impedance (e.g. a
+    thermistor with a large pull-up resistor), a long unshielded harness run, or a shared ADC channel
+    multiplexed at high speed across many inputs, a unity-gain buffer ahead of the RC filter becomes
+    worthwhile. In that case, keep a small series resistor ($10$–$100\ \Omega$) between the op-amp
+    output and $C_{\mathrm{shunt}}$ to prevent the op-amp from seeing the capacitor as a direct load,
+    which can cause peaking or oscillation.
+
+#### 9.3.2. A.3.2. Thermistor Channels (CLT/IAT): Higher-Z, Heavier Filtering
+
+Coolant Temperature (`CLT`) and Intake Air Temperature (`IAT`) use a two-wire NTC thermistor rather
+than a ratiometric sensor like the TPS. A thermistor has no built-in divider of its own — it's just a
+variable resistor to ground — so the board has to supply that missing half of the divider itself, and
+then filters the result more aggressively than the TPS/MAP channels because a temperature reading has
+no need for millisecond-scale response.
+
+**Bias resistor (sensor excitation).**
+A $2.7\ \text{k}\Omega$ resistor pulls the raw sensor node up to $+5\ \text{V}$. The external NTC
+thermistor, connected between that same node and sensor ground through the harness, forms the other
+leg of the divider. As the thermistor's resistance falls with rising temperature, the node voltage
+falls too — the classic pull-up/NTC arrangement, sized so the usable temperature range maps to a
+reasonable swing across the sensor's resistance curve.
+
+**RC filter stage.**
+From that raw node, the signal passes through a series/shunt network before reaching the MCU:
+
+| Component | Role | Value |
+| :--- | :--- | :--- |
+| $R_{\mathrm{series}}$ | Series resistor into the filter node | $10\ \text{k}\Omega$ |
+| $R_{\mathrm{shunt}}$ | Shunt resistor to GND | $18\ \text{k}\Omega$ |
+| $C_{\mathrm{shunt}}$ | Shunt capacitor to GND | $1\ \mu\text{F}$ |
+
+Both resistors are roughly $5$–$6\times$ larger than the TPS channel's, and the capacitor is
+$10\times$ larger ($1\ \mu\text{F}$ vs. $100\ \text{nF}$). Using the same Thevenin approach as §A.3.1:
+
+$$R_{\mathrm{source}} = R_{\mathrm{series}} \parallel R_{\mathrm{shunt}} = \frac{10\ \text{k}\Omega \cdot 18\ \text{k}\Omega}{10\ \text{k}\Omega + 18\ \text{k}\Omega} \approx 6.43\ \text{k}\Omega$$
+
+$$f_c = \frac{1}{2\pi \cdot R_{\mathrm{source}} \cdot C_{\mathrm{shunt}}} = \frac{1}{2\pi \cdot 6.43\ \text{k}\Omega \cdot 1\ \mu\text{F}} \approx 24.8\ \text{Hz}$$
+
+That's roughly **55× lower** than the TPS channel's $1.37\ \text{kHz}$ corner frequency.
+
+!!! success "Why heavier filtering makes sense here"
+    Coolant and intake air temperature are governed by thermal mass — they physically cannot change
+    in less than several seconds, let alone milliseconds. There's no downside to pushing the corner
+    frequency far lower than on the TPS channel: it rejects far more electrical noise (e.g. injector
+    and ignition switching transients coupled onto the long engine-bay harness runs these sensors
+    typically use) while still tracking the real signal with enormous margin.
+
+!!! note "Higher source impedance is still fine—the firmware already samples it slower"
+    At $\approx 6.43\ \text{k}\Omega$, this channel's Thevenin impedance is higher than the TPS
+    channel's $\approx 1.16\ \text{k}\Omega$ (§A.3.1). That's not a problem in practice: rusEFI-style
+    firmware already reads `CLT`, `IAT`, and `TPS` together on the same lower-rate ADC conversion
+    group (§A.3.3), which uses a much longer sample time than a high-rate channel would get — no
+    special accommodation needed, no buffer required. The exact numbers are worked out in **§A.3.3**
+    below.
+
+#### 9.3.3. A.3.3. ADC Settling Time Budget: Putting a Number on "Low Enough"
+
+The claims in §A.3.1 and §A.3.2 that these source impedances are "low enough" aren't just a rule of
+thumb — they follow from the STM32's own ADC input model and the sample time the firmware actually
+uses. This board's [`STM32F405RGT6`](24p_v1_overview.md#3-io-overview) is an F4-family part, so the
+following uses ST's F4 ADC characteristics.
+
+**rusEFI's ADC conversion groups.**
+rusEFI splits ADC channels into a few independent conversion groups, each with its own sample-time
+setting. The relevant one here is the **slow ADC group** (`stm32_adc_v2.cpp` on F4/F7, `stm32_adc_v4.cpp`
+on H7) which handles `CLT`, `IAT`, `TPS`, battery voltage, and similar sensors, running at roughly
+$500\ \text{Hz}$ with a deliberately long sample time — `ADC_SAMPLE_56` (56 ADC clock cycles) on
+F4/F7 parts, or `ADC_SMPR_SMP_16P5` on H7. A separate, shorter-sample-time group exists for channels
+that need a higher conversion rate; `TPS` is **not** in that group, so both the ratiometric channel
+(§A.3.1) and the thermistor channels (§A.3.2) get the same generous sampling budget below.
+
+**The ADC input model.**
+Internally, every STM32 ADC channel looks like a resistor $R_{\mathrm{ADC}}$ (the sampling switch) in
+series with a capacitor $C_{\mathrm{ADC}}$ (the sample-and-hold cap). For STM32F4 parts, ST's
+datasheet gives approximately:
+
+$$R_{\mathrm{ADC}} \approx 6\ \text{k}\Omega, \qquad C_{\mathrm{ADC}} \approx 12\ \text{pF}$$
+
+During the sampling phase, whatever is driving the pin ($R_{\mathrm{source}}$, the Thevenin impedance
+from §A.3.1/§A.3.2) has to charge $C_{\mathrm{ADC}}$ through both resistances in series, giving an RC
+time constant of:
+
+$$\tau = (R_{\mathrm{source}} + R_{\mathrm{ADC}}) \cdot C_{\mathrm{ADC}}$$
+
+**How long is available to settle.**
+At `ADC_SAMPLE_56`, the sampling phase lasts 56 ADC clock cycles. With the ADC clock at
+$21\ \text{MHz}$ on F4 parts, that's:
+
+$$t_{\mathrm{sample}} = \frac{56}{21\ \text{MHz}} \approx 2.67\ \mu\text{s}$$
+
+To resolve a 12-bit conversion to within 1 LSB ($1/4096 \approx 0.0244\%$ of full scale), the RC network
+needs roughly $n = 7$ to $9$ time constants to settle ($e^{-9} \approx 1/8100$, comfortably past the
+1-LSB target with margin):
+
+$$\tau_{\mathrm{max}} = \frac{t_{\mathrm{sample}}}{n} \approx \frac{2.67\ \mu\text{s}}{7\ \text{to}\ 9} \approx 296\ \text{to}\ 381\ \text{ns}$$
+
+Solving for the maximum tolerable source impedance:
+
+$$R_{\mathrm{source}} \leq \frac{\tau_{\mathrm{max}}}{C_{\mathrm{ADC}}} - R_{\mathrm{ADC}} \approx 18.7\ \text{to}\ 25.7\ \text{k}\Omega$$
+
+**Applying it to this board's two channel types:**
+
+| Channel | $R_{\mathrm{source}}$ (Thevenin) | vs. $18.7$–$25.7\ \text{k}\Omega$ ceiling |
+| :--- | :--- | :--- |
+| TPS / MAP (§A.3.1) | $\approx 1.16\ \text{k}\Omega$ | $\approx 16$–22× margin — comfortably clear |
+| CLT / IAT (§A.3.2) | $\approx 6.43\ \text{k}\Omega$ | $\approx 3$–4× margin — comfortably clear |
+
+!!! success "Both channel types settle with margin to spare"
+    Because `TPS`, `CLT`, and `IAT` all share the same $\approx 500\ \text{Hz}$ slow ADC group and its
+    56-cycle sample time, even the thermistor channels' higher $6.43\ \text{k}\Omega$ source impedance
+    settles with $3$–$4\times$ margin before the conversion completes. The 28-cycle fast group
+    (`ADC_SAMPLE_28`, $\approx 1.33\ \mu\text{s}$) exists for channels that need a much higher
+    conversion rate than these sensors do — none of the analog inputs described in §A.3.1/§A.3.2 are
+    on it, so the tighter timing budget that group implies doesn't apply here.
+
+**A note on the external capacitors.**
+A commonly cited generic guideline for a small capacitor placed directly at an ADC pin (with no series
+resistor in front of it) is roughly $100\ \text{pF}$ to $1\ \text{nF}$ — just enough to buffer
+high-frequency noise without materially loading the pin. $C_{28}$ ($100\ \text{nF}$) and $C_{32}$
+($1\ \mu\text{F}$) on this board are both far larger than that. That's intentional, not an oversight:
+unlike a bare stabilization cap, these capacitors sit behind a defined series resistor as part of a
+purpose-built anti-alias filter with a calculated corner frequency ($1.37\ \text{kHz}$ for TPS/MAP,
+$24.8\ \text{Hz}$ for CLT/IAT) — a different design goal than the generic "small cap at the pin" rule,
+and one that only works because channels are read sequentially rather than multiplexed at high speed
+(which is where a large cap combined with high source impedance would start causing channel-to-channel
+crosstalk).
 
 ---
 
