@@ -1,20 +1,16 @@
 # Hardware Reference
 --8<-- "status-reviewed.md"
 
-This guide provides a walkthrough of the schematics and PCB designs for the Hüpftronik Engine Control Unit (ECU). 
+A walkthrough of the Hüpftronik ECU's schematics and PCB design: the enclosure, thermal design, and the circuits behind every input and output.
 
 !!! note "Design files"
     The board is currently in alpha testing (see the [product overview](24p_v1_overview.md)) and the
     schematic/PCB source files are not yet published. This page will link to the GitHub repository
     once the design is public.
 
-This document covers how the ECU is built, how it stays cool, and how the electrical circuits handle signals and power.
-
 ---
 
 ## 1. Enclosure Options
-
-Choosing the right case is important for protecting the electronics and keeping the unit from overheating.
 
 ### 1.1. Quick Selection Guide
 | Case Choice | Cooling Performance | Effort to Build | Best For... |
@@ -23,11 +19,10 @@ Choosing the right case is important for protecting the electronics and keeping 
 | **Custom / 3D-Printed** | **Poor** | **High** (Requires custom design) | Test benches or very tight spaces. |
 
 ### 1.2. Recommended: AliExpress 24-Pin Aluminum Enclosure
-The PCB is designed specifically to fit the standard 24-pin cast aluminum waterproof enclosure. The connector on the board matches the one provided with these cases perfectly.
+The PCB is designed around the standard 24-pin cast aluminum waterproof enclosure — the board's connector mates directly with the one supplied with these cases. The aluminum shell does two jobs:
 
-Using this aluminum case provides two major benefits:
-* **Heat Sinking:** The metal case pulls heat away from the components, preventing them from burning out.
-* **Electrical Shielding:** The metal shell acts as a shield, stopping electrical noise from the engine from interfering with the ECU's "brain."
+* **Heat sinking:** pulls heat away from the power components.
+* **Electrical shielding:** blocks engine-bay electrical noise from reaching the electronics.
 
 ![PCB in Case](./hupftronik_motorsteurgerat_24p_v1_in_case.jpg)
 
@@ -38,32 +33,30 @@ Using this aluminum case provides two major benefits:
     (3×8 grid) before buying.
 
 ### 1.3. Custom / DIY Solutions
-If you prefer your own housing, you can do so, but you must handle two things carefully:
+A custom housing works, but you must handle two things yourself:
 
-1. **The Connector:** You will need to source the 24-pin automotive header separately, as it is not a standard part.
+1. **The connector:** source the 24-pin automotive header separately — it is not a standard part.
 
-2. **The Heat:** Plastic (3D printed) cases trap heat. If you use plastic, you **must** design a flat aluminum base plate and use a thermal pad to connect the PCB to that metal plate.
+2. **The heat:** plastic (3D-printed) cases trap heat. If you use plastic, you **must** add a flat aluminum base plate and couple the PCB to it with a thermal pad.
 
 ---
 
 ## 2. Keeping it Cool (Thermal Management)
 
-The "injector drivers" (the parts that fire your fuel injectors) generate heat. If they get too hot, they will fail.
-
-If you use the aluminum enclosure, you can significantly improve cooling by placing a **Thermal Interface Material (TIM) pad** (a squishy, non-conductive heat pad) between the bottom of the PCB and the inside floor of the case.
+The injector drivers generate heat, and if they get too hot they fail. With the aluminum enclosure, place a **Thermal Interface Material (TIM) pad** between the bottom of the PCB and the case floor — it gives the heat a low-resistance path into the metal.
 
 | Setup | Heat Level | Cooling Requirement |
 | :--- | :--- | :--- |
 | **2 Cylinders per Driver** (Standard) | Low | Standard PCB cooling is usually enough. A thermal pad is a good "extra" safety measure. |
 | **4 Cylinders per Driver** (High Stress) | High | **Mandatory:** You must use a thermal pad to bridge the heat directly to the aluminum case. |
 
-*(For the math behind these requirements, see **§A.1 Thermal Analysis** in the Technical Appendix)*
+*(Math: **§A.1 Thermal Analysis** in the Technical Appendix.)*
 
 ---
 
 ## 3. Sensor Inputs (Analog Inputs)
 
-Analog inputs are used to read sensors (like temperature or pressure). Because engine bays are "electrically noisy," the signals are cleaned up before they reach the processor.
+Analog inputs read 0–5 V sensors (TPS, MAP, temperature). Engine bays are electrically noisy, so each signal is protected, filtered, and scaled before it reaches the processor.
 
 ### 3.1. Quick Specs
 * **Input Voltage:** Accepts 0–5 V (scales it down to 0–3.24 V for the processor).
@@ -71,16 +64,17 @@ Analog inputs are used to read sensors (like temperature or pressure). Because e
 * **Protection:** Includes a "TVS diode" to protect against static electricity (ESD).
 
 ### 3.2. How it Works
-1. **Protection:** As soon as the signal enters the board, a diode blocks static shocks from hitting the processor.
-2. **Cleaning:** A small network of resistors and a capacitor (an RC filter) smooths out the signal.
-3. **Scaling:** The processor can only handle up to 3.3 V. The circuit scales the standard 5 V sensor signal down so it fits safely.
+1. **Protection:** A TVS diode at the connector blocks ESD before it reaches anything else.
+2. **Cleaning:** An RC filter smooths out high-frequency noise.
+3. **Scaling:** A voltage divider drops the 0–5 V sensor range to the MCU's 3.3 V-safe input range.
 
-*(For a detailed circuit breakdown, see **§A.3 Analog Input Topology** in the Technical Appendix; for why this signal is fed straight into the MCU instead of through an op-amp buffer, see **§A.3.1 Why Direct-to-MCU Instead of Op-Amp Buffering**)*
+*(Circuit details: **§A.3 Analog Input Topology**; why there's no op-amp buffer: **§A.3.1**.)*
 
 ### 3.3. Measured Noise at the MCU Pin
 
-The RC filter's effectiveness can be seen on a real scope capture taken at the MCU pin with a
-throttle-position sensor (TPS) / potentiometer connected as the source.
+The capture below was taken at the MCU pin with a throttle-position sensor (TPS) / potentiometer as
+the source — i.e. *after* the divider has scaled 0–5 V down to the 0–3.24 V input range
+(active span $\approx 3.15\ \text{V}$).
 
 ![TPS Input Noise at MCU Pin](measurements/input_noise.png)
 
@@ -91,124 +85,112 @@ throttle-position sensor (TPS) / potentiometer connected as the source.
 | Measured ripple-RMS ($V_\mathrm{r}$) | $506\ \text{µV}$ ($0.506\ \text{mV}$) |
 | DC average | $0.00\ \text{mV}$ |
 
-The trace shows the residual noise at the MCU pin *after* the voltage-divider drops the 0–5 V sensor level down to the 0–3.24 V processor-friendly input range (with an active signal span of $\approx 3.15\ \text{V}$). 
-
-Because the noise is measured at this scaled-down node, the Signal-to-Noise Ratio (SNR) compared to the active span is incredibly high:
+The residual noise is $\approx 506\ \text{µV}$ RMS of random broadband noise — no coherent
+interference. Against the active span, that is an SNR of roughly $76\ \text{dB}$:
 
 $$\text{SNR} = 20 \log_{10}\left(\frac{3.15\ \text{V}}{0.506\ \text{mV}}\right) \approx 75.9\ \text{dB}$$
 
-The RMS ripple is around $506\ \text{µV}$ and appears as random broadband noise rather
-than coherent interference. For the MCU's $3.3\ \text{V}$ ADC, a 12-bit conversion has roughly
-$0.806\ \text{mV/LSB}$ ($806\ \text{µV/LSB}$), so this residual RMS noise sits at just about $0.63\ \text{LSB}$ — low enough that normal
-oversampling or firmware filtering keeps the sensor reading incredibly stable.
+On the MCU's 12-bit, $3.3\ \text{V}$ ADC ($0.806\ \text{mV/LSB}$), that noise is only about
+$0.63\ \text{LSB}$ — normal oversampling or firmware filtering keeps the reading rock-stable.
 
 !!! tip "What this means in practice"
-    A TPS typically swings from $\sim 0.5\ \text{V}$ to $\sim 4.5\ \text{V}$ at the board's connector, which corresponds to $\sim 0.32\ \text{V}$ to $\sim 2.92\ \text{V}$ at the MCU pin after the divider, giving a $\approx 2.6\ \text{V}$ active signal span. Sub-millivolt noise is entirely negligible for this throttle position signal. If you see much larger ripple in your own build, check sensor ground routing, the $+5\ \text{V}$ reference return path, and whether the input is picking up switching noise from injector or ignition wiring.
+    A TPS typically swings $\sim 0.5$–$4.5\ \text{V}$ at the connector ($\sim 0.32$–$2.92\ \text{V}$ at the MCU pin, a $\approx 2.6\ \text{V}$ span), so sub-millivolt noise is negligible. If you see much larger ripple in your own build, check sensor ground routing, the $+5\ \text{V}$ reference return path, and whether the input runs near injector or ignition wiring.
 
 ---
 
 ## 4. Outputs (Low-Side Drivers)
 
-The ECU uses "Low-Side Drivers" to act as electronic switches for relays, solenoids, and injectors.
+The ECU uses low-side driver MOSFETs as electronic switches for relays, solenoids, and injectors.
 
 ### 4.1. Why use discrete MOSFETs?
-You might see "Smart Drivers" in other ECUs. We use discrete MOSFETs because they are cheaper, can handle more current, and switch faster. Since we know exactly what we are powering (relays and injectors), we don't need a "smart" chip to monitor them; we just need a strong, fast switch.
+Other ECUs use "smart driver" ICs. This board uses discrete MOSFETs instead: they're cheaper, handle more current, and switch faster. Since the loads are known (relays and injectors), per-channel monitoring isn't worth the cost — a strong, fast switch is all that's needed. *(Full comparison: **§A.2**.)*
 
 ### 4.2. The "Translator" (Gate Drive)
-The processor's brain (STM32) speaks in 3.3 V, but the power switches (MOSFETs) work better with 5 V. We use a **Buffer chip (SN74ACT244PWR)** to translate the 3.3 V signal into a strong 5 V signal to ensure the switches open and close as fast as possible.
+The STM32 runs 3.3 V logic, but the MOSFETs switch harder and faster with 5 V on the gate. A **buffer chip (SN74ACT244PWR)** translates the 3.3 V signals into strong 5 V gate drive.
 
 ### 4.3. Safety & Protection
 
 #### 4.3.1. Active Clamping (Injectors & Solenoids)
-To protect the switching MOSFETs from the high-voltage inductive "kickback" generated when a solenoid or injector coil turns off, this board utilizes **active clamping** (a feedback path between the Drain and Gate).
+When an injector or solenoid coil turns off, its collapsing magnetic field generates a high-voltage inductive "kickback." The injector channels handle this with **active clamping** — a Zener feedback path from Drain to Gate:
 
-*   **How it Works:** When the driver turns off, the magnetic field in the injector coil collapses, generating a high-voltage spike. Once this voltage exceeds the Zener diode threshold, current flows back into the MOSFET's Gate. This turns the MOSFET slightly back on (into its linear region) to dissipate the inductive energy safely across its silicon channel.
+*   **How it works:** Once the turn-off spike exceeds the Zener threshold, current feeds back into the Gate and turns the MOSFET slightly back on (into its linear region), dissipating the inductive energy safely in the silicon.
 
-*  **Fast Injector Closing:** By clamping the inductive spike at a relatively high voltage (settling to $\approx 40\ \text{V}$ on the Motorsteuergerät 24P V1), the magnetic field is forced to collapse rapidly. This results in fast and repeatable injector closing times, minimizing injector lag.
+*   **Fast injector closing:** Clamping at a high voltage (settling to $\approx 40\ \text{V}$ on this board) forces the magnetic field to collapse quickly, giving fast, repeatable injector closing times.
 
-*  **Thermal Distribution:** The robust MOSFET silicon absorbs the bulk of the thermal energy spike, preventing small, discrete diodes on the board from overheating.
+*   **Thermal distribution:** The robust MOSFET die absorbs the energy spike instead of small discrete diodes on the board.
 
 #### 4.3.2. The IAC Diode (Freewheeling)
-Unlike the injectors, the Idle Air Control (`IAC`) channel operates under continuous high-frequency Pulse-Width Modulation (PWM).
+The Idle Air Control (`IAC`) channel runs continuous high-frequency PWM — thousands of switch cycles per minute. Active clamping there would dump continuous thermal energy into the MOSFET and overheat it.
 
-*  **The Continuous Duty Challenge:** Because the `IAC` switch cycle repeats thousands of times per minute, using active clamping would dump continuous thermal energy into the MOSFET, leading to rapid overheating.
-
-*  **The Solution:** The `IAC` channel features a dedicated **Freewheeling Diode** routed to $+12\ \text{V}$. When the channel switches off, the inductive current recirculates through this diode at a low voltage drop ($\approx 0.7\ \text{V}$). This shifts the thermal dissipation away from the MOSFET, keeping the driver cool during sustained PWM operation.
+Instead, the `IAC` channel has a dedicated **freewheeling diode** to $+12\ \text{V}$: at turn-off, the inductive current recirculates through the diode at a low voltage drop ($\approx 0.7\ \text{V}$), keeping the MOSFET cool during sustained PWM.
 
 #### 4.3.3. Clamp & Switching Verification
-The active clamp circuit and turn-on performance have been verified using an oscilloscope.
+Both the active clamp and the turn-on performance have been verified on the oscilloscope.
 
 ##### A. Injector Turn-Off (Active Clamping Transition)
-The active clamping transient has been captured under two oscilloscope setups to document both the high-detail channel resolution and the logic-input timing correlation.
 
 === "Detailed Verification Capture"
     ![Active Clamp & Switching Scope Capture](measurements/active_clamp_scope.png)
 
-    *In this high-detail single-channel capture of the active clamping transition, only the MOSFET Drain voltage ($V_{\mathrm{DS}}$, yellow trace) is measured.* 
-    During the brief Zener turn-on delay, the Drain briefly spikes to about $67\ \text{V}$ for approximately $200\ \text{ns}$ before the feedback via the $36\ \text{V}$ Zener diode activates and the active clamp settles to a stable $\approx 40\ \text{V}$ plateau. This safely dissipates the coil's inductive energy in the MOSFET silicon.
+    *High-detail single-channel capture: MOSFET Drain voltage ($V_{\mathrm{DS}}$, yellow trace) only.*
+    During the Zener's brief turn-on delay, the Drain spikes to about $67\ \text{V}$ for
+    $\approx 200\ \text{ns}$; then the feedback via the $36\ \text{V}$ Zener activates and the clamp
+    settles to a stable $\approx 40\ \text{V}$ plateau, dissipating the coil energy in the MOSFET.
 
 === "Logic Signal Correlation"
     ![Injector Closing & Clamping Logic Signal](measurements/injector_closing_clamping_logic_signal.png)
 
-    *This capture depicts the exact timing relationship between the gate drive signal (CH1, yellow trace, 2.00V/div) and the resulting Drain voltage transition ($V_{\mathrm{DS}}$, CH2, blue trace, 10.0V/div) as the injector closes.*
-    It confirms that as soon as the gate drive transitions low, current conduction ceases, causing the Drain voltage (blue) to pull up to the active clamping level of $\approx 40\ \text{V}$ where it remains clamped until the inductive field collapses and it settles back to the $+12\ \text{V}$—$+14\ \text{V}$ battery rail.
+    *Timing correlation: gate drive (CH1, yellow, 2.00 V/div) vs. Drain voltage ($V_{\mathrm{DS}}$, CH2, blue, 10.0 V/div) as the injector closes.*
+    As soon as the gate drive goes low, conduction stops and the Drain pulls up to the
+    $\approx 40\ \text{V}$ clamp level, holding there until the inductive field collapses and it
+    settles back to the $+12$–$14\ \text{V}$ battery rail.
 
 ##### B. Injector Turn-On (Charging Transition)
-To verify the speed and efficiency of the gate drive, the opening transition was captured to evaluate switching speed.
 
 ![Injector Opening Drain & Logic Signal](measurements/injector_opening_drain_logic_signal.png)
 
-*The scope capture shows the opening transient of the injector: gate drive signal transitioning from 0V to 5V (CH1, yellow trace, 2.00V/div) and the corresponding rapid drop of the MOSFET Drain voltage ($V_{\mathrm{DS}}$, CH2, blue trace, 10.0V/div) from the battery supply level to 0V.*
+*Opening transient: gate drive stepping 0 → 5 V (CH1, yellow, 2.00 V/div) and the Drain voltage ($V_{\mathrm{DS}}$, CH2, blue, 10.0 V/div) dropping from battery level to 0 V.*
 
-The extremely steep falling edge of the Drain voltage (blue trace) indicates that the IRLR2905 switches ON rapidly. This fast transition minimizes the time the MOSFET spends in its highly resistive linear region, eliminating switching losses and preventing heat rise, while ensuring a highly consistent and linear injector dead-time.
+The steep falling edge of the Drain voltage shows the IRLR2905 turning ON fast. Minimal time in the resistive linear region means negligible switching losses, no heat rise, and a consistent, linear injector dead-time.
 
 ??? tip "Why a 67 V spike is safe for the MOSFET"
-    Although the $67\ \text{V}$ peak exceeds the IRLR2905's rated Drain-to-Source breakdown
-    voltage ($V_{\mathrm{DSS}} = 55\ \text{V}$), the MOSFET is not harmed. Under this ultra-short
-    sub-microsecond transient, the device enters its rated **avalanche breakdown** region. Modern
-    power MOSFETs are fully avalanche-rated, and the tiny amount of energy transferred during this
-    $200\ \text{ns}$ window is orders of magnitude below the transistor's avalanche ratings
+    The $67\ \text{V}$ peak exceeds the IRLR2905's rated $V_{\mathrm{DSS}} = 55\ \text{V}$, but the
+    device simply enters its rated **avalanche breakdown** region for the sub-microsecond transient.
+    Modern power MOSFETs are fully avalanche-rated, and the energy transferred in this
+    $200\ \text{ns}$ window is orders of magnitude below the ratings
     ($E_{\mathrm{AS}} = 210\ \text{mJ}$, $E_{\mathrm{AR}} = 11\ \text{mJ}$,
-    $I_{\mathrm{AR}} = 25\ \text{A}$), allowing it to safely absorb the spike.
+    $I_{\mathrm{AR}} = 25\ \text{A}$).
 
     ??? example "Show avalanche energy calculation"
         The exact avalanche energy is $E = \int V_{\mathrm{DS}}(t) I_{\mathrm{D}}(t)\,\mathrm{d}t$
-        and requires the Drain-current waveform. The $25\ \text{A}$ figure is the MOSFET's
-        maximum rated avalanche current ($I_{\mathrm{AR}}$), not the actual injector current.
-        A far more realistic upper-bound is the peak injector-bank current from §A.1.1,
-        $4.67\ \text{A}$ (four injectors in parallel at $14\ \text{V}$). Assuming the full
-        $67\ \text{V}$ peak and that $4.67\ \text{A}$ persist throughout the complete
-        $200\ \text{ns}$ interval:
+        and requires the Drain-current waveform. A realistic upper bound uses the peak
+        injector-bank current from §A.1.1 — $4.67\ \text{A}$ (four injectors in parallel at
+        $14\ \text{V}$) — held at the full $67\ \text{V}$ peak for the entire $200\ \text{ns}$:
 
         $$E_{\mathrm{avalanche}} \leq V \cdot I \cdot t = 67\ \text{V} \cdot 4.67\ \text{A} \cdot 200\ \text{ns} \approx 0.063\ \text{mJ} = 6.3 \times 10^{-5}\ \text{J}$$
 
-        So the energy deposited in the MOSFET during the 200 ns Zener turn-on delay is at most
-        **about $0.06\ \text{mJ}$** — roughly **0.06 millijoule**, or
-        **$6 \times 10^{-5}\ \text{J}$**. The real energy is lower because both voltage and
-        current vary during the transient, and the actual turn-off current is usually below the
-        $4.67\ \text{A}$ peak. Even this conservative estimate is far below the
-        $210\ \text{mJ}$ single-pulse avalanche-energy rating.
+        So at most **about $0.06\ \text{mJ}$** is deposited during the Zener turn-on delay — and the
+        real figure is lower, since both voltage and current fall during the transient. Even this
+        conservative bound is far below the $210\ \text{mJ}$ single-pulse avalanche rating.
 
 ??? note "Scope capture walkthrough"
-    *   **Gate Drive and Drain Roles:** In the dual-channel timing correlation screenshots (turn-on and turn-off logic/drain views), the blue trace is the MOSFET Drain voltage ($V_{\mathrm{DS}}$) and the yellow trace is the gate-drive signal.
-    *   **Single-Channel Clamping Detail:** In the high-detail active clamping zoom-in Capture, Only the Drain voltage ($V_{\mathrm{DS}}$) is plotted, represented by the yellow trace because it's the sole active measurement channel.
-    *   **Zener Turn-On Delay ($200\ \text{ns}$):** There is a short transient period of
-        **$200\ \text{ns}$** representing the duration it takes for the feedback $36\ \text{V}$
-        Zener diode (in series with a 1N4148 blocking diode) to fully turn on and start conducting.
-        During this brief delay, the Drain voltage temporarily spikes to **$\approx 67\ \text{V}$**.
-    *   **Clamping Plateau:** Once the Zener diode fully activates and delivers charge back to the
-        MOSFET Gate, the active clamp settles neatly to a stable plateau of **$\approx 40\ \text{V}$**.
-        The actual clamp voltage is higher than the $36\ \text{V}$ Zener rating because of the low
-        gate resistor value and the additional voltage drop across the 1N4148 blocking diode. This
-        high-voltage clamp minimizes injector closing times and safely dissipates the magnetic
-        energy across the silicon channel.
+    *   **Trace roles:** In the dual-channel captures, blue is the Drain voltage ($V_{\mathrm{DS}}$)
+        and yellow is the gate drive. In the single-channel clamping zoom, the Drain is the yellow
+        trace (sole active channel).
+    *   **Zener turn-on delay ($200\ \text{ns}$):** The time it takes for the feedback
+        $36\ \text{V}$ Zener (in series with a 1N4148 blocking diode) to start conducting. During
+        this delay the Drain briefly spikes to **$\approx 67\ \text{V}$**.
+    *   **Clamping plateau:** Once the Zener conducts into the Gate, the clamp settles to a stable
+        **$\approx 40\ \text{V}$** — above the $36\ \text{V}$ Zener rating because of the low gate
+        resistor value plus the 1N4148 drop. The high clamp voltage minimizes injector closing time
+        while dissipating the magnetic energy in the silicon.
 
 
 ---
 
 ### 4.4. Output Summary Table
 
-All low-side channels are rated for automotive voltage levels. Due to heat dissipation constraints on the PCB, the practical on-board continuous current limits are lower than the standalone silicon ratings.
+All low-side channels are rated for automotive voltage levels. PCB heat dissipation — not the silicon — sets the practical continuous current limits.
 
 | Channel | Controls | MOSFET Used | Datasheet Max ($I_D$ @ 25°C) | Board Design Limit |
 | :--- | :--- | :--- | :--- | :--- |
@@ -218,27 +200,23 @@ All low-side channels are rated for automotive voltage levels. Due to heat dissi
 | `FAN_RELAY` | Cooling Fan Relay | `NCE6005AS` (SOIC-8) | `5 A` | **Heatsink-Dependent** <br> **`< 2.0 A`** peak |
 | `FP_RELAY` | Fuel Pump Relay | `NCE6005AS` (SOIC-8) | `5 A` | **Heatsink-Dependent** <br> **`< 2.0 A`** peak |
 
-<small>\* *Note: The IRLR2905's silicon capability is high, but thermal performance on the PCB restricts actual continuous current. Refer to the thermal calculations in the Technical Appendix (§A.1–A.2) for multi-injector bank limit details.*</small>
+<small>\* *The IRLR2905's silicon capability is high, but PCB thermal performance restricts actual continuous current. See the Technical Appendix (§A.1–A.2) for multi-injector bank limits.*</small>
 
-<small>\* *The `NCE6005AS` channels are also heatsink-dependent, scaled down: the SOIC-8 package has
-a much smaller footprint and lower thermal mass than the IRLR2905's D-PAK, so its board-mounted
-derating is tighter in proportion. We haven't published a worked calculation for this package the
-way we have for the injector drivers (§A.1–A.2) — treat `< 2.0 A` as the practical continuous
-limit and avoid running it near the 5 A datasheet maximum on the PCB.*</small>
+<small>\* *The `NCE6005AS` channels derate harder in proportion: the SOIC-8 package has far less footprint and thermal mass than the D-PAK. No worked calculation is published for this package yet — treat `< 2.0 A` as the practical continuous limit and stay well below the 5 A datasheet maximum on the PCB.*</small>
 
 ---
 
 ## 5. Ignition Outputs
 
-Unlike the injector and relay channels, the two ignition outputs `IGN1` and `IGN2` are **logic-level
-trigger outputs, not power drivers**. They are designed to command an external igniter (power stage)
-or a smart coil with a built-in igniter — never an ignition coil primary directly.
+The two ignition outputs `IGN1` and `IGN2` are **logic-level trigger outputs, not power drivers**.
+They command an external igniter (power stage) or a smart coil with a built-in igniter — never an
+ignition coil primary directly.
 
 ### 5.1. Circuit
 
-Each channel is driven by an `NSG4437` driver stage with a $330\ \Omega$ series resistor on the
-output. The series resistor limits output current into the igniter input and damps ringing on the
-trigger line, keeping the edge clean over a real-world harness run into the engine bay.
+Each channel is an `NSG4437` driver stage with a $330\ \Omega$ series resistor, which limits current
+into the igniter input and damps ringing so the trigger edge stays clean over a real-world harness
+run.
 
 | Specification | Value |
 | :--- | :--- |
@@ -250,14 +228,14 @@ trigger line, keeping the edge clean over a real-world harness run into the engi
 
 ### 5.2. Design Rationale
 
-Driving ignition coils directly from inside the ECU generates intense localized heat and injects
-severe flyback transients into the enclosure. By pushing the high-current switching out to a rugged,
-inexpensive igniter mounted in the engine bay, the ECU's thermal and EMI environment stays clean —
-and if a coil shorts, the external igniter fails instead of the ECU.
+Driving coil primaries inside the ECU means intense localized heat and severe flyback transients in
+the enclosure. Pushing the high-current switching out to a rugged, cheap igniter in the engine bay
+keeps the ECU's thermal and EMI environment clean — and if a coil shorts, the external igniter fails
+instead of the ECU.
 
-With two channels, a 4-cylinder engine runs **wasted spark**: `IGN1` fires the coils for the
-cylinder pair 360° apart (e.g. 1+4), `IGN2` the other pair (2+3). Fully sequential per-cylinder
-ignition would require four channels and is not available on this board.
+With two channels, a 4-cylinder engine runs **wasted spark**: `IGN1` fires the coil pair 360° apart
+(e.g. 1+4), `IGN2` the other pair (2+3). Fully sequential ignition would need four channels and is
+not available on this board.
 
 ---
 
@@ -267,9 +245,8 @@ Engine position comes in through a dedicated differential VR sensor interface bu
 `MAX9924` IC (pins `VR_POS`/`VR_NEG` — see the
 [IO Overview](24p_v1_overview.md#3-io-overview)).
 
-A VR (variable reluctance) sensor outputs an analog voltage swing whose amplitude grows with engine
-speed — from well under a volt at cranking to tens of volts at redline. The `MAX9924` handles this
-with:
+A VR (variable reluctance) sensor's output amplitude grows with engine speed — from well under a
+volt at cranking to tens of volts at redline. The `MAX9924` handles this with:
 
 *   **Differential input:** both sensor wires are measured against each other, not against ground,
     so noise induced equally on both wires (the dominant failure mode near ignition wiring) cancels
@@ -323,10 +300,10 @@ The $+5\ \text{V}$ rail on pin C5 is the **sensor reference** — power your TPS
 with the ADC reference.
 
 !!! note "Sensor rail current budget: to be confirmed"
-    The rated external load of the $+5\ \text{V}$ sensor rail (how many sensors it can feed with
-    what margin) has not been published yet. A typical passive-sensor set (TPS + T-MAP + CLT) draws
-    only a few tens of mA and is well within any LDO's capability; for unusual loads (many active
-    sensors, external modules), wait for the confirmed figure or measure your own draw.
+    The rated external load of the $+5\ \text{V}$ sensor rail has not been published yet. A typical
+    passive-sensor set (TPS + T-MAP + CLT) draws only a few tens of mA and is well within any LDO's
+    capability; for unusual loads (many active sensors, external modules), wait for the confirmed
+    figure or measure your own draw.
 
 ---
 
@@ -361,21 +338,20 @@ tuning, firmware console access, and DFU firmware flashing (see
 
 ## 9. Technical Appendix
 
-Sections 1–8 above cover what most builders need. The rest of this page shows the math and
-component-level detail behind those numbers — read it if you want to verify the thermal limits
-yourself, compare driver architectures, or adapt the board for a load outside the summary table.
-
-This section contains the mathematical proofs and detailed component specifications for engineers and advanced users.
+Sections 1–8 cover what most builders need. This appendix holds the math and component-level detail
+behind those numbers — read it to verify the thermal limits yourself, compare driver architectures,
+or adapt the board for a load outside the summary table.
 
 ### 9.1. A.1. Thermal Analysis
 
-In a 4-injector single-driver setup, the thermal load rises, but the design remains practical when heat is moved into the enclosure efficiently. The IRLR2905 MOSFET stays well within reach of a robust thermal solution when the PCB is coupled to the aluminum case with a thermal pad.
-
-Without that path — PCB junction-to-ambient thermal resistance alone, $R_{\theta JA} = 50\ \text{°C/W}$ per the IRLR2905 datasheet, no thermal pad to the case — the junction temperature rise would be:
+A 4-injector single-driver setup raises the thermal load, but stays practical as long as heat is
+moved into the enclosure. Without that path — bare-PCB junction-to-ambient resistance of
+$R_{\theta JA} = 50\ \text{°C/W}$ per the IRLR2905 datasheet, no thermal pad — the junction
+temperature rise would be:
 
 $$\Delta T_{\mathrm{JA}} = 3.88\ \text{W} \cdot 50\ \text{°C/W} = 194\ \text{°C}$$
 
-With a 50°C ambient temperature it would reach about **244°C**.
+At a 50°C ambient, that's about **244°C** — far beyond survivable.
 
 !!! success "Thermal coupling to enclosure"
     A thermal pad drops the effective thermal resistance from the bare-PCB $50\ \text{°C/W}$ above to
@@ -402,11 +378,11 @@ With a 50°C ambient temperature it would reach about **244°C**.
 
 ### 9.2. A.2. Discrete MOSFET vs. Automotive Smart Driver
 
-Using an automotive smart low-side driver instead of a low-$R_{\mathrm{DS(on)}}$ discrete MOSFET shifts the thermal profile and alters the system's failure mode.
+Swapping the low-$R_{\mathrm{DS(on)}}$ discrete MOSFET for an automotive smart low-side driver shifts the thermal profile and changes the failure mode.
 
 #### 9.2.1. A.2.1. Thermal Comparison
 
-The physics of the inductive load remain identical — the energy from the injector coils must be dissipated. Because smart drivers use an internal active clamp, the $3.27\ \text{W}$ inductive loss remains fixed. However, smart drivers typically have a higher $R_{\mathrm{DS(on)}}$ (for example $70\ \text{m}\Omega$), which increases conduction losses.
+The inductive energy from the injector coils must be dissipated either way, so the $3.27\ \text{W}$ clamp loss is fixed. Smart drivers typically have a higher $R_{\mathrm{DS(on)}}$ (e.g. $70\ \text{m}\Omega$), which doubles the conduction losses:
 
 | Parameter | Discrete (IRLR2905) | Smart Driver (Typical) |
 | :--- | :--- | :--- |
@@ -415,7 +391,7 @@ The physics of the inductive load remain identical — the energy from the injec
 | Inductive Loss | $3.27\ \text{W}$ | $3.27\ \text{W}$ |
 | Total Thermal Load | $3.88\ \text{W}$ | $4.49\ \text{W}$ |
 
-Using the same enclosure coupling introduced in §A.1 ($8.36\ \text{°C/W}$, PCB-to-case via thermal pad) at a $50\ \text{°C}$ ambient temperature, the smart driver runs hotter ($87.5\ \text{°C}$ vs $82.4\ \text{°C}$).
+With the §A.1 enclosure coupling ($8.36\ \text{°C/W}$, PCB-to-case via thermal pad) at $50\ \text{°C}$ ambient, the smart driver runs hotter: $87.5\ \text{°C}$ vs $82.4\ \text{°C}$.
 
 #### 9.2.2. A.2.2. Architecture & Failure Modes
 
@@ -443,38 +419,32 @@ Corner Frequency
     The TVS diode is designed to sacrifice itself if 12 V is accidentally applied to an input, maintaining signal purity for normal 0–5V operation.
 
 !!! note "These values are for ratiometric channels (TPS, MAP/T-MAP)"
-    The R/C values above are tuned for fast, ratiometric sensors whose signal already spans a wide
-    voltage range and needs reasonable bandwidth. The thermistor-based `CLT`/`IAT` channels use a
-    different, higher-impedance network with a larger capacitor — see **§A.3.2 Thermistor Channels
-    (CLT/IAT)** below for why.
+    The R/C values above suit fast, ratiometric sensors that need reasonable bandwidth. The
+    thermistor-based `CLT`/`IAT` channels use a higher-impedance network with a larger capacitor —
+    see **§A.3.2 Thermistor Channels (CLT/IAT)** for why.
 
 #### 9.3.1. A.3.1. Why Direct-to-MCU Instead of Op-Amp Buffering
 
-A reasonable question when looking at this schematic is: why feed the divider node straight into the
-MCU pin, rather than adding an op-amp (e.g. an `MCP6002`) as a unity-gain buffer for level shifting
-and isolation? The short answer is that the divider's own source impedance is already low enough for
-the ADC to sample directly, so a buffer stage would add cost, board space, and new failure modes
-without fixing a problem that exists here.
+Why feed the divider node straight into the MCU pin instead of adding a unity-gain op-amp buffer
+(e.g. an `MCP6002`)? Because the divider's source impedance is already low enough for the ADC to
+sample directly — a buffer would add cost, board space, and new failure modes without solving a
+problem that exists here.
 
 **1. The divider's Thevenin impedance is already low.**
-What matters for direct ADC connection is not the individual resistor values but the impedance the
-ADC's sample-and-hold capacitor actually sees, looking back into the node between $R_{\mathrm{series}}$
-and $R_{\mathrm{shunt}}$ with the source shorted to AC ground:
+What the ADC's sample-and-hold capacitor sees is the impedance looking back into the node between
+$R_{\mathrm{series}}$ and $R_{\mathrm{shunt}}$, with the source at AC ground:
 
 $$R_{\mathrm{source}} = R_{\mathrm{series}} \parallel R_{\mathrm{shunt}} = \frac{1.8\ \text{k}\Omega \cdot 3.3\ \text{k}\Omega}{1.8\ \text{k}\Omega + 3.3\ \text{k}\Omega} \approx 1.16\ \text{k}\Omega$$
 
-This is comfortably under the source-impedance figures typically recommended for STM32-class ADCs to
-fully charge their internal sampling capacitor within one acquisition phase — see **§A.3.3 ADC
-Settling Time Budget** for the worked derivation of that limit on this board's `STM32F405` MCU.
-$C_{\mathrm{shunt}}$ also helps: it acts as a small local charge reservoir sitting right at the ADC
-pin, supplying the brief burst of charge the sampling capacitor demands so the resistor network
-doesn't have to do all the work on its own.
+That's comfortably under what STM32-class ADCs need to charge their sampling capacitor within one
+acquisition phase — see **§A.3.3** for the worked limit on this board's `STM32F405`.
+$C_{\mathrm{shunt}}$ helps too: it sits right at the pin as a local charge reservoir, supplying the
+brief burst the sampling capacitor demands.
 
 **2. The divider is doing double duty.**
-A unity-gain buffer only isolates impedance — it does not scale voltage. The 5 V→3.3 V-range scaling
-still has to happen somewhere, either before the buffer (as a divider feeding the buffer's input) or
-after it (as a second resistive stage). Either way you keep the resistor network *and* add an active
-stage on top of it, rather than replacing one with the other.
+A unity-gain buffer isolates impedance but does not scale voltage. The 5 V→3.3 V scaling still needs
+a resistor network somewhere — before or after the buffer — so buffering adds an active stage on top
+of the divider rather than replacing it.
 
 **3. What a buffer would actually change.**
 
@@ -489,17 +459,14 @@ stage on top of it, rather than replacing one with the other.
 | Bill of materials / board space | Minimal | Higher — extra IC, decoupling, routing per channel |
 
 **4. Why it doesn't matter here.**
-The ratiometric sensors on this board (TPS, MAP/T-MAP) are moderate-bandwidth signals with modest
-source impedance (potentiometers and resistive dividers in the low-kΩ range), read by a single-ended
-ADC that samples channels sequentially rather than a fast simultaneous mux bank. Charge-injection
-kickback and cable-length-driven source impedance — the two scenarios where a buffer earns its keep —
-simply aren't in play. Given that, the passive divider is the simpler, cheaper, and more reliable
-choice: fewer parts, no extra supply rail to sequence and decouple, and no new active-component failure
-mode sitting between the sensor and the MCU.
+The two scenarios where a buffer earns its keep — charge-injection kickback from fast channel
+multiplexing, and high source impedance from long cable runs — aren't in play: this board's
+ratiometric sensors (TPS, MAP/T-MAP) are low-kΩ sources read sequentially by a single-ended ADC. The
+passive divider is therefore the simpler, cheaper, more reliable choice.
 
-The thermistor channels (`CLT`, `IAT`) run a higher Thevenin impedance than TPS/MAP (§A.3.2), but the
-same logic still holds: firmware groups them with TPS on the same lower-rate ADC conversion group
-(§A.3.3), which already gives them a longer sample time than a design would need to add a buffer for.
+The thermistor channels (`CLT`, `IAT`) run a higher Thevenin impedance (§A.3.2), but firmware groups
+them with TPS on the same lower-rate ADC conversion group (§A.3.3), which already gives them more
+sample time than a buffer would ever be needed for.
 
 !!! tip "When you *would* want a buffer"
     If you're adapting this front-end for a sensor with much higher source impedance (e.g. a
@@ -511,18 +478,15 @@ same logic still holds: firmware groups them with TPS on the same lower-rate ADC
 
 #### 9.3.2. A.3.2. Thermistor Channels (CLT/IAT): Higher-Z, Heavier Filtering
 
-Coolant Temperature (`CLT`) and Intake Air Temperature (`IAT`) use a two-wire NTC thermistor rather
-than a ratiometric sensor like the TPS. A thermistor has no built-in divider of its own — it's just a
-variable resistor to ground — so the board has to supply that missing half of the divider itself, and
-then filters the result more aggressively than the TPS/MAP channels because a temperature reading has
-no need for millisecond-scale response.
+Coolant (`CLT`) and Intake Air Temperature (`IAT`) use two-wire NTC thermistors — just a variable
+resistance to ground, with no divider of their own. The board supplies the missing divider half and
+filters the result much more aggressively than the TPS/MAP channels, since a temperature reading
+never needs millisecond-scale response.
 
 **Bias resistor (sensor excitation).**
-A $2.7\ \text{k}\Omega$ resistor pulls the raw sensor node up to $+5\ \text{V}$. The external NTC
-thermistor, connected between that same node and sensor ground through the harness, forms the other
-leg of the divider. As the thermistor's resistance falls with rising temperature, the node voltage
-falls too — the classic pull-up/NTC arrangement, sized so the usable temperature range maps to a
-reasonable swing across the sensor's resistance curve.
+A $2.7\ \text{k}\Omega$ pull-up to $+5\ \text{V}$ forms a divider with the external NTC: as the
+thermistor's resistance falls with rising temperature, the node voltage falls with it. The value is
+sized so the usable temperature range maps to a reasonable voltage swing.
 
 **RC filter stage.**
 From that raw node, the signal passes through a series/shunt network before reaching the MCU:
@@ -533,8 +497,8 @@ From that raw node, the signal passes through a series/shunt network before reac
 | $R_{\mathrm{shunt}}$ | Shunt resistor to GND | $18\ \text{k}\Omega$ |
 | $C_{\mathrm{shunt}}$ | Shunt capacitor to GND | $1\ \mu\text{F}$ |
 
-Both resistors are roughly $5$–$6\times$ larger than the TPS channel's, and the capacitor is
-$10\times$ larger ($1\ \mu\text{F}$ vs. $100\ \text{nF}$). Using the same Thevenin approach as §A.3.1:
+The resistors are $5$–$6\times$ larger than the TPS channel's and the capacitor $10\times$ larger.
+Using the same Thevenin approach as §A.3.1:
 
 $$R_{\mathrm{source}} = R_{\mathrm{series}} \parallel R_{\mathrm{shunt}} = \frac{10\ \text{k}\Omega \cdot 18\ \text{k}\Omega}{10\ \text{k}\Omega + 18\ \text{k}\Omega} \approx 6.43\ \text{k}\Omega$$
 
@@ -543,35 +507,30 @@ $$f_c = \frac{1}{2\pi \cdot R_{\mathrm{source}} \cdot C_{\mathrm{shunt}}} = \fra
 That's roughly **55× lower** than the TPS channel's $1.37\ \text{kHz}$ corner frequency.
 
 !!! success "Why heavier filtering makes sense here"
-    Coolant and intake air temperature are governed by thermal mass — they physically cannot change
-    in less than several seconds, let alone milliseconds. There's no downside to pushing the corner
-    frequency far lower than on the TPS channel: it rejects far more electrical noise (e.g. injector
-    and ignition switching transients coupled onto the long engine-bay harness runs these sensors
-    typically use) while still tracking the real signal with enormous margin.
+    Coolant and intake air temperature are governed by thermal mass — they can't change in less than
+    seconds. Pushing the corner frequency far down costs nothing and rejects far more of the injector
+    and ignition switching noise coupled onto these sensors' long engine-bay harness runs.
 
 !!! note "Higher source impedance is still fine—the firmware already samples it slower"
     At $\approx 6.43\ \text{k}\Omega$, this channel's Thevenin impedance is higher than the TPS
-    channel's $\approx 1.16\ \text{k}\Omega$ (§A.3.1). That's not a problem in practice: rusEFI-style
-    firmware already reads `CLT`, `IAT`, and `TPS` together on the same lower-rate ADC conversion
-    group (§A.3.3), which uses a much longer sample time than a high-rate channel would get — no
-    special accommodation needed, no buffer required. The exact numbers are worked out in **§A.3.3**
-    below.
+    channel's $\approx 1.16\ \text{k}\Omega$ (§A.3.1) — but rusEFI-style firmware reads `CLT`, `IAT`,
+    and `TPS` together on the same lower-rate ADC conversion group with a long sample time, so no
+    buffer or special accommodation is needed. The numbers are worked out in **§A.3.3** below.
 
 #### 9.3.3. A.3.3. ADC Settling Time Budget: Putting a Number on "Low Enough"
 
-The claims in §A.3.1 and §A.3.2 that these source impedances are "low enough" aren't just a rule of
-thumb — they follow from the STM32's own ADC input model and the sample time the firmware actually
-uses. This board's [`STM32F405RGT6`](24p_v1_overview.md#3-io-overview) is an F4-family part, so the
-following uses ST's F4 ADC characteristics.
+The "low enough" claims in §A.3.1 and §A.3.2 follow from the STM32's own ADC input model and the
+sample time the firmware actually uses. This board's
+[`STM32F405RGT6`](24p_v1_overview.md#3-io-overview) is an F4-family part, so ST's F4 ADC
+characteristics apply.
 
 **rusEFI's ADC conversion groups.**
-rusEFI splits ADC channels into a few independent conversion groups, each with its own sample-time
-setting. The relevant one here is the **slow ADC group** (`stm32_adc_v2.cpp` on F4/F7, `stm32_adc_v4.cpp`
-on H7) which handles `CLT`, `IAT`, `TPS`, battery voltage, and similar sensors, running at roughly
-$500\ \text{Hz}$ with a deliberately long sample time — `ADC_SAMPLE_56` (56 ADC clock cycles) on
-F4/F7 parts, or `ADC_SMPR_SMP_16P5` on H7. A separate, shorter-sample-time group exists for channels
-that need a higher conversion rate; `TPS` is **not** in that group, so both the ratiometric channel
-(§A.3.1) and the thermistor channels (§A.3.2) get the same generous sampling budget below.
+rusEFI splits ADC channels into independent conversion groups, each with its own sample time. The
+relevant one here is the **slow ADC group** (`stm32_adc_v2.cpp` on F4/F7, `stm32_adc_v4.cpp` on H7),
+which handles `CLT`, `IAT`, `TPS`, battery voltage, and similar sensors at roughly $500\ \text{Hz}$
+with a deliberately long sample time — `ADC_SAMPLE_56` (56 ADC clock cycles) on F4/F7, or
+`ADC_SMPR_SMP_16P5` on H7. `TPS` is **not** in the faster group, so both the ratiometric (§A.3.1)
+and thermistor (§A.3.2) channels get the generous budget below.
 
 **The ADC input model.**
 Internally, every STM32 ADC channel looks like a resistor $R_{\mathrm{ADC}}$ (the sampling switch) in
@@ -580,21 +539,18 @@ datasheet gives approximately:
 
 $$R_{\mathrm{ADC}} \approx 6\ \text{k}\Omega, \qquad C_{\mathrm{ADC}} \approx 12\ \text{pF}$$
 
-During the sampling phase, whatever is driving the pin ($R_{\mathrm{source}}$, the Thevenin impedance
-from §A.3.1/§A.3.2) has to charge $C_{\mathrm{ADC}}$ through both resistances in series, giving an RC
-time constant of:
+During sampling, the source ($R_{\mathrm{source}}$, the Thevenin impedance from §A.3.1/§A.3.2) must
+charge $C_{\mathrm{ADC}}$ through both resistances in series:
 
 $$\tau = (R_{\mathrm{source}} + R_{\mathrm{ADC}}) \cdot C_{\mathrm{ADC}}$$
 
 **How long is available to settle.**
-At `ADC_SAMPLE_56`, the sampling phase lasts 56 ADC clock cycles. With the ADC clock at
-$21\ \text{MHz}$ on F4 parts, that's:
+At `ADC_SAMPLE_56` with the F4's ADC clock at $21\ \text{MHz}$, the sampling phase lasts:
 
 $$t_{\mathrm{sample}} = \frac{56}{21\ \text{MHz}} \approx 2.67\ \mu\text{s}$$
 
-To resolve a 12-bit conversion to within 1 LSB ($1/4096 \approx 0.0244\%$ of full scale), the RC network
-needs roughly $n = 7$ to $9$ time constants to settle ($e^{-9} \approx 1/8100$, comfortably past the
-1-LSB target with margin):
+Settling a 12-bit conversion to within 1 LSB ($1/4096 \approx 0.0244\%$ of full scale) takes roughly
+$n = 7$ to $9$ time constants ($e^{-9} \approx 1/8100$, comfortably past the 1-LSB target):
 
 $$\tau_{\mathrm{max}} = \frac{t_{\mathrm{sample}}}{n} \approx \frac{2.67\ \mu\text{s}}{7\ \text{to}\ 9} \approx 296\ \text{to}\ 381\ \text{ns}$$
 
@@ -610,24 +566,21 @@ $$R_{\mathrm{source}} \leq \frac{\tau_{\mathrm{max}}}{C_{\mathrm{ADC}}} - R_{\ma
 | CLT / IAT (§A.3.2) | $\approx 6.43\ \text{k}\Omega$ | $\approx 3$–4× margin — comfortably clear |
 
 !!! success "Both channel types settle with margin to spare"
-    Because `TPS`, `CLT`, and `IAT` all share the same $\approx 500\ \text{Hz}$ slow ADC group and its
-    56-cycle sample time, even the thermistor channels' higher $6.43\ \text{k}\Omega$ source impedance
-    settles with $3$–$4\times$ margin before the conversion completes. The 28-cycle fast group
-    (`ADC_SAMPLE_28`, $\approx 1.33\ \mu\text{s}$) exists for channels that need a much higher
-    conversion rate than these sensors do — none of the analog inputs described in §A.3.1/§A.3.2 are
-    on it, so the tighter timing budget that group implies doesn't apply here.
+    `TPS`, `CLT`, and `IAT` all share the same $\approx 500\ \text{Hz}$ slow ADC group and its
+    56-cycle sample time, so even the thermistor channels' $6.43\ \text{k}\Omega$ source impedance
+    settles with $3$–$4\times$ margin. The 28-cycle fast group (`ADC_SAMPLE_28`,
+    $\approx 1.33\ \mu\text{s}$) exists for channels needing much higher conversion rates — none of
+    the inputs described here are on it, so its tighter budget doesn't apply.
 
 **A note on the external capacitors.**
-A commonly cited generic guideline for a small capacitor placed directly at an ADC pin (with no series
-resistor in front of it) is roughly $100\ \text{pF}$ to $1\ \text{nF}$ — just enough to buffer
-high-frequency noise without materially loading the pin. $C_{28}$ ($100\ \text{nF}$) and $C_{32}$
-($1\ \mu\text{F}$) on this board are both far larger than that. That's intentional, not an oversight:
-unlike a bare stabilization cap, these capacitors sit behind a defined series resistor as part of a
-purpose-built anti-alias filter with a calculated corner frequency ($1.37\ \text{kHz}$ for TPS/MAP,
-$24.8\ \text{Hz}$ for CLT/IAT) — a different design goal than the generic "small cap at the pin" rule,
-and one that only works because channels are read sequentially rather than multiplexed at high speed
-(which is where a large cap combined with high source impedance would start causing channel-to-channel
-crosstalk).
+A common guideline for a bare capacitor placed directly at an ADC pin (no series resistor) is
+$100\ \text{pF}$ to $1\ \text{nF}$. $C_{28}$ ($100\ \text{nF}$) and $C_{32}$ ($1\ \mu\text{F}$) are
+far larger — intentionally: they sit behind a defined series resistor as part of a purpose-built
+anti-alias filter with a calculated corner frequency ($1.37\ \text{kHz}$ for TPS/MAP,
+$24.8\ \text{Hz}$ for CLT/IAT). That's a different design goal than the generic "small cap at the
+pin" rule, and it works because channels are read sequentially rather than multiplexed at high
+speed — which is where a large cap plus high source impedance would cause channel-to-channel
+crosstalk.
 
 ---
 
