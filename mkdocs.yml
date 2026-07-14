@@ -54,8 +54,8 @@ nav:
       - Overview & Specs: products/motorsteuergerat-24p-v1/24p_v1_overview.md
       - Hardware & Wiring: products/motorsteuergerat-24p-v1/wiring.md
       - Design Reference: products/motorsteuergerat-24p-v1/reference.md
-      - Hardware Test Protocol: products/motorsteuergerat-24p-v1/hardware-test-protocol.md
-      - Design Verification Protocol: products/motorsteuergerat-24p-v1/design-verification-protocol.md
+      - Practical Hardware Checks: products/motorsteuergerat-24p-v1/hardware-test-protocol.md
+      - Community Design Validation: products/motorsteuergerat-24p-v1/design-verification-protocol.md
       - Setup guide:
         - Setup Overview: products/motorsteuergerat-24p-v1/setup/index.md
         - Flashing the PCB: products/motorsteuergerat-24p-v1/setup/flashing.md
@@ -111,5 +111,4 @@ nav:
 #      - Speeduino Guide: products/schildknappe/speeduino.md
 #      - Standalone Operation: products/schildknappe/standalone.md
 #      - Hardware Reference: products/schildknappe/reference.md
-
 
