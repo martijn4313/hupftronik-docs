@@ -55,6 +55,7 @@ nav:
       - Hardware & Wiring: products/motorsteuergerat-24p-v1/wiring.md
       - Design Reference: products/motorsteuergerat-24p-v1/reference.md
       - Hardware Test Protocol: products/motorsteuergerat-24p-v1/hardware-test-protocol.md
+      - Design Verification Protocol: products/motorsteuergerat-24p-v1/design-verification-protocol.md
       - Setup guide:
         - Setup Overview: products/motorsteuergerat-24p-v1/setup/index.md
         - Flashing the PCB: products/motorsteuergerat-24p-v1/setup/flashing.md

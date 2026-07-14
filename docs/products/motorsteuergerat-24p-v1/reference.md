@@ -127,7 +127,7 @@ Instead, the `IAC` channel has a dedicated **freewheeling diode** to $+12\ \text
 #### 4.3.3. Clamp & Switching Verification
 Both the active clamp and the turn-on performance have been verified on the oscilloscope.
 
-##### A. Injector Turn-Off (Active Clamping Transition)
+##### 4.3.3.1. A. Injector Turn-Off (Active Clamping Transition)
 
 === "Detailed Verification Capture"
     ![Active Clamp & Switching Scope Capture](measurements/active_clamp_scope.png)
@@ -145,7 +145,7 @@ Both the active clamp and the turn-on performance have been verified on the osci
     $\approx 40\ \text{V}$ clamp level, holding there until the inductive field collapses and it
     settles back to the $+12$–$14\ \text{V}$ battery rail.
 
-##### B. Injector Turn-On (Charging Transition)
+##### 4.3.3.2. B. Injector Turn-On (Charging Transition)
 
 ![Injector Opening Drain & Logic Signal](measurements/injector_opening_drain_logic_signal.png)
 
@@ -184,7 +184,6 @@ The steep falling edge of the Drain voltage shows the IRLR2905 turning ON fast. 
         **$\approx 40\ \text{V}$** — above the $36\ \text{V}$ Zener rating because of the low gate
         resistor value plus the 1N4148 drop. The high clamp voltage minimizes injector closing time
         while dissipating the magnetic energy in the silicon.
-
 
 ---
 
@@ -336,13 +335,15 @@ tuning, firmware console access, and DFU firmware flashing (see
 
 ---
 
-## 9. Technical Appendix
+<!-- heading-numbering: appendix -->
+
+## Technical Appendix
 
 Sections 1–8 cover what most builders need. This appendix holds the math and component-level detail
 behind those numbers — read it to verify the thermal limits yourself, compare driver architectures,
 or adapt the board for a load outside the summary table.
 
-### 9.1. A.1. Thermal Analysis
+### A.1. Thermal Analysis
 
 A 4-injector single-driver setup raises the thermal load, but stays practical as long as heat is
 moved into the enclosure. Without that path — bare-PCB junction-to-ambient resistance of
@@ -358,53 +359,51 @@ At a 50°C ambient, that's about **244°C** — far beyond survivable.
     roughly $8.36\ \text{°C/W}$ by giving the heat a low-resistance path into the aluminum case
     (see §A.2.1 for the resulting junction temperatures with this coupling in place).
 
-#### 9.1.1. A.1.1. Loss Calculations
+??? info "Loss calculation ($3.88\ \text{W}$ total)"
+    *   **Conduction losses ($P_{\mathrm{cond}}$):** Parallel resistance for four injectors is
+        $3\ \Omega$; peak current at 14 V is $4.67\ \text{A}$.
 
-*   **Conduction Losses ($P_{\mathrm{cond}}$)**
-    Parallel resistance for 4 injectors is $3\ \Omega$; Peak current at 14V is $4.67\ \text{A}$.
-    
-    $$P_{\mathrm{cond}} = I_{\mathrm{peak}}^2 \cdot R_{\mathrm{DS(on)}} \cdot D = (4.67\ \text{A})^2 \cdot 0.035\ \Omega \cdot 0.80 \approx 0.61\ \text{W}$$
+        $$P_{\mathrm{cond}} = I_{\mathrm{peak}}^2 \cdot R_{\mathrm{DS(on)}} \cdot D = (4.67\ \text{A})^2 \cdot 0.035\ \Omega \cdot 0.80 \approx 0.61\ \text{W}$$
 
-*   **Inductive Losses ($P_{\mathrm{clamp}}$)**
-    At 6000 RPM (100 Hz switching), the energy dumped into the Zener clamp is:
-    
-    $$P_{\mathrm{clamp}} = E_{\mathrm{clamp}} \cdot f = 0.0327\ \text{J} \cdot 100\ \text{Hz} \approx 3.27\ \text{W}$$
+    *   **Inductive losses ($P_{\mathrm{clamp}}$):** At 6000 RPM (100 Hz switching), the energy
+        dumped into the Zener clamp is:
 
-*   **Total Thermal Load**
-    
-    $$P_{\mathrm{total}} = 0.61\ \text{W} + 3.27\ \text{W} = 3.88\ \text{W}$$
+        $$P_{\mathrm{clamp}} = E_{\mathrm{clamp}} \cdot f = 0.0327\ \text{J} \cdot 100\ \text{Hz} \approx 3.27\ \text{W}$$
+
+    *   **Total thermal load:**
+
+        $$P_{\mathrm{total}} = 0.61\ \text{W} + 3.27\ \text{W} = 3.88\ \text{W}$$
 
 ---
 
-### 9.2. A.2. Discrete MOSFET vs. Automotive Smart Driver
+### A.2. Discrete MOSFET vs. Automotive Smart Driver
 
 Swapping the low-$R_{\mathrm{DS(on)}}$ discrete MOSFET for an automotive smart low-side driver shifts the thermal profile and changes the failure mode.
 
-#### 9.2.1. A.2.1. Thermal Comparison
+At $50\ \text{°C}$ ambient with the §A.1 thermal coupling, a typical smart driver is expected to
+run about $5\ \text{°C}$ hotter than the discrete design ($87.5\ \text{°C}$ vs.
+$82.4\ \text{°C}$).
 
-The inductive energy from the injector coils must be dissipated either way, so the $3.27\ \text{W}$ clamp loss is fixed. Smart drivers typically have a higher $R_{\mathrm{DS(on)}}$ (e.g. $70\ \text{m}\Omega$), which doubles the conduction losses:
+??? info "Thermal comparison and interactive model"
+        The injector coils' $3.27\ \text{W}$ inductive loss must be dissipated either way. A typical
+        smart driver has a higher $R_{\mathrm{DS(on)}}$ (e.g. $70\ \text{m}\Omega$), which doubles the
+        conduction loss:
 
-| Parameter | Discrete (IRLR2905) | Smart Driver (Typical) |
-| :--- | :--- | :--- |
-| $R_{\mathrm{DS(on)}}$ | $35\ \text{m}\Omega$ | $70\ \text{m}\Omega$ |
-| Conduction Loss | $0.61\ \text{W}$ | $1.22\ \text{W}$ |
-| Inductive Loss | $3.27\ \text{W}$ | $3.27\ \text{W}$ |
-| Total Thermal Load | $3.88\ \text{W}$ | $4.49\ \text{W}$ |
+        | Parameter | Discrete (IRLR2905) | Smart Driver (Typical) |
+        | :--- | :--- | :--- |
+        | $R_{\mathrm{DS(on)}}$ | $35\ \text{m}\Omega$ | $70\ \text{m}\Omega$ |
+        | Conduction Loss | $0.61\ \text{W}$ | $1.22\ \text{W}$ |
+        | Inductive Loss | $3.27\ \text{W}$ | $3.27\ \text{W}$ |
+        | Total Thermal Load | $3.88\ \text{W}$ | $4.49\ \text{W}$ |
 
-With the §A.1 enclosure coupling ($8.36\ \text{°C/W}$, PCB-to-case via thermal pad) at $50\ \text{°C}$ ambient, the smart driver runs hotter: $87.5\ \text{°C}$ vs $82.4\ \text{°C}$.
+        The discrete IRLR2905 and NCE6005 continue operating under extreme thermal stress until
+        destructive failure.
 
-#### 9.2.2. A.2.2. Architecture & Failure Modes
+        <div style="margin: 0 0 0.25rem 0; padding: 0;">
+            <iframe src="../interactive_heat.html" title="Interactive thermal comparison" style="width: 100%; height: 650px; min-height: 650px; border: 0; display: block; margin: 0;"></iframe>
+        </div>
 
-The discrete IRLR2905 and NCE6005 will continue operating under extreme thermal stress until destructive failure. 
-
-Check operating conditions and heatsinking with this widget.
-
-<div style="margin: 0 0 0.25rem 0; padding: 0;">
-  <iframe src="../interactive_heat.html" title="Interactive thermal comparison" style="width: 100%; height: 650px; min-height: 650px; border: 0; display: block; margin: 0;"></iframe>
-</div>
-<hr style="margin-top: 0.5rem; margin-bottom: 1rem;">
-
-### 9.3. A.3. Analog Input Topology
+### A.3. Analog Input Topology
 
 ESD Protection
 :   `USBLC6-2SC6` bidirectional TVS diode placed at the connector to prevent traces from acting as antennas for EMI.
@@ -423,7 +422,7 @@ Corner Frequency
     thermistor-based `CLT`/`IAT` channels use a higher-impedance network with a larger capacitor —
     see **§A.3.2 Thermistor Channels (CLT/IAT)** for why.
 
-!!! note "Why the divider sits close to the MCU"
+??? note "Why the divider sits close to the MCU"
     The placement of TVS, resistors, and capacitors matters as much as their values.
     
     **TVS at the connector:** The TVS diode is placed immediately at the connector because that's the entry point for ESD and EMI — it must clamp transients before they travel any further onto the board. Because it conducts only during transients and has essentially zero series impedance in the signal path when inactive, it doesn't interact with trace length.
@@ -432,60 +431,51 @@ Corner Frequency
     
     **Physical placement strategy:** By keeping $R_{\mathrm{series}}$, $R_{\mathrm{shunt}}$, and $C_{\mathrm{shunt}}$ physically close to the MCU pin, the trace length after the divider/filter is minimized — i.e., the last passive components before the ADC input are close to the pin, so there is minimal trace to re-couple RF energy downstream of the filtering network. Any RF picked up on the long connector-to-MCU trace gets bled off by $C_{\mathrm{shunt}}$ right at the pin rather than being modulated by a resistor sitting far away. This is consistent with what §A.3.1 already says about $C_{\mathrm{shunt}}$ "sitting right at the pin as a local charge reservoir" — the same physical placement also serves this RF-immunity purpose, it is just not stated in those terms.
 
-#### 9.3.1. A.3.1. Why Direct-to-MCU Instead of Op-Amp Buffering
-
 Why feed the divider node straight into the MCU pin instead of adding a unity-gain op-amp buffer
 (e.g. an `MCP6002`)? Because the divider's source impedance is already low enough for the ADC to
 sample directly — a buffer would add cost, board space, and new failure modes without solving a
 problem that exists here.
 
-**1. The divider's Thevenin impedance is already low.**
-What the ADC's sample-and-hold capacitor sees is the impedance looking back into the node between
-$R_{\mathrm{series}}$ and $R_{\mathrm{shunt}}$, with the source at AC ground:
+??? info "A.3.1 Why no op-amp buffer is needed"
+    **The divider's Thevenin impedance is already low.** What the ADC's sample-and-hold capacitor
+    sees is the impedance looking back into the node between $R_{\mathrm{series}}$ and
+    $R_{\mathrm{shunt}}$, with the source at AC ground:
 
-$$R_{\mathrm{source}} = R_{\mathrm{series}} \parallel R_{\mathrm{shunt}} = \frac{1.8\ \text{k}\Omega \cdot 3.3\ \text{k}\Omega}{1.8\ \text{k}\Omega + 3.3\ \text{k}\Omega} \approx 1.16\ \text{k}\Omega$$
+    $$R_{\mathrm{source}} = R_{\mathrm{series}} \parallel R_{\mathrm{shunt}} = \frac{1.8\ \text{k}\Omega \cdot 3.3\ \text{k}\Omega}{1.8\ \text{k}\Omega + 3.3\ \text{k}\Omega} \approx 1.16\ \text{k}\Omega$$
 
-That's comfortably under what STM32-class ADCs need to charge their sampling capacitor within one
-acquisition phase — see **§A.3.3** for the worked limit on this board's `STM32F405`.
-$C_{\mathrm{shunt}}$ helps too: it sits right at the pin as a local charge reservoir, supplying the
-brief burst the sampling capacitor demands.
+    That is comfortably below what STM32-class ADCs need to charge their sampling capacitor within
+    one acquisition phase; §A.3.3 gives the worked limit for this board's `STM32F405`.
+    $C_{\mathrm{shunt}}$ also sits at the pin as a local charge reservoir.
 
-**2. The divider is doing double duty.**
-A unity-gain buffer isolates impedance but does not scale voltage. The 5 V→3.3 V scaling still needs
-a resistor network somewhere — before or after the buffer — so buffering adds an active stage on top
-of the divider rather than replacing it.
+    **The divider is doing double duty.** A unity-gain buffer isolates impedance but does not scale
+    voltage. The 5 V-to-3.3 V scaling still needs a resistor network somewhere, so buffering adds an
+    active stage rather than replacing the divider.
 
-**3. What a buffer would actually change.**
+    | Aspect | Passive divider + RC (used here) | Buffered (e.g. `MCP6002` follower) |
+    | :--- | :--- | :--- |
+    | Output impedance at MCU pin | $\approx 1.16\ \text{k}\Omega$ (Thevenin) | $\approx 0\ \Omega$ (op-amp output) |
+    | Extra supply rail needed | No | Yes — clean rail-to-rail supply per chip |
+    | Parts per channel | 2 resistors + 1 cap | Same, plus one op-amp channel (2 channels/`MCP6002`) |
+    | Tolerant of long/high-Z sensor wiring | Only if source impedance stays low | Yes — buffer absorbs it |
+    | Immune to ADC-mux charge-injection kickback | Only as good as $C_{\mathrm{shunt}}$ + source impedance | Yes — low-Z output soaks up the transient instantly |
+    | New failure modes | None beyond the existing TVS/passive network | Op-amp output can fail shorted to a rail; offset voltage error (a few mV); potential instability driving $C_{\mathrm{shunt}}$ directly without a series isolation resistor |
+    | Bill of materials / board space | Minimal | Higher — extra IC, decoupling, routing per channel |
 
-| Aspect | Passive divider + RC (used here) | Buffered (e.g. `MCP6002` follower) |
-| :--- | :--- | :--- |
-| Output impedance at MCU pin | $\approx 1.16\ \text{k}\Omega$ (Thevenin) | $\approx 0\ \Omega$ (op-amp output) |
-| Extra supply rail needed | No | Yes — clean rail-to-rail supply per chip |
-| Parts per channel | 2 resistors + 1 cap | Same, plus one op-amp channel (2 channels/`MCP6002`) |
-| Tolerant of long/high-Z sensor wiring | Only if source impedance stays low | Yes — buffer absorbs it |
-| Immune to ADC-mux charge-injection kickback | Only as good as $C_{\mathrm{shunt}}$ + source impedance | Yes — low-Z output soaks up the transient instantly |
-| New failure modes | None beyond the existing TVS/passive network | Op-amp output can fail shorted to a rail; offset voltage error (a few mV); potential instability driving $C_{\mathrm{shunt}}$ directly without a series isolation resistor |
-| Bill of materials / board space | Minimal | Higher — extra IC, decoupling, routing per channel |
+    The situations where a buffer earns its keep — fast channel multiplexing and high source
+    impedance from long cable runs — are not in play. This board's ratiometric sensors (TPS,
+    MAP/T-MAP) are low-kΩ sources read sequentially by a single-ended ADC. The thermistor channels
+    (`CLT`, `IAT`) run at higher Thevenin impedance (§A.3.2), but share the lower-rate conversion
+    group and its longer sample time (§A.3.3).
 
-**4. Why it doesn't matter here.**
-The two scenarios where a buffer earns its keep — charge-injection kickback from fast channel
-multiplexing, and high source impedance from long cable runs — aren't in play: this board's
-ratiometric sensors (TPS, MAP/T-MAP) are low-kΩ sources read sequentially by a single-ended ADC. The
-passive divider is therefore the simpler, cheaper, more reliable choice.
+    !!! tip "When you *would* want a buffer"
+        If you're adapting this front-end for a sensor with much higher source impedance (e.g. a
+        thermistor with a large pull-up resistor), a long unshielded harness run, or a shared ADC
+        channel multiplexed at high speed across many inputs, a unity-gain buffer ahead of the RC
+        filter becomes worthwhile. Keep a small series resistor ($10$–$100\ \Omega$) between the
+        op-amp output and $C_{\mathrm{shunt}}$ to prevent the capacitor becoming a direct load,
+        which can cause peaking or oscillation.
 
-The thermistor channels (`CLT`, `IAT`) run a higher Thevenin impedance (§A.3.2), but firmware groups
-them with TPS on the same lower-rate ADC conversion group (§A.3.3), which already gives them more
-sample time than a buffer would ever be needed for.
-
-!!! tip "When you *would* want a buffer"
-    If you're adapting this front-end for a sensor with much higher source impedance (e.g. a
-    thermistor with a large pull-up resistor), a long unshielded harness run, or a shared ADC channel
-    multiplexed at high speed across many inputs, a unity-gain buffer ahead of the RC filter becomes
-    worthwhile. In that case, keep a small series resistor ($10$–$100\ \Omega$) between the op-amp
-    output and $C_{\mathrm{shunt}}$ to prevent the op-amp from seeing the capacitor as a direct load,
-    which can cause peaking or oscillation.
-
-#### 9.3.2. A.3.2. Thermistor Channels (CLT/IAT): Higher-Z, Heavier Filtering
+#### A.3.2. Thermistor Channels (CLT/IAT): Higher-Z, Heavier Filtering
 
 Coolant (`CLT`) and Intake Air Temperature (`IAT`) use two-wire NTC thermistors — just a variable
 resistance to ground, with no divider of their own. The board supplies the missing divider half and
@@ -520,13 +510,13 @@ That's roughly **55× lower** than the TPS channel's $1.37\ \text{kHz}$ corner f
     seconds. Pushing the corner frequency far down costs nothing and rejects far more of the injector
     and ignition switching noise coupled onto these sensors' long engine-bay harness runs.
 
-!!! note "Higher source impedance is still fine—the firmware already samples it slower"
+??? note "Why the higher source impedance is still acceptable"
     At $\approx 6.43\ \text{k}\Omega$, this channel's Thevenin impedance is higher than the TPS
     channel's $\approx 1.16\ \text{k}\Omega$ (§A.3.1) — but rusEFI-style firmware reads `CLT`, `IAT`,
     and `TPS` together on the same lower-rate ADC conversion group with a long sample time, so no
     buffer or special accommodation is needed. The numbers are worked out in **§A.3.3** below.
 
-#### 9.3.3. A.3.3. ADC Settling Time Budget: Putting a Number on "Low Enough"
+#### A.3.3. ADC Settling Time Budget: Putting a Number on "Low Enough"
 
 The "low enough" claims in §A.3.1 and §A.3.2 follow from the STM32's own ADC input model and the
 sample time the firmware actually uses. This board's
@@ -581,19 +571,18 @@ $$R_{\mathrm{source}} \leq \frac{\tau_{\mathrm{max}}}{C_{\mathrm{ADC}}} - R_{\ma
     $\approx 1.33\ \mu\text{s}$) exists for channels needing much higher conversion rates — none of
     the inputs described here are on it, so its tighter budget doesn't apply.
 
-**A note on the external capacitors.**
-A common guideline for a bare capacitor placed directly at an ADC pin (no series resistor) is
-$100\ \text{pF}$ to $1\ \text{nF}$. $C_{28}$ ($100\ \text{nF}$) and $C_{32}$ ($1\ \mu\text{F}$) are
-far larger — intentionally: they sit behind a defined series resistor as part of a purpose-built
-anti-alias filter with a calculated corner frequency ($1.37\ \text{kHz}$ for TPS/MAP,
-$24.8\ \text{Hz}$ for CLT/IAT). That's a different design goal than the generic "small cap at the
-pin" rule, and it works because channels are read sequentially rather than multiplexed at high
-speed — which is where a large cap plus high source impedance would cause channel-to-channel
-crosstalk.
+??? note "Why the ADC capacitors are larger than the usual guideline"
+    A common guideline for a bare capacitor placed directly at an ADC pin (no series resistor) is
+    $100\ \text{pF}$ to $1\ \text{nF}$. $C_{28}$ ($100\ \text{nF}$) and $C_{32}$
+    ($1\ \mu\text{F}$) are intentionally larger: they sit behind a defined series resistor as part
+    of a purpose-built anti-alias filter with a calculated corner frequency ($1.37\ \text{kHz}$ for
+    TPS/MAP, $24.8\ \text{Hz}$ for CLT/IAT). This differs from the generic small-cap rule and works
+    because channels are read sequentially rather than multiplexed at high speed, where large
+    capacitance and high source impedance could cause channel-to-channel crosstalk.
 
 ---
 
-### 9.4. A.4. Output Characteristics
+### A.4. Output Characteristics
 
 All channels are driven by the `SN74ACT244PWR` buffer (rail-to-rail `5 V`, `24 mA` source/sink).
 

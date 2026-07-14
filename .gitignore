@@ -7,3 +7,16 @@ build-site/
 scripts/
 build-site.zip
 *.zip
+
+!.cursor/
+.cursor/*
+!.cursor/rules/
+.cursor/rules/*
+!.cursor/rules/docs.mdc
+
+!scripts/
+scripts/*
+!scripts/normalize_markdown_headings.py
+!scripts/tests/
+scripts/tests/*
+!scripts/tests/test_normalize_markdown_headings.py

@@ -3,13 +3,11 @@
 
 This is the bench test protocol for qualifying a Motorsteuergerät 24P V1 board — every input,
 output, interface, and protection feature, exercised in a fixed order on the bench, with recorded
-results. It is written for two audiences:
+results. It is a board qualification protocol: run every stage before a board is shipped or
+installed in a vehicle.
 
-- **Board qualification (full protocol):** run every stage before a board is shipped to an alpha
-  tester or installed in a vehicle.
-- **Incoming acceptance (tester subset):** tests marked **[A]** form a shorter acceptance pass an
-  alpha tester runs on receipt, before any vehicle wiring. It catches shipping damage and confirms
-  the board matches this documentation.
+Alpha testers are not expected to run this bench protocol. The board owner should receive a
+completed results sheet from the person who performed qualification.
 
 Work through the stages **in order** — each stage assumes the previous one passed, so a fault
 surfaces at the earliest, cheapest point. Record every measured value in the
@@ -30,6 +28,7 @@ work, see [Injector Flow Rate Testing](../../guides/workshop/injector-flow-testi
 | Item | Requirement | Used in |
 |---|---|---|
 | Bench power supply | 0–20 V, ≥ 5 A, adjustable current limit | All powered stages |
+| USB power source | 5 V, current-limited or with inline current meter | PWR-9..12 |
 | Digital multimeter | Voltage, resistance, diode mode | §2, §3, §4, §9 |
 | Oscilloscope | ≥ 10 MHz, 1 probe (2 preferred), rated ≥ 50 V | §7, §8 |
 | Laptop | TunerStudio, `dfu-util` or STM32CubeProgrammer installed | §5 onward |
@@ -64,7 +63,7 @@ All pin references below are to the [IO Overview](24p_v1_overview.md#3-io-overvi
 
 ---
 
-## 2. Stage 0 — Visual inspection **[A]**
+## 2. Stage 0 — Visual inspection
 
 Unpowered. With good light and ideally a loupe:
 
@@ -78,7 +77,7 @@ Unpowered. With good light and ideally a loupe:
 
 ---
 
-## 3. Stage 1 — Unpowered electrical checks **[A]**
+## 3. Stage 1 — Unpowered electrical checks
 
 Multimeter only, board unpowered, nothing else connected.
 
@@ -99,7 +98,7 @@ Multimeter only, board unpowered, nothing else connected.
 
 ---
 
-## 4. Stage 2 — First power-up and supply rails **[A]**
+## 4. Stage 2 — First power-up and supply rails
 
 Bench supply to `VIN_KL30` (B1) and GND (C1/B8). **Current limit 100 mA** for PWR-1 through
 PWR-4.
@@ -114,6 +113,10 @@ PWR-4.
 | PWR-6 | Reverse polarity | Supply **reversed** onto KL30, current limit 100 mA, ≤ 5 s | Current ≈ 0 (blocked by series Schottky); board unharmed — re-run PWR-3/PWR-4 to confirm | mA |
 | PWR-7 | Supply sweep | Correct polarity, sweep 9 V → 16 V slowly | Rails from PWR-4 stay in spec across the sweep; no resets | — |
 | PWR-8 | Brown-out behavior | Reduce supply to ~6 V, then restore 13.8 V | Board resets/recovers cleanly, no latch-up | — |
+| PWR-9 | USB-only power-up | Disconnect KL30/KL15. Apply 5 V to `USBVCC` through a current-limited supply or current meter | Board boots, rails in spec; current is comparable to the KL15-on value from PWR-3 | mA |
+| PWR-10 | Changeover threshold (KL15 rising) | Keep `USBVCC` at 5 V. Raise `VIN_KL15` slowly from 0 V while monitoring the `USBVCC` current | `USBVCC` current drops to near zero as KL15 takes over; threshold ≈ 6 V — **record this TBC value** | V |
+| PWR-11 | Changeover return (KL15 falling) | Keep `USBVCC` at 5 V. Lower `VIN_KL15` from 13.8 V slowly | Board returns to `USBVCC` without reset or rail dip; record the falling threshold | V |
+| PWR-12 | Input isolation | (a) KL15 = 13.8 V, USB disconnected: measure voltage at `USBVCC`. (b) USBVCC = 5 V, KL15 open: measure voltage at `VIN_KL15` | No significant voltage appears on the inactive input (≪ 1 V typically) | V / V |
 
 !!! warning "Do not test the overvoltage limit"
     PWR-7 stops at 16 V by design. The TVS crowbar's job is transient surges; holding the supply
@@ -122,7 +125,7 @@ PWR-4.
 
 ---
 
-## 5. Stage 3 — MCU, flashing, and interfaces **[A]**
+## 5. Stage 3 — MCU, flashing, and interfaces
 
 Follows [Flashing the PCB](setup/flashing.md). Powered at 13.8 V, current limit 500 mA.
 
@@ -186,14 +189,12 @@ Powered at 13.8 V; raise the current limit to the load's needs **plus margin, ne
 NCE6005AS channels). Loads wire from switched +12 V to the output pin; command each channel with
 the firmware output test mode ([Calibration §4](setup/calibration.md#4-output-tests-before-first-start)).
 
-**[A]** — for acceptance, run OUT-1 only, with a relay as the load on every channel.
-
 | ID | Test | Procedure | Pass criterion |
 |---|---|---|---|
 | OUT-1 | Switching, every channel | Relay coil as load on `INJ1_DRV` (C8), `INJ2_DRV` (A8), `BOOST_DRV` (A6), `IAC_DRV` (A7), `FPRELAY_DRV` (B6), `FANRELAY_DRV` (B7) in turn; command on/off | Relay clicks on command; pin voltage < 0.5 V when on, ≈ supply when off; only the commanded channel responds |
 | OUT-2 | Off-state leakage | Channel off, load connected, measure voltage across the load | ≈ 0 V across the load (no partial turn-on) |
 | OUT-3 | Injector clamp voltage | Real high-impedance injector on `INJ1_DRV`; scope on the pin; pulse at 10 ms / 10 Hz | Turn-off flyback clamps at a flat top ≈ **36 V** ([active clamp](reference.md#431-active-clamping-injectors-solenoids)); repeat for `INJ2_DRV`. Record the plateau |
-| OUT-4 | Injector switching speed | Same setup, zoom the turn-on edge | Clean, fast transition (sub-µs-class fall time per [§A.4](reference.md#94-a4-output-characteristics)); no ringing that re-crosses threshold |
+| OUT-4 | Injector switching speed | Same setup, zoom the turn-on edge | Clean, fast transition (sub-µs-class fall time per [§A.4](reference.md#a4-output-characteristics)); no ringing that re-crosses threshold |
 | OUT-5 | IAC freewheel path | Solenoid/IAC valve on `IAC_DRV`; scope the pin; PWM ~100 Hz, 50 % | Turn-off voltage clamps ≈ supply + 0.7 V ([freewheeling diode](reference.md#432-the-iac-diode-freewheeling)), **not** ~36 V |
 | OUT-6 | IAC thermal soak | Continue OUT-5 for 10 min at rated valve current (< 2 A) | Q3 package temperature stabilizes; record the temperature and ambient |
 | OUT-7 | Injector dual-load soak | Two high-impedance injectors in parallel on `INJ1_DRV` (in-car batch configuration), 10 ms / 20 Hz for 10 min | IRLR2905 temperature stabilizes; record |
@@ -220,7 +221,7 @@ primary ([Hardware Reference §5](reference.md#5-ignition-outputs)). Scope direc
 
 ---
 
-## 10. Stage 8 — CAN bus **[A]**
+## 10. Stage 8 — CAN bus
 
 | ID | Test | Procedure | Pass criterion |
 |---|---|---|---|
@@ -250,8 +251,8 @@ trigger generator running ~3000 RPM equivalent, two injectors on `INJ1_DRV`, rel
 
 ## 12. Results sheet
 
-Copy this block per board. File the completed sheet with the board's serial/revision — for alpha
-boards, attach it to the tester's board so both sides know exactly what was verified.
+Copy this block per board. File the completed sheet with the board's serial/revision and include
+it whenever the board changes hands, so the verified state is explicit.
 
 ```
 Board serial / revision: __________      Firmware image + commit: __________
@@ -260,7 +261,7 @@ Bench supply: __________                 Ambient temp: __________ °C
 
 Stage 0  VIS-1..5   [ ] pass   notes: ____________________
 Stage 1  UNP-1..7   [ ] pass   KL30→GND __ Ω   +5V→GND __ Ω   CAN_H↔L __ Ω
-Stage 2  PWR-1..8   [ ] pass   quiescent __ mA   +5V __ V   +3V3 __ V   droop@100mA __ mV
+Stage 2  PWR-1..12  [ ] pass   quiescent __ mA   +5V __ V   +3V3 __ V   droop@100mA __ mV   USB changeover __ V
 Stage 3  MCU-1..7   [ ] pass   notes: ____________________
 Stage 4  AIN-1..5   [ ] pass   worst endpoint error __ %   CLT@2.49kΩ reads __ V / __ °C
 Stage 5  TRG-1..6   [ ] pass   sync range __ – __ Vpp
@@ -271,9 +272,6 @@ Stage 9  SOK-1..4   [ ] pass   case temp __ °C after 30 min
 
 Overall:  [ ] QUALIFIED   [ ] FAILED at stage ____ (attach notes)
 ```
-
-**Acceptance subset [A]** (tester on receipt): Stage 0, Stage 1, Stage 2, Stage 3, OUT-1, Stage 8
-— roughly an hour with no oscilloscope required.
 
 ---
 

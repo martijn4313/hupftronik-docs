@@ -1,0 +1,18 @@
+---
+description: "Use when authoring Hüpftronik Markdown, MkDocs configuration, or heading normalization."
+globs:
+  - "docs/**/*.md"
+  - "includes/**/*.md"
+  - "mkdocs.yml"
+  - "scripts/normalize_markdown_headings.py"
+alwaysApply: false
+---
+
+# Hüpftronik Documentation
+
+- Use the Material for MkDocs and PyMdown syntax already enabled in `mkdocs.yml`; do not introduce extensions without adding and validating their configuration.
+- Preserve the content-status snippet immediately below each page title. Mark hardware details that are not verified as `to be confirmed`; do not guess specifications.
+- Put safety-critical advice, operating limits, and concise conclusions in visible text. Use default-collapsed `???` details blocks for optional derivations, design rationale, scope-capture analysis, and long comparison tables.
+- Keep section labels short and stable. In a terminal technical appendix, use `<!-- heading-numbering: appendix -->` before the appendix title and preserve authored `A.x` labels. Refer to those sections as `§A.x`.
+- After changing Markdown headings or fragments, run `python scripts/normalize_markdown_headings.py docs` only when a broad normalization is intended; otherwise use an isolated fixture or inspect the diff immediately. Run `python -m mkdocs build --strict` before finishing.
+- Do not edit generated `site/` output or local Cursor workspace state. The tracked project rule is `.cursor/rules/docs.mdc`.
