@@ -66,4 +66,3 @@ from the evidence available, known limitations, and the risk of the intended use
 should remain marked *to be confirmed*, and known problems should be visible in the documentation.
 Share results and corrections through [Open-Source & Community](../../about/community.md). Useful
 field experience is just as welcome as structured bench testing.
-field experience is just as welcome as structured bench testing.
