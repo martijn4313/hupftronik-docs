@@ -95,6 +95,7 @@ nav:
   - Tools:
     - Overview: tools/index.md
     - Wiring Diagram Designer: tools/diagram-editor/index.html
+    - B230 Compression Ratio Calculator: tools/b230_compression_calc.html
 
   - About:
     - Our Philosophy: about/philosophy.md

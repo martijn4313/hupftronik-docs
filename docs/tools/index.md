@@ -6,7 +6,19 @@ entirely in the browser — no account or server is required.
 
 ---
 
-## 1. Harness Bench — wiring diagram designer
+## 1. B230 Compression Ratio Calculator
+
+**[Open B230 Compression Ratio Calculator →](b230_compression_calc.html)**
+
+A browser-based calculator for estimating the static compression ratio of Volvo B230 engines. Enter
+bore, stroke, head gasket thickness, piston deck height, combustion chamber volume, and piston
+dish/dome volume to see how the final ratio changes with different build combinations. It is useful
+when planning a naturally aspirated or turbo redblock build and comparing options before buying
+parts.
+
+---
+
+## 2. Harness Bench — wiring diagram designer
 
 **[Open Harness Bench →](diagram-editor/index.html)**
 
@@ -20,7 +32,7 @@ to produce a diagram to share with a builder or tuner working on the same car.
 
 ---
 
-## 2. Saving and loading diagrams
+## 3. Saving and loading diagrams
 
 Harness Bench stores its diagrams as JSON. Use **Save JSON** to download a `.json` file to your
 computer and **Load JSON** to reopen it later. The JSON file is the source of truth for your diagram
@@ -28,7 +40,7 @@ computer and **Load JSON** to reopen it later. The JSON file is the source of tr
 
 ---
 
-## 3. Exporting diagrams for use in these docs
+## 4. Exporting diagrams for use in these docs
 
 Harness Bench provides three export routes, each suited to a different context in the documentation.
 

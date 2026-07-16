@@ -1,0 +1,567 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>B230 +T Compression &amp; Induction Calculator</title>
+<style>
+  :root{
+    --paper:#EFF2F1;
+    --panel:#FBFCFC;
+    --gridline:#D7DEE2;
+    --ink:#17222B;
+    --muted:#5C6B76;
+    --plate:#1E3A50;
+    --plate-ink:#E8EDF1;
+    --val:#144B67;
+    --red:#C8102E;
+    --ok:#2C6E49;
+    --line:#C3CDD3;
+    --mono:ui-monospace,"Cascadia Mono",Consolas,Menlo,monospace;
+    --cond:"Arial Narrow","Helvetica Neue Condensed","Roboto Condensed",Arial,sans-serif;
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0; background:var(--paper); color:var(--ink);
+    font:14px/1.45 system-ui,Segoe UI,Arial,sans-serif;
+    background-image:
+      linear-gradient(var(--gridline) 1px, transparent 1px),
+      linear-gradient(90deg, var(--gridline) 1px, transparent 1px);
+    background-size:24px 24px;
+  }
+  .wrap{max-width:1120px;margin:0 auto;padding:20px 16px 48px}
+
+  /* ---- data plate header ---- */
+  .plate{
+    background:var(--plate); color:var(--plate-ink);
+    border:2px solid #10222F; border-radius:3px;
+    padding:14px 18px; position:relative;
+    display:flex; flex-wrap:wrap; gap:4px 24px; align-items:baseline;
+    box-shadow:0 2px 0 rgba(16,34,47,.35);
+  }
+  .plate::before,.plate::after,
+  .plate .rvt::before,.plate .rvt::after{
+    content:""; position:absolute; width:8px; height:8px; border-radius:50%;
+    background:radial-gradient(circle at 35% 35%, #B9C6CF, #5A6E7D 70%);
+  }
+  .plate::before{top:6px;left:6px}
+  .plate::after{top:6px;right:6px}
+  .plate .rvt::before{bottom:6px;left:6px}
+  .plate .rvt::after{bottom:6px;right:6px}
+  .plate h1{
+    font-family:var(--cond); font-size:22px; font-weight:700; margin:0;
+    text-transform:uppercase; letter-spacing:.14em;
+  }
+  .plate .sub{
+    font-family:var(--mono); font-size:11px; letter-spacing:.08em;
+    color:#9FB2C0; text-transform:uppercase;
+  }
+
+  .cols{display:grid; grid-template-columns:390px 1fr; gap:16px; margin-top:16px}
+  @media(max-width:920px){ .cols{grid-template-columns:1fr} }
+
+  /* ---- cards ---- */
+  .card{
+    background:var(--panel); border:1px solid var(--line); border-radius:3px;
+    margin-bottom:16px; overflow:hidden;
+  }
+  .card h2{
+    margin:0; padding:8px 12px; background:var(--plate); color:var(--plate-ink);
+    font-family:var(--cond); font-size:13px; font-weight:700;
+    text-transform:uppercase; letter-spacing:.12em;
+    display:flex; justify-content:space-between; align-items:center;
+  }
+  .card h2 .tag{font-family:var(--mono); font-size:10px; color:#9FB2C0; letter-spacing:.05em}
+  .card .body{padding:12px}
+
+  /* ---- inputs ---- */
+  .frow{display:grid; grid-template-columns:1fr 108px; gap:6px 10px; align-items:center; margin-bottom:7px}
+  .frow label{color:var(--ink); font-size:13px}
+  .frow label small{display:block;color:var(--muted);font-size:11px}
+  input[type=number], select{
+    font-family:var(--mono); font-size:13px; color:var(--val);
+    padding:5px 7px; border:1px solid var(--line); border-radius:2px;
+    background:#fff; width:100%;
+  }
+  input[type=number]:focus, select:focus, input[type=range]:focus{
+    outline:2px solid var(--val); outline-offset:1px;
+  }
+  select{color:var(--ink)}
+  .presetrow{display:flex; gap:8px; margin-bottom:12px}
+  .presetrow select{flex:1}
+  .unit{color:var(--muted); font-size:11px; font-family:var(--mono)}
+
+  input[type=range]{width:100%; accent-color:var(--plate)}
+  .rangeout{font-family:var(--mono); color:var(--val); font-size:13px; white-space:nowrap}
+
+  /* ---- results ---- */
+  .bigrow{display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:1px; background:var(--line); border-bottom:1px solid var(--line)}
+  .big{background:var(--panel); padding:12px 14px; text-align:center}
+  .big .lbl{font-family:var(--cond); text-transform:uppercase; letter-spacing:.1em; font-size:11px; color:var(--muted)}
+  .big .num{font-family:var(--mono); font-size:30px; font-weight:600; color:var(--val); line-height:1.15}
+  .big .num.warn{color:var(--red)}
+  .big .note{font-size:11px; color:var(--muted)}
+
+  /* CR scale rail */
+  .rail{position:relative; margin:34px 14px 30px; height:10px; background:linear-gradient(90deg,#DCE6DF, #E7E2D2 55%, #EEDAD6); border:1px solid var(--line); border-radius:2px}
+  .rail .tick{position:absolute; top:12px; font-family:var(--mono); font-size:10px; color:var(--muted); transform:translateX(-50%)}
+  .rail .tick::before{content:""; position:absolute; top:-14px; left:50%; width:1px; height:10px; background:var(--line)}
+  .rail .mk{position:absolute; top:-24px; transform:translateX(-50%); text-align:center; font-family:var(--mono); font-size:10px; font-weight:700}
+  .rail .mk::after{content:""; display:block; margin:1px auto 0; width:0; height:0; border-left:5px solid transparent; border-right:5px solid transparent; border-top:8px solid currentColor}
+  .mk.scr{color:var(--plate)} .mk.dcr{color:var(--ok)} .mk.ecr{color:var(--red)}
+  .raillegend{display:flex; gap:16px; padding:0 14px 12px; font-family:var(--mono); font-size:11px; color:var(--muted); flex-wrap:wrap}
+  .raillegend b{font-weight:700}
+  .lg-scr{color:var(--plate)} .lg-dcr{color:var(--ok)} .lg-ecr{color:var(--red)}
+
+  /* volume table */
+  table.vol{width:100%; border-collapse:collapse; font-family:var(--mono); font-size:12px}
+  table.vol td{padding:4px 6px; border-top:1px solid #E4E9EC}
+  table.vol td:last-child{text-align:right; color:var(--val)}
+  table.vol tr.total td{border-top:2px solid var(--line); font-weight:700}
+
+  /* cam spec strip */
+  .camspec{font-family:var(--mono); font-size:11.5px; color:var(--muted); margin-top:8px; border-top:1px dashed var(--line); padding-top:8px; line-height:1.7}
+  .camspec b{color:var(--ink)}
+
+  /* airflow bar */
+  .flowbar{height:18px; border:1px solid var(--line); border-radius:2px; background:#fff; position:relative; overflow:hidden; margin:6px 0 4px}
+  .flowbar .fill{height:100%; background:var(--plate); transition:width .25s}
+  .flowbar.over .fill{background:var(--red)}
+  .flowtxt{font-family:var(--mono); font-size:12px; color:var(--muted)}
+  .flowtxt b{color:var(--val)}
+  .hint{font-size:12px; color:var(--muted); margin-top:8px; border-left:3px solid var(--line); padding-left:8px}
+  .hint.warn{border-color:var(--red); color:var(--red)}
+
+  svg text{font-family:var(--mono)}
+  footer{margin-top:8px; font-size:11px; color:var(--muted); font-family:var(--mono); line-height:1.6}
+  @media (prefers-reduced-motion: reduce){ *{transition:none !important} }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="plate"><span class="rvt"></span>
+    <h1>B230 +T Compression &amp; Induction</h1>
+    <span class="sub">Typ B230 · 4 cyl in-line · 8V OHC · static / dynamic CR · cam &amp; turbo match</span>
+  </header>
+
+  <div class="cols">
+    <!-- ================= LEFT: INPUTS ================= -->
+    <div>
+      <section class="card">
+        <h2>Engine geometry <span class="tag">1/3</span></h2>
+        <div class="body">
+          <div class="presetrow">
+            <select id="preset" aria-label="Engine preset">
+              <option value="b230f">B230F preset (≈9.8:1 nominal)</option>
+              <option value="b230ft">B230FT preset (≈8.7:1 nominal)</option>
+              <option value="custom">Custom (edited)</option>
+            </select>
+          </div>
+          <div class="frow"><label>Bore <span class="unit">mm</span></label><input type="number" id="bore" step="0.1" value="96.0"></div>
+          <div class="frow"><label>Stroke <span class="unit">mm</span></label><input type="number" id="stroke" step="0.1" value="80.0"></div>
+          <div class="frow"><label>Rod length c-c <span class="unit">mm</span></label><input type="number" id="rod" step="0.1" value="152.0"></div>
+          <div class="frow"><label>Chamber volume <small>cc your head — 0.5 mm skim ≈ −4 cc</small><span class="unit">cc</span></label><input type="number" id="chamber" step="0.1" value="53.0"></div>
+          <div class="frow"><label>Gasket bore <span class="unit">mm</span></label><input type="number" id="gbore" step="0.1" value="97.0"></div>
+          <div class="frow"><label>Gasket compressed thickness <small>stock ≈1.2 · thick +T ≈2.0–2.5</small><span class="unit">mm</span></label><input type="number" id="gthk" step="0.05" value="1.20"></div>
+          <div class="frow"><label>Piston deck clearance <small>piston below deck at TDC; negative = above</small><span class="unit">mm</span></label><input type="number" id="deck" step="0.05" value="0.30"></div>
+          <div class="frow"><label>Piston dish + valve reliefs <small>negative for dome</small><span class="unit">cc</span></label><input type="number" id="dish" step="0.1" value="1.7"></div>
+        </div>
+      </section>
+
+      <section class="card">
+        <h2>Camshaft <span class="tag">2/3</span></h2>
+        <div class="body">
+          <select id="cam" aria-label="OEM camshaft"></select>
+          <div class="camspec" id="camspec"></div>
+        </div>
+      </section>
+
+      <section class="card">
+        <h2>Turbo &amp; boost <span class="tag">3/3</span></h2>
+        <div class="body">
+          <select id="turbo" aria-label="Turbocharger"></select>
+          <div class="camspec" id="turbospec"></div>
+          <div class="frow" style="margin-top:10px">
+            <label>Boost <span class="unit">bar gauge</span></label>
+            <span class="rangeout"><span id="boostout">1.00</span> bar</span>
+          </div>
+          <input type="range" id="boost" min="0" max="2.5" step="0.05" value="1.0" aria-label="Boost pressure">
+          <div class="frow" style="margin-top:8px"><label>Redline <span class="unit">rpm</span></label><input type="number" id="rpm" step="100" value="6000"></div>
+          <div class="frow"><label>Volumetric efficiency <small>auto-suggested per cam, editable</small><span class="unit">%</span></label><input type="number" id="ve" step="1" value="88"></div>
+          <div class="frow"><label>Ambient / intake air temp <span class="unit">°C</span></label><input type="number" id="ambient" step="1" value="25"></div>
+          <div class="frow"><label>Compressor isentropic efficiency <small>HX35/HE351-class, decent operating point</small><span class="unit">%</span></label><input type="number" id="etac" step="1" value="70"></div>
+          <div class="frow"><label>Intercooler effectiveness <small>fraction of compressor rise removed</small><span class="unit">%</span></label><input type="number" id="iceff" step="1" value="75"></div>
+          <div class="frow"><label>In-cylinder heat pickup <small>port/wall/residual heating before IVC</small><span class="unit">°C</span></label><input type="number" id="dth" step="1" value="35"></div>
+          <div class="frow"><label>Polytropic exponent n <small>compression with wall losses, typ. 1.25–1.35</small></label><input type="number" id="poly" step="0.01" value="1.30"></div>
+          <div class="frow"><label>Fuel <small>E85 gets an evaporative cooling credit at IVC</small></label>
+            <select id="fuel"><option value="e85">E85</option><option value="98">98 RON</option><option value="95">95 RON</option></select>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <!-- ================= RIGHT: RESULTS ================= -->
+    <div>
+      <section class="card">
+        <h2>Compression ratios</h2>
+        <div class="bigrow">
+          <div class="big"><div class="lbl">Static CR</div><div class="num" id="scr">–</div><div class="note">geometric</div></div>
+          <div class="big"><div class="lbl">Dynamic CR</div><div class="num" id="dcr">–</div><div class="note">from cam IVC <span id="ivcnote"></span></div></div>
+          <div class="big"><div class="lbl">T end of compression</div><div class="num" id="teoc">–</div><div class="note" id="teocnote">T<sub>IVC</sub>·DCR<sup>n−1</sup></div></div>
+          <div class="big"><div class="lbl">P end of compression</div><div class="num" id="peoc">–</div><div class="note">MAP·DCR<sup>n</sup>, before spark</div></div>
+        </div>
+        <div class="rail" id="rail" aria-hidden="true"></div>
+        <div class="raillegend">
+          <span class="lg-scr"><b>▼ static</b></span>
+          <span class="lg-dcr"><b>▼ dynamic</b></span>
+          <span class="lg-ecr"><b>▼ boosted</b></span>
+          <span>scale 6 … 16</span>
+        </div>
+        <div class="body" style="padding-top:0">
+          <table class="vol" id="voltab"></table>
+          <div class="hint" id="crhint"></div>
+        </div>
+      </section>
+
+      <section class="card">
+        <h2>Cylinder cross-section <span class="tag">live · to scale</span></h2>
+        <div class="body" style="text-align:center">
+          <svg id="cyl" width="100%" viewBox="0 0 460 320" role="img" aria-label="Schematic cylinder cross-section"></svg>
+        </div>
+      </section>
+
+      <section class="card">
+        <h2>Airflow &amp; turbo match</h2>
+        <div class="body">
+          <div class="flowtxt">Engine demand at redline: <b id="demand">–</b> lb/min &nbsp;·&nbsp; compressor capability: <b id="cap">–</b> lb/min</div>
+          <div class="flowbar" id="flowbar"><div class="fill" id="flowfill"></div></div>
+          <div class="flowtxt" id="flowpct"></div>
+          <div class="flowtxt" style="margin-top:8px">Estimated crank power at this airflow: <b id="hp">–</b> hp <span style="color:var(--muted)">(≈9.7 hp per lb/min, petrol or E85)</span></div>
+          <div class="hint" id="turbohint"></div>
+        </div>
+      </section>
+
+      <footer>
+        Cam figures: measured factory-grind data (duration @1 mm lift, lift, intake centerline) via redblockpowered.com camshaft chart.
+        IVC is derived as ICL + dur/2 − 180 at the 1 mm threshold, so dynamic-CR values are comparative, not absolute.
+        Chamber / dish defaults are back-fitted to factory nominal CR — cc your actual parts for real numbers.
+        Turbo flow figures are community/manufacturer ballpark values. Baro fixed at 1013 mbar.
+        T_EOC model: ambient air is compressed to boost pressure with the given compressor isentropic efficiency (real compressor
+        outlet temp rises with boost, not just pressure), cooled through the intercooler by its stated effectiveness, then picks up
+        heat in-port/in-cylinder before IVC (E85 gets an evaporative credit). That trapped charge is compressed polytropically over
+        the dynamic ratio: T·DCR<sup>n−1</sup>, P·DCR<sup>n</sup>. Still ignores combustion-phase rise, squish and hot spots — an
+        ordering tool, in physical units, that now actually responds to boost.
+      </footer>
+    </div>
+  </div>
+</div>
+
+<script>
+"use strict";
+
+/* ------------ data ------------ */
+const CAMS = {
+  A:  {di:231, de:232, li:10.4, le:10.6, icl:109,   ve:88, desc:"B230F ’85–’88 NA stock. Honest all-rounder, common +T pick."},
+  B:  {di:235, de:239, li:10.5, le:10.6, icl:109,   ve:88, desc:"Older B21E/B23E injection NA grind."},
+  D:  {di:246, de:245, li:11.2, le:11.0, icl:108,   ve:92, desc:"Hot factory NA grind. Lumpy idle, likes revs and compression."},
+  H:  {di:250, de:244, li:12.0, le:11.4, icl:106,   ve:92, desc:"Carb-era sport grind. Longest intake duration of the OEM set."},
+  K:  {di:246, de:246, li:12.1, le:12.0, icl:113,   ve:92, desc:"Hot NA grind, highest lift of the OEM cams. Late IVC."},
+  M:  {di:209, de:228, li:9.4,  le:10.5, icl:116,   ve:82, desc:"B230F ’89+ economy/emissions grind. The one people swap out."},
+  T:  {di:218, de:215, li:10.0, le:10.0, icl:109.5, ve:85, desc:"Factory turbo cam (B21FT/B230FT/FK). Short, symmetric, early IVC."},
+  V:  {di:236, de:237, li:11.2, le:11.3, icl:111,   ve:90, desc:"B23ET / 240 Turbo era. Mild step up from A."},
+  VX: {di:238, de:231, li:11.3, le:10.6, icl:115,   ve:90, desc:"B230FX ’92–’93. Big intake bias; the classic OEM +T upgrade."}
+};
+
+const TURBOS = {
+  t3:   {name:"Garrett T3 (stock 240/740 Turbo)",  ind:"≈45",  flow:23, note:"Stock wastegated unit. Runs out of breath early but spools instantly."},
+  tc13: {name:"Mitsubishi TD04HL-13C (940 Turbo)", ind:"—",    flow:20, note:"Stock 940 unit. Quick spool, done by ≈200 hp."},
+  tc15: {name:"Mitsubishi TD04HL-15G",             ind:"—",    flow:26, note:"Popular cheap upgrade, Saab/Volvo sourced."},
+  tc16: {name:"Mitsubishi TD04HL-16T",             ind:"—",    flow:29, note:"Good street compromise on a +T."},
+  tc19: {name:"Mitsubishi TD04HL-19T",             ind:"—",    flow:34, note:"About the limit of the TD04 frame."},
+  he341:{name:"Holset HE341CW",                    ind:"≈50",  flow:50, note:"Smaller Holset, strong spool for its flow."},
+  hy35: {name:"Holset HY35W",                      ind:"54",   flow:52, note:"9 cm² undivided housing — fast spool."},
+  hx35: {name:"Holset HX35W",                      ind:"54",   flow:55, note:"12 cm² divided T3 flange. The classic budget 400 hp unit."},
+  he351:{name:"Holset HE351CW",                    ind:"60/82",flow:65, note:"9 cm² housing, ≈65 lb/min. Watch the surge line at low rpm / high boost."}
+};
+
+const BARO = 101.325; // kPa
+const $ = id => document.getElementById(id);
+const GEO = ["bore","stroke","rod","chamber","gbore","gthk","deck","dish"];
+
+const PRESETS = {
+  b230f:  {bore:96.0, stroke:80.0, rod:152.0, chamber:53.0, gbore:97.0, gthk:1.20, deck:0.30, dish:1.7},
+  b230ft: {bore:96.0, stroke:80.0, rod:152.0, chamber:53.0, gbore:97.0, gthk:1.20, deck:0.30, dish:11.2}
+};
+
+/* ------------ populate selects ------------ */
+(function(){
+  const cs = $("cam");
+  for (const k of Object.keys(CAMS)){
+    const c = CAMS[k], ivc = (c.icl + c.di/2 - 180).toFixed(1);
+    const o = document.createElement("option");
+    o.value = k;
+    o.textContent = `${k} — ${c.di}°/${c.de}° @1mm · ${c.li}/${c.le} mm · IVC ${ivc}° ABDC`;
+    cs.appendChild(o);
+  }
+  cs.value = "A";
+  const ts = $("turbo");
+  for (const k of Object.keys(TURBOS)){
+    const t = TURBOS[k];
+    const o = document.createElement("option");
+    o.value = k;
+    o.textContent = `${t.name} · ≈${t.flow} lb/min`;
+    ts.appendChild(o);
+  }
+  ts.value = "he351";
+})();
+
+/* ------------ math ------------ */
+const cylArea = b => Math.PI/4 * b*b;                      // mm²
+const cc = mm3 => mm3/1000;
+
+function pistonDistFromTDC(thetaDeg, r, L){
+  const t = thetaDeg * Math.PI/180;
+  return (r + L) - (r*Math.cos(t) + Math.sqrt(L*L - Math.pow(r*Math.sin(t),2)));
+}
+
+function readGeo(){
+  const g = {};
+  for (const k of GEO) g[k] = parseFloat($(k).value) || 0;
+  return g;
+}
+
+function compute(){
+  const g = readGeo();
+  const cam = CAMS[$("cam").value];
+  const turbo = TURBOS[$("turbo").value];
+  const boost = parseFloat($("boost").value);
+  const rpm = parseFloat($("rpm").value) || 0;
+  const ve = (parseFloat($("ve").value) || 0)/100;
+
+  const Vd = cc(cylArea(g.bore) * g.stroke);               // cc per cyl
+  const Vgask = cc(cylArea(g.gbore) * g.gthk);
+  const Vdeck = cc(cylArea(g.bore) * g.deck);
+  const Vc = g.chamber + Vgask + Vdeck + g.dish;
+  const scr = Vd/Vc + 1;
+
+  const ivc = cam.icl + cam.di/2 - 180;                    // ° ABDC @1mm
+  const effStroke = pistonDistFromTDC(180 + ivc, g.stroke/2, g.rod);
+  const dcr = (Vd * effStroke/g.stroke)/Vc + 1;
+
+  const pr = (BARO + boost*100)/BARO;
+
+  // compressor discharge & post-intercooler temperature — this is what actually responds to boost
+  const k = 1.4;
+  const ambientC = parseFloat($("ambient").value) || 0;
+  const etaC = (parseFloat($("etac").value) || 100)/100;
+  const icEff = (parseFloat($("iceff").value) || 0)/100;
+  const T1 = ambientC + 273.15;
+  const T2s = T1 * Math.pow(pr, (k-1)/k);
+  const T2actual = T1 + (T2s - T1)/etaC;             // real compressor outlet temp
+  const TicK = T2actual - icEff * (T2actual - T1);   // post-intercooler, coolant ≈ ambient
+
+  // end-of-compression state (trapped charge from IVC, polytropic)
+  const n = parseFloat($("poly").value) || 1.30;
+  const dth = parseFloat($("dth").value) || 0;
+  const fuel = $("fuel").value;
+  const evap = fuel === "e85" ? 25 : 0;                    // °C evaporative credit
+  const tivcK = TicK + dth - evap;
+  const teocK = tivcK * Math.pow(dcr, n - 1);
+  const peocBar = (BARO + boost*100)/100 * Math.pow(dcr, n);
+  const ecr = dcr * Math.pow(pr, 1/1.3);            // legacy index, kept for the table row
+
+  // airflow demand at redline (density at manifold = post-intercooler state)
+  const rho = (BARO + boost*100)*1000 / (287 * TicK);       // kg/m³
+  const volFlow = (4*Vd/1e6) * rpm/2;                       // m³/min
+  const lbmin = volFlow * rho * ve * 2.20462;
+  const hp = lbmin * 9.7;
+
+  return {g, Vd, Vgask, Vdeck, Vc, scr, ivc, effStroke, dcr, pr, ecr, boost, lbmin, hp, cam, turbo, rpm,
+          n, fuel, tivcK, teocK, peocBar, T2actual, TicK};
+}
+
+/* ------------ render ------------ */
+function fmt(x,d=2){ return isFinite(x) ? x.toFixed(d) : "–"; }
+
+function railMarkers(r){
+  const rail = $("rail");
+  rail.innerHTML = "";
+  const lo = 6, hi = 16;
+  for (let t = lo; t <= hi; t++){
+    const tick = document.createElement("span");
+    tick.className = "tick";
+    tick.style.left = ((t-lo)/(hi-lo)*100) + "%";
+    tick.textContent = t;
+    rail.appendChild(tick);
+  }
+  const mks = [ [r.scr,"scr","S"], [r.dcr,"dcr","D"], [r.ecr,"ecr","B"] ];
+  for (const [v,cls,lab] of mks){
+    if (!isFinite(v)) continue;
+    const m = document.createElement("span");
+    m.className = "mk " + cls;
+    m.style.left = (Math.min(Math.max(v,lo),hi)-lo)/(hi-lo)*100 + "%";
+    m.textContent = lab + " " + v.toFixed(1);
+    rail.appendChild(m);
+  }
+}
+
+function drawCyl(r){
+  const s = 2.1;                                  // px per mm
+  const g = r.g;
+  const cx = 230;
+  const bw = g.bore * s, gw = g.gbore * s;
+  const wall = 14;
+  const deckY = 74;
+  const strokePx = g.stroke * s;
+  const gaskPx = Math.max(g.gthk * s, 1.5);
+  const deckClrPx = g.deck * s;
+  const tdcCrownY = deckY + deckClrPx;
+  const bdcCrownY = tdcCrownY + strokePx;
+  const effY = tdcCrownY + r.effStroke * s;       // piston crown at IVC
+  const chH = Math.max(r.g.chamber*1000 / cylArea(g.bore) * s, 4); // equivalent slab height
+  const dishH = Math.max(g.dish*1000 / cylArea(g.bore) * s, 0);
+
+  const L = [];
+  L.push(`<defs><pattern id="hatch" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><line x1="0" y1="0" x2="0" y2="6" stroke="#9FB0BA" stroke-width="1.4"/></pattern></defs>`);
+  // block walls
+  L.push(`<rect x="${cx-bw/2-wall}" y="${deckY}" width="${wall}" height="${strokePx+46}" fill="url(#hatch)" stroke="#5C6B76"/>`);
+  L.push(`<rect x="${cx+bw/2}" y="${deckY}" width="${wall}" height="${strokePx+46}" fill="url(#hatch)" stroke="#5C6B76"/>`);
+  // head + chamber slab
+  L.push(`<rect x="${cx-gw/2-wall}" y="${deckY-gaskPx-chH-26}" width="${gw+2*wall}" height="26" fill="url(#hatch)" stroke="#5C6B76"/>`);
+  L.push(`<rect x="${cx-bw/2}" y="${deckY-gaskPx-chH}" width="${bw}" height="${chH}" fill="#DCE8EE" stroke="#144B67" stroke-dasharray="3 2"/>`);
+  L.push(`<text x="${cx}" y="${deckY-gaskPx-chH/2+3}" font-size="10" fill="#144B67" text-anchor="middle">chamber ${fmt(g.chamber,1)} cc</text>`);
+  // gasket
+  L.push(`<rect x="${cx-gw/2}" y="${deckY-gaskPx}" width="${gw}" height="${gaskPx}" fill="#C9CFB8" stroke="#7A8266"/>`);
+  L.push(`<text x="${cx+gw/2+18}" y="${deckY-gaskPx/2+3}" font-size="10" fill="#5C6B76">gasket ${fmt(r.Vgask,1)} cc</text>`);
+  // swept volume shading between eff stroke and BDC (lost to IVC)
+  if (r.effStroke < g.stroke - 0.05){
+    L.push(`<rect x="${cx-bw/2}" y="${effY}" width="${bw}" height="${bdcCrownY-effY}" fill="#F4E3E0"/>`);
+    L.push(`<text x="${cx}" y="${(effY+bdcCrownY)/2+3}" font-size="10" fill="#C8102E" text-anchor="middle">pushed back out before IVC</text>`);
+  }
+  // effective swept
+  L.push(`<rect x="${cx-bw/2}" y="${tdcCrownY}" width="${bw}" height="${effY-tdcCrownY}" fill="#E4EEE7" opacity="0.7"/>`);
+  // piston at BDC
+  const ph = 30;
+  L.push(`<rect x="${cx-bw/2+1.5}" y="${bdcCrownY}" width="${bw-3}" height="${ph}" fill="#B9C6CF" stroke="#5C6B76"/>`);
+  if (dishH > 0.5) L.push(`<path d="M ${cx-bw/4} ${bdcCrownY} q ${bw/4} ${dishH*2.2} ${bw/2} 0" fill="#FBFCFC" stroke="#5C6B76"/>`);
+  L.push(`<text x="${cx}" y="${bdcCrownY+ph-9}" font-size="10" fill="#17222B" text-anchor="middle">piston @ BDC · dish ${fmt(g.dish,1)} cc</text>`);
+  // TDC ghost
+  L.push(`<line x1="${cx-bw/2}" y1="${tdcCrownY}" x2="${cx+bw/2}" y2="${tdcCrownY}" stroke="#5C6B76" stroke-dasharray="4 3"/>`);
+  L.push(`<text x="${cx-bw/2-6}" y="${tdcCrownY+3}" font-size="10" fill="#5C6B76" text-anchor="end">TDC crown</text>`);
+  // IVC line
+  L.push(`<line x1="${cx-bw/2}" y1="${effY}" x2="${cx+bw/2}" y2="${effY}" stroke="#2C6E49" stroke-dasharray="4 3"/>`);
+  L.push(`<text x="${cx-bw/2-6}" y="${effY+3}" font-size="10" fill="#2C6E49" text-anchor="end">crown @ IVC ${fmt(r.ivc,1)}°</text>`);
+  // dimension: stroke
+  const dimX = cx + bw/2 + wall + 30;
+  L.push(`<line x1="${dimX}" y1="${tdcCrownY}" x2="${dimX}" y2="${bdcCrownY}" stroke="#17222B"/>`);
+  L.push(`<line x1="${dimX-4}" y1="${tdcCrownY}" x2="${dimX+4}" y2="${tdcCrownY}" stroke="#17222B"/>`);
+  L.push(`<line x1="${dimX-4}" y1="${bdcCrownY}" x2="${dimX+4}" y2="${bdcCrownY}" stroke="#17222B"/>`);
+  L.push(`<text x="${dimX+7}" y="${(tdcCrownY+bdcCrownY)/2}" font-size="10" fill="#17222B">stroke ${fmt(g.stroke,1)}</text>`);
+  // dimension: bore
+  L.push(`<line x1="${cx-bw/2}" y1="${bdcCrownY+ph+12}" x2="${cx+bw/2}" y2="${bdcCrownY+ph+12}" stroke="#17222B"/>`);
+  L.push(`<text x="${cx}" y="${bdcCrownY+ph+24}" font-size="10" fill="#17222B" text-anchor="middle">bore ${fmt(g.bore,1)}</text>`);
+
+  const svg = $("cyl");
+  svg.setAttribute("viewBox", `0 0 460 ${bdcCrownY+ph+34}`);
+  svg.innerHTML = L.join("");
+}
+
+function crGuidance(r){
+  const el = $("crhint");
+  const T = r.teocK, P = r.peocBar;
+  // fuel-specific comfort bands for end-gas temperature at TDC (K)
+  const bands = { "95":[610,650,690], "98":[635,675,710], "e85":[680,720,750] };
+  const [ok, watch, hot] = bands[r.fuel];
+  const fname = r.fuel === "e85" ? "E85" : r.fuel + " RON";
+  let txt, warn = false;
+  if (T < ok){
+    txt = `T_eoc ${T.toFixed(0)} K on ${fname} — comfortable. Timing can go where torque wants it.`;
+  } else if (T < watch){
+    txt = `T_eoc ${T.toFixed(0)} K on ${fname} — workable, but this is where the knock limit starts setting your timing map.`;
+  } else if (T < hot){
+    txt = `T_eoc ${T.toFixed(0)} K on ${fname} — hot end gas. Expect significant timing retard at peak torque; better IC, later-IVC cam, or lower CR pays off here.`;
+    warn = true;
+  } else {
+    txt = `T_eoc ${T.toFixed(0)} K on ${fname} — aggressive. Thicker gasket, deeper dish, later-IVC cam (VX/K) or colder charge before chasing this tune.`;
+    warn = true;
+  }
+  if (P > 48) txt += ` P_eoc ${P.toFixed(0)} bar — end-gas density is high, which speeds knock chemistry at any given temperature.`;
+  txt += " Model: trapped charge from IVC compressed polytropically; ignores combustion-phase pressure/temperature rise, squish and hot spots.";
+  el.textContent = txt;
+  el.className = "hint" + (warn ? " warn" : "");
+}
+
+function render(){
+  const r = compute();
+  $("scr").textContent = fmt(r.scr) + ":1";
+  $("dcr").textContent = fmt(r.dcr) + ":1";
+  $("teoc").textContent = (r.teocK - 273.15).toFixed(0) + " °C";
+  $("teocnote").innerHTML = `${r.teocK.toFixed(0)} K · T<sub>IVC</sub>·DCR<sup>n−1</sup>`;
+  const bands = { "95":690, "98":710, "e85":750 };
+  $("teoc").className = "num" + (r.teocK >= bands[r.fuel] - 40 ? " warn" : "");
+  $("peoc").textContent = fmt(r.peocBar,0) + " bar";
+  $("ivcnote").textContent = `(IVC ${fmt(r.ivc,1)}° ABDC)`;
+
+  $("voltab").innerHTML = `
+    <tr><td>Swept volume / cyl</td><td>${fmt(r.Vd,1)} cc</td></tr>
+    <tr><td>Total displacement</td><td>${fmt(4*r.Vd/1000,3)} L</td></tr>
+    <tr><td>Chamber</td><td>${fmt(r.g.chamber,1)} cc</td></tr>
+    <tr><td>Gasket volume</td><td>${fmt(r.Vgask,1)} cc</td></tr>
+    <tr><td>Deck volume</td><td>${fmt(r.Vdeck,1)} cc</td></tr>
+    <tr><td>Piston dish / reliefs</td><td>${fmt(r.g.dish,1)} cc</td></tr>
+    <tr class="total"><td>Clearance volume V<sub>c</sub></td><td>${fmt(r.Vc,1)} cc</td></tr>
+    <tr class="total"><td>Effective stroke @ IVC</td><td>${fmt(r.effStroke,1)} mm</td></tr>
+    <tr><td>Compressor outlet temp</td><td>${(r.T2actual-273.15).toFixed(0)} °C</td></tr>
+    <tr><td>Post-intercooler temp</td><td>${(r.TicK-273.15).toFixed(0)} °C</td></tr>
+    <tr><td>Charge temp at IVC (post-IC + pickup − evap)</td><td>${(r.tivcK-273.15).toFixed(0)} °C</td></tr>
+    <tr><td>Legacy boosted-CR index (DCR·PR<sup>1/1.3</sup>)</td><td>${fmt(r.ecr,1)}</td></tr>`;
+
+  railMarkers(r);
+  drawCyl(r);
+  crGuidance(r);
+
+  // cam spec strip
+  const c = r.cam;
+  $("camspec").innerHTML =
+    `<b>${$("cam").value}</b> — ${c.desc}<br>` +
+    `IN ${c.di}° / EX ${c.de}° @1 mm · lift ${c.li}/${c.le} mm · ICL ${c.icl}° · ` +
+    `<b>IVC ${fmt(r.ivc,1)}° ABDC</b> → later IVC bleeds cylinder pressure, tolerates more static CR under boost.`;
+
+  // turbo
+  const t = r.turbo;
+  $("turbospec").innerHTML = `<b>${t.name}</b> — inducer ${t.ind} mm · ≈${t.flow} lb/min. ${t.note}`;
+  $("boostout").textContent = fmt(r.boost);
+  $("demand").textContent = fmt(r.lbmin,1);
+  $("cap").textContent = t.flow;
+  $("hp").textContent = Math.round(r.hp);
+  const pct = r.lbmin / t.flow * 100;
+  $("flowfill").style.width = Math.min(pct,100) + "%";
+  $("flowbar").className = "flowbar" + (pct > 100 ? " over" : "");
+  $("flowpct").textContent = `Compressor utilisation ≈ ${fmt(pct,0)} %` + (pct > 100 ? " — beyond the map, boost will taper / temps climb" : pct < 40 ? " — lots of headroom (mind surge at low rpm with big boost)" : "");
+  const th = $("turbohint");
+  if (pct > 100){
+    th.textContent = "This combo asks more airflow than the compressor delivers. Lower boost/redline expectations or step up a frame.";
+    th.className = "hint warn";
+  } else {
+    th.textContent = `At ${fmt(r.boost)} bar and ${r.rpm} rpm this turbo is ${pct<60?"loafing — quick spool, thermally comfortable":"well matched"}. Flow figures are ballpark; check the actual compressor map for surge margin.`;
+    th.className = "hint";
+  }
+}
+
+/* ------------ wiring ------------ */
+$("preset").addEventListener("change", e => {
+  const p = PRESETS[e.target.value];
+  if (p){ for (const k of GEO) $(k).value = p[k]; }
+  render();
+});
+for (const k of GEO){
+  $(k).addEventListener("input", () => { $("preset").value = "custom"; render(); });
+}
+$("cam").addEventListener("change", () => { $("ve").value = CAMS[$("cam").value].ve; render(); });
+for (const id of ["turbo","boost","rpm","ve","ambient","etac","iceff","dth","poly","fuel"]) $(id).addEventListener("input", render);
+
+render();
+</script>
+</body>
+</html>

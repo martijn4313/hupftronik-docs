@@ -22,7 +22,13 @@ what its build *changes* relative to that baseline.
 
 ---
 
-## 1. Next steps
+## 1. Tools
+
+Use the [B230 Compression Ratio Calculator](../../../../tools/b230_compression_calc.html) to
+experiment with bore, stroke, gasket, deck height, chamber, and piston volumes before settling on
+a build recipe.
+
+## 2. Next steps
 
 Pick the build closest to your goal and read its page alongside the
 [Volvo B2xx guide](../volvo-b2xx.md). Then plan the full conversion with
