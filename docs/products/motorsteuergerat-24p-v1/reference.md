@@ -98,7 +98,105 @@ normal oversampling or firmware filtering keeps readings stable.
 
 !!! tip "What this means in practice"
     A TPS typically spans $\sim 0.5$–$4.5\ \text{V}$ at the connector ($\sim 0.32$–$2.92\ \text{V}$ at the MCU pin), so sub-millivolt noise is negligible. Larger ripple points to sensor-ground routing, the $+5\ \text{V}$ reference return path, or nearby injector/ignition wiring.
+### 3.4. IAT Calibration Example: Bosch `0 281 006 051` T-MAP NTC
 
+This section walks through the voltage produced by the Bosch `0 281 006 051` 4 bar / 130 °C
+T-MAP sensor's internal NTC thermistor when it is wired to the Motorsteuergerät 24P V1 `IAT_RAW`
+input. Use it as a worked example and as the calibration table for your own build if you use the
+same sensor.
+
+**Sensor.** Bosch `0 281 006 051` T-MAP sensor: pin 2 is the NTC element, pin 1 is its ground
+reference. The ECU's `IAT_RAW` input connects to pin 2; pin 1 returns to the ECU sensor ground.
+
+**Input network (from the schematic).**
+
+| Component | Value | Role |
+| :--- | :--- | :--- |
+| `R27` | $2.7\ \text{kΩ}$ | Pull-up to the $+5\ \text{V}$ sensor reference |
+| `R29` | $10\ \text{kΩ}$ | Series resistor into the filter node |
+| `R33` | $18\ \text{kΩ}$ | Shunt resistor to ground |
+| `C32` | $1\ \text{µF}$ | Shunt capacitor to ground (open circuit at DC) |
+
+**DC transfer function.**
+At DC, `C32` is irrelevant. The NTC resistance $R_{\mathrm{NTC}}$ appears from `IAT_RAW` to
+ground, in parallel with the $R29 + R33 = 28\ \text{kΩ}$ branch. The voltage at `IAT_RAW` is
+therefore:
+
+$$V_{\mathrm{RAW}} = 5\ \text{V} \cdot \frac{R_{\mathrm{NTC}} \parallel 28\ \text{kΩ}}{2.7\ \text{kΩ} + (R_{\mathrm{NTC}} \parallel 28\ \text{kΩ})}$$
+
+`IAT_PROT` is the unloaded tap of the $10\ \text{kΩ}$ / $18\ \text{kΩ}$ divider:
+
+$$V_{\mathrm{PROT}} = V_{\mathrm{RAW}} \cdot \frac{18\ \text{kΩ}}{10\ \text{kΩ} + 18\ \text{kΩ}}$$
+
+Multiplying out:
+
+$$V_{\mathrm{PROT}} = \frac{90{,}000 \cdot R_{\mathrm{NTC}}}{30{,}700 \cdot R_{\mathrm{NTC}} + 75{,}600{,}000}$$
+
+with $R_{\mathrm{NTC}}$ in ohms and $V_{\mathrm{PROT}}$ in volts.
+
+**Voltage / temperature table.**
+
+| Temp. (°C) | $R_{\mathrm{NTC}}$ (Ω) | $V_{\mathrm{PROT}}$ (V) |
+| :--- | :--- | :--- |
+| −40 | 45 303 | 2.780 |
+| −35 | 34 273 | 2.735 |
+| −30 | 26 108 | 2.679 |
+| −25 | 19 999 | 2.610 |
+| −20 | 15 458 | 2.529 |
+| −15 | 12 000 | 2.432 |
+| −10 | 9 395 | 2.323 |
+| −5 | 7 413 | 2.201 |
+| 0 | 5 895 | 2.068 |
+| 5 | 4 711 | 1.925 |
+| 10 | 3 791 | 1.777 |
+| 15 | 3 068 | 1.626 |
+| 20 | 2 499 | 1.477 |
+| 25 | 2 056 | 1.334 |
+| 30 | 1 706 | 1.200 |
+| 35 | 1 411 | 1.068 |
+| 40 | 1 174 | 0.946 |
+| 45 | 987.4 | 0.839 |
+| 50 | 833.8 | 0.742 |
+| 55 | 702.7 | 0.651 |
+| 60 | 595.4 | 0.571 |
+| 65 | 508.2 | 0.502 |
+| 70 | 435.6 | 0.441 |
+| 75 | 374.1 | 0.387 |
+| 80 | 322.5 | 0.339 |
+| 85 | 279.5 | 0.299 |
+| 90 | 243.1 | 0.263 |
+| 95 | 212.6 | 0.233 |
+| 100 | 186.6 | 0.206 |
+| 105 | 163.8 | 0.183 |
+| 110 | 144.2 | 0.162 |
+| 115 | 127.3 | 0.144 |
+| 120 | 112.7 | 0.128 |
+| 125 | 100.2 | 0.115 |
+| 130 | 89.28 | 0.103 |
+
+!!! warning "Do not use a generic Bosch preset in rusEFI"
+    Generic Bosch NTC calibration curves assume a single pull-up resistor to +5 V, with no
+    additional loading branch. The Motorsteuergerät 24P V1 `IAT` input adds the $10\ \text{kΩ}$
+    series / $18\ \text{kΩ}$ shunt network, which changes the voltage at every temperature. A
+    generic curve will read incorrect temperatures.
+
+**How to use this table in rusEFI:**
+
+1. Open the **IAT sensor calibration** settings.
+2. Set the sensor type / curve to a **custom voltage-vs-temperature table**.
+3. Enter the $V_{\mathrm{PROT}}$ column as the voltage breakpoints and the corresponding °C
+   column as the temperatures. Use at least the full sensor range (−40 °C to 130 °C); the table
+   above is already sampled at the Bosch datasheet points.
+4. Verify against a known temperature: at room temperature (~25 °C) the raw voltage on
+   `IAT_RAW` / `IAT_PROT` should be close to **1.33 V**.
+
+**If you change the input resistors.**
+If you ever modify `R27`, `R29`, or `R33`, recompute the table with the same method. The formula
+above is specific to the values shown; the $28\ \text{kΩ}$ loading branch in particular has a
+large effect at high NTC resistances (cold temperatures).
+
+*(Circuit theory and ADC settling margin: **§A.3.2 Thermistor Channels (CLT/IAT)** and
+**§A.3.3**.)*
 ---
 
 ## 4. Outputs (Low-Side Drivers)
