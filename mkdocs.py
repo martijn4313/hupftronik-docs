@@ -1,0 +1,148 @@
+"""MkDocs config with switchable themes via THEME environment variable."""
+import os
+
+# Read theme from environment (defaults to 'material')
+THEME = os.getenv('THEME', 'material').lower()
+
+# Base configuration shared by all themes
+config = {
+    'site_name': 'Hüpftronik Documentation',
+    'site_description': 'Open-source hardware solutions for automotive and motorcycle projects.',
+    'site_author': 'Hüpftronik',
+    'site_url': 'https://martijn4313.github.io/hupftronik-docs/',
+    'use_directory_urls': True,
+    'extra_css': ['stylesheets/extra.css'],
+    'extra_javascript': [
+        'javascripts/mathjax-config.js',
+        'https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js'
+    ],
+    'markdown_extensions': [
+        'admonition',
+        'pymdownx.details',
+        {
+            'pymdownx.superfences': {
+                'custom_fences': [
+                    {
+                        'name': 'mermaid',
+                        'class': 'mermaid',
+                        'format': '!!python/name:pymdownx.superfences.fence_code_format'
+                    }
+                ]
+            }
+        },
+        {
+            'pymdownx.snippets': {
+                'base_path': ['includes'],
+                'check_paths': True
+            }
+        },
+        'attr_list',
+        {'pymdownx.tabbed': {'alternate_style': True}},
+        {'pymdownx.arithmatex': {'generic': True}}
+    ],
+    'nav': [
+        {'Home': 'index.md'},
+        {
+            'Products': [
+                {
+                    'Motorsteuergerät 24P V1': [
+                        {'Overview & Specs': 'products/motorsteuergerat-24p-v1/24p_v1_overview.md'},
+                        {'Hardware & Wiring': 'products/motorsteuergerat-24p-v1/wiring.md'},
+                        {'Design Reference': 'products/motorsteuergerat-24p-v1/reference.md'},
+                        {'Practical Hardware Checks': 'products/motorsteuergerat-24p-v1/hardware-test-protocol.md'},
+                        {'Community Design Validation': 'products/motorsteuergerat-24p-v1/design-verification-protocol.md'},
+                        {
+                            'Setup guide': [
+                                {'Setup Overview': 'products/motorsteuergerat-24p-v1/setup/index.md'},
+                                {'Flashing the PCB': 'products/motorsteuergerat-24p-v1/setup/flashing.md'},
+                                {'rusEFI Guide': 'products/motorsteuergerat-24p-v1/setup/rusefi.md'},
+                                {'Speeduino Guide': 'products/motorsteuergerat-24p-v1/setup/speeduino.md'},
+                                {'Calibration & Dynamic Testing': 'products/motorsteuergerat-24p-v1/setup/calibration.md'}
+                            ]
+                        }
+                    ]
+                },
+                {
+                    'Schildknappe (CAN Node)': [
+                        {'Overview (in development)': 'products/schildknappe/index.md'}
+                    ]
+                }
+            ]
+        },
+        {
+            'Guides': [
+                {'Planning your build': 'guides/setup/planning.md'},
+                {'Tuning Basics': 'guides/tuning/basics.md'},
+                {'Software Tools (TunerStudio)': 'guides/tuning/software.md'},
+                {'CAN Bus Basics': 'guides/setup/canbus-basics.md'},
+                {'Troubleshooting': 'guides/setup/troubleshooting.md'},
+                {
+                    'Workshop & Bench Testing': [
+                        {'Injector Flow Rate Testing': 'guides/workshop/injector-flow-testing.md'},
+                        {'Fuel Pump Pressure & Flow Testing': 'guides/workshop/fuel-pump-testing.md'}
+                    ]
+                },
+                {
+                    'Vehicle specific setup guides': [
+                        {'Overview': 'guides/setup/specific/index.md'},
+                        {'Volvo B2xx Redblock': 'guides/setup/specific/volvo-b2xx.md'},
+                        {
+                            'B230 Example Builds': [
+                                {'Overview': 'guides/setup/specific/b230-examples/index.md'},
+                                {'B230F + OEM Camshaft': 'guides/setup/specific/b230-examples/b230f-oem-cam.md'},
+                                {'B230F Higher Compression + Mild Cam': 'guides/setup/specific/b230-examples/b230f-higher-compression.md'},
+                                {'B230F+T with Holset': 'guides/setup/specific/b230-examples/b230ft-holset.md'}
+                            ]
+                        },
+                        {'Peugeot TU Series': 'guides/setup/specific/peugeot-tu.md'},
+                        {'Renault F4R': 'guides/setup/specific/renault-f4r.md'},
+                        {'Mini A-Series': 'guides/setup/specific/mini-a-series.md'},
+                        {'Volkswagen 1.8T': 'guides/setup/specific/vw-1.8t.md'}
+                    ]
+                },
+                {
+                    'Conversion Guides': [
+                        {'MegaSquirt to Motorsteuergerät 24P V1': 'guides/conversions/ms-to-24p.md'}
+                    ]
+                }
+            ]
+        },
+        {
+            'Tools': [
+                {'Overview': 'tools/index.md'},
+                {'Wiring Diagram Designer': 'tools/diagram-editor/index.html'},
+                {'B230 Compression Ratio Calculator': 'tools/b230_compression_calc.html'}
+            ]
+        },
+        {
+            'About': [
+                {'Our Philosophy': 'about/philosophy.md'},
+                {'Open-Source & Community': 'about/community.md'},
+                {'Our Use of AI': 'about/ai-statement.md'},
+                {'License & Disclaimer': 'about/license.md'}
+            ]
+        }
+    ]
+}
+
+# Theme-specific configuration
+if THEME == 'windmill':
+    config['theme'] = {
+        'name': 'windmill'
+    }
+else:  # default to material
+    config['theme'] = {
+        'name': 'material',
+        'palette': {
+            'scheme': 'slate',
+            'primary': 'black',
+            'accent': 'deep orange'
+        },
+        'features': [
+            'navigation.tabs',
+            'navigation.sections',
+            'navigation.expand',
+            'search.suggest',
+            'search.highlight'
+        ]
+    }
