@@ -4,6 +4,15 @@ on:
   push:
     branches: [main]
   workflow_dispatch:
+    inputs:
+      theme:
+        description: 'Theme to build with'
+        required: true
+        default: 'material'
+        type: choice
+        options:
+          - material
+          - windmill
 
 permissions:
   contents: read
@@ -31,6 +40,8 @@ jobs:
         run: pip install -r requirements.txt
 
       - name: Build site
+        env:
+          THEME: ${{ github.event.inputs.theme || 'material' }}
         run: mkdocs build --site-dir build-site
 
       - name: Add Pages marker
