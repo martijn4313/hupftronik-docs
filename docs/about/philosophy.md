@@ -27,3 +27,11 @@ The key takeaway is this: while the ultimate owner or end-user of the system mig
 If a builder can solve their ECU puzzle at a fair price, the money they save might be exactly what allows them to finally get a quality paint job or buy those last needed parts.
 
 By making this hardware platform available to the wider community, everyone in the industry helps one another. Ultimately, our goal is to ensure that we can all keep pursuing our passion and our craft. If the existence of this hardware platform can make a difference for even just a handful of builders, then from our perspective, the mission is already a success.
+
+---
+
+## 3. Next steps
+
+See these principles applied in the
+[Hardware Reference](../products/motorsteuergerat-24p-v1/reference.md), or read
+[Open-Source & Community](community.md) for how to take part in the project.

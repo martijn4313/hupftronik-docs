@@ -44,7 +44,7 @@ computer and **Load JSON** to reopen it later. The JSON file is the source of tr
 
 Harness Bench provides three export routes, each suited to a different context in the documentation.
 
-### 3.1. Mermaid export (recommended for embedded diagrams)
+### 4.1. Mermaid export (recommended for embedded diagrams)
 
 Click **Export Mermaid** to generate a Mermaid flowchart that renders directly inside any
 documentation page. The site already has Mermaid rendering enabled, so the workflow is:
@@ -70,7 +70,7 @@ any screen size and is fully copy-able text, which keeps diagrams diffable and m
     source lives in the Markdown file, so changes are tracked by Git and visible in pull-request
     diffs. SVG files are binary blobs from Git's perspective.
 
-### 3.2. SVG export (for complex diagrams or print-quality output)
+### 4.2. SVG export (for complex diagrams or print-quality output)
 
 Click **Export SVG** to download a standalone `.svg` file that preserves the exact canvas
 appearance including colours, fonts, and layout.
@@ -99,7 +99,7 @@ To embed an SVG in a documentation page:
     SVG files exported from Harness Bench are self-contained and load without any external
     dependencies, so they render reliably on every browser and in the generated static site.
 
-### 3.3. JSON embed (interactive viewer — future option)
+### 4.3. JSON embed (interactive viewer — future option)
 
 The Harness Bench JSON save format is a complete description of the diagram including all component
 positions, wire routes, colours, and labels. A future option is to embed a read-only viewer on a
@@ -111,7 +111,7 @@ place. If this is useful for your project, open an issue or a pull request.
 
 ---
 
-## 4. Next steps
+## 5. Next steps
 
 - [Plan your build](../guides/setup/planning.md) — the planning guide where diagrams are most useful
 - [Wiring and hardware guide](../products/motorsteuergerat-24p-v1/wiring.md) — connector and harness reference

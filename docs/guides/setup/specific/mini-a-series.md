@@ -84,7 +84,7 @@ Key values to verify before the first start:
 ## 4. Known issues
 
 - **No factory reference exists** — every dimension, bracket, and wiring run is bespoke to your
-  build. Budget fabrication time accordingly, and design brackets and mounts intentionally rather
+  build. Budget fabrication time accordingly, and design brackets and mounts up front rather
   than improvising under time pressure.
 - **Distributor-based triggering caps timing resolution** at 4 pulses per two revolutions — acceptable
   for a mild build, a real limitation for anything performance-oriented.

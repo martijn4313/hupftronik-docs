@@ -20,6 +20,7 @@ On this site, you can find product overviews, hardware setup and wiring guides, 
 
 ## 2. Start here
 
+- [Plan your build](guides/setup/planning.md) — the recommended first stop for a new project
 - [Motorsteuergerät overview and wiring](products/motorsteuergerat-24p-v1/24p_v1_overview.md)
 - [Tuning basics](guides/tuning/basics.md)
 - [Troubleshooting tips](guides/setup/troubleshooting.md)
@@ -32,11 +33,13 @@ Hüpftronik is a collection of hardware solutions and documentation specifically
 
 ### 3.1. Motorsteuergerät
 
-The Motorsteuergerät (Engine Control Unit) is the first product in the Hüpftronik world. 
+The Motorsteuergerät (Engine Control Unit) is the first Hüpftronik product.
 
-Compared to its early days around the year 2000, the market for standalone ECUs and related solutions has grown massively. Today, there is a wide variety of professional, open-source, and DIY products available, each with its own set of pros and cons. However, none of them suited our requirements.
+The standalone-ECU market has grown massively since its early days around the year 2000, and there
+is no shortage of professional, open-source, and DIY products to choose from. What we wanted,
+though — an affordable, fully open ECU we could confidently use in our own clients' builds without
+depending on third-party manufacturers — didn't exist. So we designed it ourselves.
 
-So this meant we had to develop it ourselves.
-
-Furthermore, we thought it would be cool to have an in-house designed ECU that we could confidently use in our own clients' builds without being dependent on third-party manufacturers. Because we engineered the hardware ourselves, the platform is easier to modify and expand, and we can fully leverage our intimate knowledge of the system.    
+Because we engineered the hardware in-house, the platform is easy to modify and expand, and we know
+every corner of it. That knowledge flows directly back into these pages.
 

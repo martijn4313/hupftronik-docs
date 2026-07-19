@@ -61,6 +61,9 @@ you trust a page's specifics with your engine:
   content has been checked for internal consistency, cross-references, and (where applicable) the
   underlying math. It has **not** been tested on physical hardware — that verification is still
   yours to do, the same as with any documentation.
+- <span class="content-status status-in-review" style="display:inline-flex;">In Review</span> —
+  currently being checked for accuracy and completeness. The content may still change; feedback and
+  verification are especially welcome while a page carries this badge.
 - <span class="content-status status-ai-draft" style="display:inline-flex;">AI-drafted — verify
   before use</span> — written from general engineering knowledge, not checked against a specific
   car's factory documentation or bench-tested. Treat exact part numbers, trigger patterns, and

@@ -38,7 +38,7 @@ Firing order for all variants: **1–3–4–2**. Cylinder 1 is at the front of 
 ## 3. Engine position sensor
 
 !!! info "Trigger integrity dictates engine survival"
-    The trigger signal is the heartbeat of the ECU. Take this seriously. Chasing trigger or sync problems later on is a major headache, and a fluctuating timing signal causes immediate engine damage under high load.
+    The trigger signal is the heartbeat of the ECU. Chasing trigger or sync problems later on is a major headache, and a fluctuating timing signal causes immediate engine damage under high load.
 
 ### 3.1. Quick Scan
 
@@ -96,8 +96,8 @@ While alternative trigger options exist (e.g., front-mounted Hall sensors, after
 
 ## 4. Camshaft position sensor
 
-!!! info "Batch fueling and wasted spark meet the performance mandate"
-    Adding a cam sync for fully sequential operation yields marginal idle emissions improvements but introduces unnecessary mechanical complexity to a B2xx. We optimize for robust performance, not theoretical perfection. The 24P V1 focuses on batch fueling and wasted spark, rendering a camshaft position sensor obsolete.
+!!! info "Why this build skips the cam sensor"
+    Adding a cam sync for fully sequential operation yields marginal idle emissions improvements but introduces unnecessary mechanical complexity to a B2xx. We optimize for robust performance, not theoretical perfection. The 24P V1 focuses on batch fueling and wasted spark, which need no camshaft position sensor.
 
 ### 4.1. Quick Scan
 
@@ -117,8 +117,8 @@ The ECU calculates engine phase solely based on the primary crank trigger (60-2)
 
 ## 5. Throttle position sensor
 
-!!! info "Transient fueling requires intent"
-    A MAP sensor alone cannot predict rapid throttle transients; it only reacts to them after the manifold pressure drops. An analog TPS is mandatory for immediate acceleration enrichment. Relying solely on MAP for acceleration is a lazy configuration that compromises drivability.
+!!! info "Transient fueling needs a TPS"
+    A MAP sensor alone cannot predict rapid throttle transients; it only reacts to them after the manifold pressure drops. An analog TPS is mandatory for immediate acceleration enrichment — MAP-only acceleration handling responds too late and compromises drivability.
 
 ### 5.1. Quick Scan
 
@@ -303,7 +303,7 @@ Key values to verify before the first start:
 
 ## 10. Known issues
 
-*   **B21/B23 Bracket Fabrication:** The front crank snout on early engines is shorter than on the later B230. Off-the-shelf trigger wheel kits designed for the B230 do not fit without significant modification. Design your brackets and spacer hubs intentionally.
+*   **B21/B23 Bracket Fabrication:** The front crank snout on early engines is shorter than on the later B230. Off-the-shelf trigger wheel kits designed for the B230 do not fit without significant modification. Plan for custom brackets and spacer hubs.
 
 ---
 

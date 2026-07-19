@@ -3,8 +3,8 @@
 
 The "+T" is the definitive budget redblock build: a naturally aspirated B230F bottom end, a
 Holset turbocharger pulled from a Cummins diesel truck, and low boost on pump fuel. It works
-because the B230F's forged crank and stout block tolerate mild boost, Holsets are cheap,
-journal-bearing, and nearly indestructible.
+because the B230F's forged crank and stout block tolerate mild boost, and because Holsets are
+cheap, journal-bearing, and nearly indestructible.
 
 This page lists the hardware and the ECU deltas; the risk framing below is part of the build, not a disclaimer.
 
@@ -25,7 +25,7 @@ Everything not mentioned here follows the [Volvo B2xx Redblock guide](../volvo-b
 !!! warning "9.8:1 plus boost on pump fuel is the defining risk of this build"
     The factory turbo engine (B230FT) ran $8.7:1$ for a reason. Step outside the safe tuning envelope—a heat-soaked summer pull, or a tank of 95 RON—and detonation **will** destroy the head gasket or melt the ring lands. 
 
-**Why it survives:** Boosting a 9.8:1 engine works here because of the large turbo. The low exhaust backpressure allows using a higher-overlap camshaft (see [§4](#4-sensors-and-ignition)), which lowers the engine's dynamic compression. Provided you have a **real** intercooler and be careful when tuning, it works beautifully.
+**Why it survives:** Boosting a 9.8:1 engine works here because of the large turbo. The low exhaust backpressure allows using a higher-overlap camshaft (see [§5](#5-sensors-and-ignition)), which lowers the engine's dynamic compression. Provided you have a **real** intercooler and tune carefully, it works beautifully.
 
 **The mechanical fuse:** Keep the OEM-style composite head gasket in place. If detonation occurs, it typically blows the gasket before melting the pistons—a much cheaper failure.
 
