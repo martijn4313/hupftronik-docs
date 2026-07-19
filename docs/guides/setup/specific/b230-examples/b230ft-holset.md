@@ -19,7 +19,7 @@ Everything not mentioned here follows the [Volvo B2xx Redblock guide](../volvo-b
 | Aspect | Target |
 |--------|--------|
 | Power | Roughly $250$–$350\,\text{hp}$ at $1$–$1.5\,\text{bar}$ of boost |
-| Bottom end | Stock B230F, $\sim 9.8:1$ compression, healthy and compression-tested |
+| Bottom end | Stock B230F, $\sim 9.8:1$ compression, healthy and compression-tested; a 13 mm-rod engine (~1990+) is strongly preferred — see [B230 bottom-end versions](../volvo-b2xx.md#21-b230-bottom-end-versions) |
 | Fuel | **98 RON minimum**, or "the devil's fuel," E85 |
 | Turbo | Holset — HE351CW (cheap, lazy below $3000\,\text{RPM}$ on a 2.3) |
 | Character | Turbo-lag is fun |
