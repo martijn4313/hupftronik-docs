@@ -3,7 +3,7 @@
 
 The "+T" is the definitive budget redblock build: a naturally aspirated B230F bottom end, a
 Holset turbocharger pulled from a Cummins diesel truck, and low boost on pump fuel. It works
-because the B230F's forged crank and stout block tolerate mild boost, and because Holsets are
+because the B230F's cast — but famously strong — crank and stout block tolerate mild boost, and because Holsets are
 cheap, journal-bearing, and nearly indestructible.
 
 This page lists the hardware and the ECU deltas; the risk framing below is part of the build, not a disclaimer.
