@@ -97,7 +97,7 @@ While alternative trigger options exist (e.g., front-mounted Hall sensors, after
 ## 4. Camshaft position sensor
 
 !!! info "Why this build skips the cam sensor"
-    Adding a cam sync for fully sequential operation yields marginal idle emissions improvements but introduces unnecessary mechanical complexity to a B2xx. We optimize for robust performance, not theoretical perfection. The 24P V1 focuses on batch fueling and wasted spark, which need no camshaft position sensor.
+    Fully sequential operation is cool — no denying that — but in the spirit of this simple ECU it's overkill on a B2xx: a retrofitted cam sync buys marginal idle and emissions gains at the cost of real mechanical complexity. Plenty of power has been made on these engines with batch fire and distributor ignition, so batch fueling and wasted spark — which need no camshaft position sensor — will serve this build very well.
 
 ### 4.1. Quick Scan
 
