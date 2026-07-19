@@ -42,7 +42,12 @@ jobs:
       - name: Build site
         env:
           THEME: ${{ github.event.inputs.theme || 'material' }}
-        run: mkdocs build --site-dir build-site
+        run: |
+          if [ "$THEME" = "windmill" ]; then
+            mkdocs build -f mkdocs-windmill.yml --site-dir build-site
+          else
+            mkdocs build -f mkdocs.yml --site-dir build-site
+          fi
 
       - name: Add Pages marker
         run: cp .nojekyll build-site/.nojekyll
