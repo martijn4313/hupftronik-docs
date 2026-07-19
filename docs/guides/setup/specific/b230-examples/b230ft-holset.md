@@ -3,8 +3,10 @@
 
 The "+T" is the definitive budget redblock build: a naturally aspirated B230F bottom end, a
 Holset turbocharger pulled from a Cummins diesel truck, and low boost on pump fuel. It works
-because the B230F's cast — but famously strong — crank and stout block tolerate mild boost, and because Holsets are
-cheap, journal-bearing, and nearly indestructible.
+because the bottom end is nowhere near its limits at this power level — the stout block is good
+for some 600 hp, and the cast (but famously strong) crank takes boost in stride; the first real
+limit is the 9.8:1 compression, not the iron — and because Holsets are cheap, journal-bearing,
+and nearly indestructible.
 
 This page lists the hardware and the ECU deltas; the risk framing below is part of the build, not a disclaimer.
 
@@ -25,11 +27,11 @@ Everything not mentioned here follows the [Volvo B2xx Redblock guide](../volvo-b
 !!! warning "9.8:1 plus boost on pump fuel is the defining risk of this build"
     The factory turbo engine (B230FT) ran $8.7:1$ for a reason. Step outside the safe tuning envelope—a heat-soaked summer pull, or a tank of 95 RON—and detonation **will** destroy the head gasket or melt the ring lands. 
 
-**Why it survives:** Stock compression is workable with a large turbo and cam because the combination lowers the engine's *dynamic* compression: the turbo's low exhaust backpressure is what allows the higher-overlap camshaft (see [§5](#5-sensors-and-ignition)) in the first place. Provided you have a **real** intercooler and tune carefully, it works beautifully.
+**Why it survives:** Stock compression is workable with a large turbo and cam because the combination lowers the engine's *dynamic* compression: the turbo's low exhaust backpressure is what allows the higher-overlap camshaft (see [§5](#5-sensors-and-ignition)) in the first place. Community experience puts the comfortable ceiling around $1.2\,\text{bar}$ at this compression on a large-turbo, low-backpressure setup with a mild-duration cam (`D` or `V` class) — the top of this build's $1$–$1.5\,\text{bar}$ range demands the most careful tuning. Provided you have a **real** intercooler and tune carefully, it works beautifully.
 
 **The mechanical fuse:** Keep the OEM-style composite head gasket in place. If detonation occurs, it typically blows the gasket before melting the pistons—a much cheaper failure.
 
-**Going further:** If you want more than $\sim 1.5\,\text{bar}$, lower the compression by using B230FT pistons and/or increasing the combustion chamber size. 
+**Going further:** If you want more than $\sim 1.5\,\text{bar}$, or you're tuning for serious torque, lower the compression to around $8.2:1$ — B230FT pistons, larger combustion chambers, or a dish machined into the stock pistons on a lathe all get you there. 
 
 But building a classic setup will often provide plenty of smiles per gallon. You can always upgrade later. 
 
