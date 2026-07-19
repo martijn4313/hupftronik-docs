@@ -1,14 +1,13 @@
-# Programming the board
+# Flashing the board
 --8<-- "status-reviewed.md"
 
 ---
 
 ## 1. What is flashing?
 
-Before the board can do anything, we need to copy the program that makes it work. This is called flashing.
-Flashing means copying this program into the MCU (microcontroller) memory on the board. 
-
-This either installs the first program on the MCU or replaces the existing one with a new version.
+Flashing means copying the engine-control firmware into the memory of the MCU (microcontroller) on
+the board — either installing firmware for the first time or replacing it with a new version. The
+board cannot do anything until it has firmware on it.
 
 This page shows the basic steps to update the STM32F405 used on the Motorsteuergerät 24P v1. It
 assumes you already have a firmware `.bin` or `.hex` file — see [Setup and
@@ -23,8 +22,9 @@ There are two flashing options:
 
 ## 2. USB DFU bootloader
 
-1. Hold the boot switch and power the board to enter DFU mode.
-2. Connect the board to USB.
+1. Hold the boot switch while powering the board — starting up with the switch held is what puts
+   the MCU in DFU mode.
+2. Connect the board to your computer over USB.
 3. Upload the firmware file to address `0x08000000` using either STM32CubeProgrammer or `dfu-util`:
 
    ```bash
@@ -33,11 +33,10 @@ There are two flashing options:
 
 4. Release the boot switch and reset the board after programming completes.
 
-Notes
-
-- Make sure the board is powered before attempting to flash.
-- Verify the firmware file matches the STM32F405 and your intended firmware (rusEFI or Speeduino)
-  before flashing — flashing the wrong image can leave the board unresponsive until re-flashed.
+!!! note "Before you flash"
+    - Make sure the board is powered before attempting to flash.
+    - Verify the firmware file matches the STM32F405 and your intended firmware (rusEFI or
+      Speeduino) — flashing the wrong image can leave the board unresponsive until re-flashed.
 
 !!! warning "Full chip erase is destructive"
     If the device is locked or not responding to a normal flash, a full chip erase clears the entire

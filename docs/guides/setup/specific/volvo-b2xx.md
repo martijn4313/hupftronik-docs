@@ -33,12 +33,43 @@ Since the "LH2.4 era" of the B2xx production spans almost a decade, OEM parts to
 
 Firing order for all variants: **1–3–4–2**. Cylinder 1 is at the front of the engine (timing cover end).
 
+### 2.1. B230 bottom-end versions
+
+Not every B230 bottom end is equally happy about boost. Volvo revised the block and crank twice
+during the production run, and the differences decide how much a used engine tolerates before the
+rotating assembly becomes the limit:
+
+| Years (approx.) | Community name | Rods | Thrust bearing | Notes |
+|---|---|---|---|---|
+| 1985–1988 | Early block | $9\,\text{mm}$ | Centre main | Weakest combination — the 9 mm rods are the risk item under boost or sustained high RPM |
+| 1989–1992 | "K block" | $9 \to 13\,\text{mm}$ (13 mm from ~1990) | Rear main, larger main bearings | Transition years — verify which rods a 1989–1990 engine actually has |
+| 1993–1998 | "L block" | $13\,\text{mm}$ | Rear main | Adds piston oil squirters (fitted on turbo blocks, drilled and plugged on NA); "L" sticker on the timing cover |
+
+**What "9 mm vs 13 mm" means.** The figures are the thickness of the connecting-rod beam measured
+at the side. The early 9 mm rods are the bottom end's weak point — they let go under sustained
+high RPM or boost — while the later 13 mm rods have survived in community builds to roughly
+$500\,\text{hp}$. For anything boosted, hunt for a 13 mm-rod engine or fit aftermarket rods.
+
+**Why centre thrust matters.** Early blocks locate the crank's axial thrust bearing on the centre
+main — a known wear point and the weaker crank arrangement. From 1989 the thrust moved back to
+the rear main with larger main bearings, as on the B21/B23. A worn centre-thrust crank shows up
+as measurable crank end-float; check it before building on an early block.
+
+**The donor to look for** is a 1993-or-later engine: 13 mm rods, rear thrust, and oil squirters
+in one package.
+
+!!! note "AI-researched section — verify before you buy"
+    The year splits and figures above are compiled from redblock community sources (Turbobricks,
+    Brickboard, and Oz Volvo threads), not from factory documentation. Production transitions were
+    not clean model-year cuts — measure the actual rods and check for squirters on any engine you
+    are about to build on.
+
 ---
 
 ## 3. Engine position sensor
 
 !!! info "Trigger integrity dictates engine survival"
-    The trigger signal is the heartbeat of the ECU. Take this seriously. Chasing trigger or sync problems later on is a major headache, and a fluctuating timing signal causes immediate engine damage under high load.
+    The trigger signal is the heartbeat of the ECU. Chasing trigger or sync problems later on is a major headache, and a fluctuating timing signal causes immediate engine damage under high load.
 
 ### 3.1. Quick Scan
 
@@ -96,8 +127,8 @@ While alternative trigger options exist (e.g., front-mounted Hall sensors, after
 
 ## 4. Camshaft position sensor
 
-!!! info "Batch fueling and wasted spark meet the performance mandate"
-    Adding a cam sync for fully sequential operation yields marginal idle emissions improvements but introduces unnecessary mechanical complexity to a B2xx. We optimize for robust performance, not theoretical perfection. The 24P V1 focuses on batch fueling and wasted spark, rendering a camshaft position sensor obsolete.
+!!! info "Why this build skips the cam sensor"
+    Fully sequential operation is cool — no denying that — but in the spirit of this simple ECU it's overkill on a B2xx: a retrofitted cam sync buys marginal idle and emissions gains at the cost of real mechanical complexity. Plenty of power has been made on these engines with batch fire and distributor ignition, so batch fueling and wasted spark — which need no camshaft position sensor — will serve this build very well.
 
 ### 4.1. Quick Scan
 
@@ -117,8 +148,8 @@ The ECU calculates engine phase solely based on the primary crank trigger (60-2)
 
 ## 5. Throttle position sensor
 
-!!! info "Transient fueling requires intent"
-    A MAP sensor alone cannot predict rapid throttle transients; it only reacts to them after the manifold pressure drops. An analog TPS is mandatory for immediate acceleration enrichment. Relying solely on MAP for acceleration is a lazy configuration that compromises drivability.
+!!! info "Transient fueling needs a TPS"
+    A MAP sensor alone cannot predict rapid throttle transients; it only reacts to them after the manifold pressure drops. An analog TPS is mandatory for immediate acceleration enrichment — MAP-only acceleration handling responds too late and compromises drivability.
 
 ### 5.1. Quick Scan
 
@@ -303,7 +334,7 @@ Key values to verify before the first start:
 
 ## 10. Known issues
 
-*   **B21/B23 Bracket Fabrication:** The front crank snout on early engines is shorter than on the later B230. Off-the-shelf trigger wheel kits designed for the B230 do not fit without significant modification. Design your brackets and spacer hubs intentionally.
+*   **B21/B23 Bracket Fabrication:** The front crank snout on early engines is shorter than on the later B230. Off-the-shelf trigger wheel kits designed for the B230 do not fit without significant modification. Plan for custom brackets and spacer hubs.
 
 ---
 

@@ -1,7 +1,7 @@
 # Setup and Commissioning
 --8<-- "status-reviewed.md"
 
-This sub-sections in this guide detail the process for bringing the Motorsteuergerät 24P V1 online.
+The sub-sections in this guide detail the process for bringing the Motorsteuergerät 24P V1 online.
 
 This page provides a brief outline of the steps involved and links to more detailed information.
 
@@ -24,7 +24,9 @@ Work through the [Plan Your Build](../../../guides/setup/planning.md) guide befo
 ## 3. Firmware Architecture: Choosing Your Path
 
 !!! info "Choose Deliberately"
-    Choosing your firmware is your first act of intentionality. We do not provide a "default" binary because the board ships blank on purpose: you decide which ecosystem matches your goals. Both run well on the STM32F405RGT6—they just use its silicon in very different ways. Optimize for your intended use case.
+    We do not provide a "default" binary — the board ships blank on purpose: you decide which
+    ecosystem matches your goals. Both run well on the STM32F405RGT6; they just use its silicon in
+    very different ways. Optimize for your intended use case.
 
 Two firmwares, two philosophies. For most users, this is enough to decide:
 
@@ -68,7 +70,7 @@ compiled `.bin` or `.hex` file.
 ## 5. Wiring and Integration
 
 !!! info "Optimize for Intended Use, Not Potential Abuse"
-    We optimize the board for signal integrity, not user-proofing. Systemic threats—such as EMI, thermal loads, and ground loops—are mitigated by the hardware design. However, incorrect wiring is a user error and remains an **acceptable failure mode**. If you reverse polarity or dead-short a high-side driver, the component will fail. Wiring requires absolute intentionality.
+    We optimize the board for signal integrity, not user-proofing. Systemic threats—such as EMI, thermal loads, and ground loops—are mitigated by the hardware design. However, incorrect wiring is a user error and remains an **acceptable failure mode**. If you reverse polarity or dead-short a driver output, the component will fail. Wire deliberately and verify every pin with a multimeter before first power-up.
 
 **Quick Scan**
 

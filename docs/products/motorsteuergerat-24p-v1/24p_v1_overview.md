@@ -52,12 +52,14 @@ timing, and auxiliary outputs through a single sealed 24-pin connector.
 All 24 pins are on a single FCI connector, arranged in three rows (A, B, C) of eight columns.
 
 !!! success "Reverse polarity and surge protection"
-    `VIN_KL30` and `VIN_KL15` are protected +12 V inputs, there is a SHOTTKY diode in series followed by a TVS crowbar for preventing short voltage surges to reach the voltage regulators. 
+    `VIN_KL30` and `VIN_KL15` are protected +12 V inputs. A series Schottky diode blocks reversed
+    polarity, and a TVS crowbar behind it clips short voltage surges before they reach the voltage
+    regulators.
 
 !!! warning "Long term overvoltage"
-	Applying substantial long term overvoltage >20V to these power pins will cause the TVS diode to overheat and short out. 
-	
-	
+    Sustained overvoltage above 20 V on these power pins overheats the TVS diode until it fails
+    short.
+
 **Power and reference**
 
 | Pin | Signal | Description |
@@ -69,7 +71,7 @@ All 24 pins are on a single FCI connector, arranged in three rows (A, B, C) of e
 
 **Engine position**
 
-The board has a differential VR sensor input`VR_POS`/`VR_NEG` using a dedicated MAX9924 IC.
+The board has a differential VR sensor input `VR_POS`/`VR_NEG` using a dedicated MAX9924 IC.
 
 | Pin | Signal | Description |
 |---|---|---|
