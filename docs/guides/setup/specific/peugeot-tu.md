@@ -1,6 +1,8 @@
 # Peugeot TU Series
 --8<-- "status-ai-draft.md"
 
+---
+
 The Peugeot/Citroën TU series (TU1/TU3/TU5, 1.1–1.6L inline-fours found across the 106, 206, 306,
 Saxo, and shared PSA platforms) covers a wide spread of engine management hardware across its
 production run, from early single-point carburetor-replacement injection through later

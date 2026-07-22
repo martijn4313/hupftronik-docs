@@ -1,6 +1,8 @@
 # Software Tools (TunerStudio)
 --8<-- "status-ai-draft.md"
 
+---
+
 TunerStudio is the tuning dashboard both rusEFI and Speeduino use — it's how you view live sensor
 data, edit fuel and ignition tables, and log a drive for later analysis. You'll use it from first
 power-up through final tuning, so it's worth understanding its layout before you're relying on it

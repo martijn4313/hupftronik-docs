@@ -1,6 +1,8 @@
 # Plan Your Build
 --8<-- "status-reviewed.md"
 
+---
+
 An ECU can only manage what you have planned for. Before you flash firmware, terminate a single wire, or open a tuning dashboard, you need to know what your engine system looks like in full—the injectors the ECU drives, the sensors it reads, and the actuators it commands all trace back to decisions you make here.
 
 Every project differs. Each category below has more than one valid solution, and your engine, goals, and budget determine which is right. Work through them in order and **document your choices**. That document becomes the reference you wire and tune against throughout commissioning.

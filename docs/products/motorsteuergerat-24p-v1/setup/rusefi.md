@@ -1,6 +1,8 @@
 # rusEFI Setup Guide for Motorsteuergerät 24P V1
 --8<-- "status-ai-draft.md"
 
+---
+
 This guide walks through first-time rusEFI configuration on a freshly-flashed Motorsteuergerät 24P
 V1 — telling the firmware which pin does what, so the generic rusEFI image becomes a config specific
 to your board and engine. Do this once, right after

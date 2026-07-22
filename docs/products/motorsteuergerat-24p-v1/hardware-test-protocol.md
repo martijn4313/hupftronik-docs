@@ -1,6 +1,8 @@
 # Practical Hardware Checks
 --8<-- "status-ai-draft.md"
 
+---
+
 This page is a practical checklist for bringing up a Motorsteuergerät 24P V1 board. It is not a
 formal qualification or certification process. Use the checks that match your equipment and
 experience, and share anything unusual with the project.
@@ -9,7 +11,9 @@ Alpha testers are not expected to own an oscilloscope, CAN adapter, trigger gene
 set of test loads. A careful visual inspection, current-limited first power-up, and basic
 input/output checks provide useful feedback.
 
-## Safety essentials
+---
+
+## 1. Safety essentials
 
 !!! danger "Bench safety"
     - Use a fused, current-limited bench supply for first power-up.
@@ -21,9 +25,11 @@ input/output checks provide useful feedback.
 
 See the [IO Overview](24p_v1_overview.md#3-io-overview) for pin assignments and design limits.
 
-## Recommended checks
+---
 
-### 1. Inspect the unpowered board
+## 2. Recommended checks
+
+### 2.1. Inspect the unpowered board
 
 - Check for bent pins, solder bridges, cracked parts, and conductive debris.
 - Confirm the board revision and connector orientation.
@@ -34,7 +40,7 @@ See the [IO Overview](24p_v1_overview.md#3-io-overview) for pin assignments and 
 
 Do not power the board if a supply rail appears shorted or anything looks damaged.
 
-### 2. Perform a current-limited first power-up
+### 2.2. Perform a current-limited first power-up
 
 1. Set the bench supply to 13.8 V with a 100 mA current limit.
 2. Connect `VIN_KL30` and ground, then add `VIN_KL15`.
@@ -45,14 +51,14 @@ Do not power the board if a supply rail appears shorted or anything looks damage
 
 If these checks pass, raise the current limit only as needed for the later test load.
 
-### 3. Check firmware and communication
+### 2.3. Check firmware and communication
 
 - Enter DFU mode and flash the board by following [Flashing the PCB](setup/flashing.md).
 - Power-cycle and confirm that the firmware starts normally.
 - Connect TunerStudio and check that live values update.
 - If you plan to use SD logging, create a short log and confirm that it can be read.
 
-### 4. Check the functions you will use
+### 2.4. Check the functions you will use
 
 There is no need to test every possible configuration. Concentrate on the inputs and outputs needed
 by your installation:
@@ -66,7 +72,9 @@ by your installation:
 Follow [Calibration §4](setup/calibration.md#4-output-tests-before-first-start) before the first
 engine start.
 
-## Optional deeper checks
+---
+
+## 3. Optional deeper checks
 
 The following checks are useful when developing hardware, investigating a problem, or documenting
 the design, but are not expected from every builder:
@@ -81,7 +89,9 @@ the design, but are not expected from every builder:
 Stop a thermal test if temperature continues to rise, communication is lost, or the supply reaches
 its current limit.
 
-## Share a short result
+---
+
+## 4. Share a short result
 
 A simple report is enough:
 

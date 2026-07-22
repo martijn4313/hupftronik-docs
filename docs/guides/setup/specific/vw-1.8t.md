@@ -1,6 +1,8 @@
 # Volkswagen 1.8T
 --8<-- "status-ai-draft.md"
 
+---
+
 The VW/Audi 1.8T (EA827-based, 20-valve turbo four-cylinder, common engine codes AEB/APU/AWP/AWU
 and others across the Mk4 Golf/Jetta, B5 Passat, and Audi A4/A3 platforms) is one of the
 best-documented turbo four-cylinders in the standalone ECU community — factory coil-on-plug

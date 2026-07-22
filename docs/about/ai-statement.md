@@ -1,6 +1,8 @@
 # Our Use of AI
 --8<-- "status-ai-draft.md"
 
+---
+
 This page explains how AI tools are used to write and maintain this documentation, what they are
 never trusted with, and how you can tell — on any page — how much human scrutiny its content has
 had. Read it once and the badges across the site will tell you the rest.

@@ -1,6 +1,8 @@
 # Troubleshooting
 --8<-- "status-ai-draft.md"
 
+---
+
 Every procedure page on this site points here when something doesn't work as described. This page
 collects the symptoms builders hit most often, organized by the stage of commissioning they show up
 in — flashing, first power-up, trigger sync, and running/tuning — with the likely cause and where to

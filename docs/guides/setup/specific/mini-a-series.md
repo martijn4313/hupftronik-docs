@@ -1,6 +1,8 @@
 # Mini A-Series
 --8<-- "status-ai-draft.md"
 
+---
+
 The BMC/Rover A-Series (848cc–1275cc pushrod inline-four, fitted to the classic Mini from 1959
 through 2000) predates electronic fuel injection almost entirely — most examples left the factory
 carbureted, with no crank trigger wheel, no injectors, and no ECU-relevant sensors at all. This page

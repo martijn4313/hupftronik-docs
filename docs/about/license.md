@@ -1,6 +1,8 @@
 # License & Disclaimer
 --8<-- "status-ai-draft.md"
 
+---
+
 This page covers the legal terms around using Hüpftronik hardware, firmware, and documentation, and
 the safety disclaimer that applies to every build described on this site. Read this before you rely
 on anything here for a vehicle you drive.

@@ -1,6 +1,8 @@
 # Calibration and Dynamic Testing
 --8<-- "status-ai-draft.md"
 
+---
+
 This page covers the calibration phase: the work between "the board communicates and the sensors
 read" ([Setup and Commissioning §6](index.md#6-verification-and-testing)) and "the engine is ready
 to tune" ([Tuning Basics](../../../guides/tuning/basics.md)). Everything here happens before and

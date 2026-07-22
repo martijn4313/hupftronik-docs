@@ -1,6 +1,8 @@
 # Tools
 --8<-- "status-reviewed.md"
 
+---
+
 This section collects interactive tools that live alongside the documentation site. Each tool runs
 entirely in the browser — no account or server is required.
 

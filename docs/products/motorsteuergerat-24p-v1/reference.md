@@ -1,6 +1,8 @@
 # Hardware Reference
 --8<-- "status-reviewed.md"
 
+---
+
 An overview of the Hüpftronik ECU's enclosure, thermal design, and input/output circuits.
 
 **How to read this page:** sections 1–8 tell you what each circuit does and what it means for your
@@ -83,9 +85,23 @@ Every analog input (TPS, MAP, temperature, and friends) therefore runs a three-s
 The TVS diode is deliberately sacrificial: if +12 V ever lands on a sensor pin, the diode dies
 first so the MCU doesn't.
 
+### 3.3. Why Protection Sits at the Connector, Not Just at the MCU
+
+The RC divider's resistors would, on their own, knock down most of an ESD pulse before it reached
+the MCU — so it's tempting to think the TVS diode is only there for the MCU's benefit. It isn't.
+The series and shunt resistors in that divider are ordinary **thick-film chip resistors**, and
+thick-film resistors are themselves an ESD failure mode: a strike can punch through or locally
+vaporize the resistive film, permanently shifting or open-circuiting the part, long before enough
+energy reaches the MCU pin to hurt it.
+
+Relying on the resistor network alone to shield the MCU would probably still keep the MCU alive —
+but every ESD event would be a bet against the resistors instead. Putting the TVS diode at the
+connector clamps the transient before it reaches the divider at all, so the passives downstream
+see it too, not just the MCU.
+
 *(Circuit details: **§A.3 Analog Input Topology**; why there's no op-amp buffer: **§A.3.1**.)*
 
-### 3.3. Measured Noise at the MCU Pin
+### 3.4. Measured Noise at the MCU Pin
 
 Design math is nice; measurements are better. This capture was taken at the MCU pin with a
 throttle-position sensor (TPS) / potentiometer as the source, after the divider scaled the 0–5 V
@@ -115,7 +131,7 @@ readings rock-stable.
 !!! tip "What this means in practice"
     A TPS typically spans $\sim 0.5$–$4.5\ \text{V}$ at the connector ($\sim 0.32$–$2.92\ \text{V}$ at the MCU pin), so sub-millivolt noise is negligible. Larger ripple points to sensor-ground routing, the $+5\ \text{V}$ reference return path, or nearby injector/ignition wiring.
 
-### 3.4. IAT Calibration Example: Bosch `0 281 006 051` T-MAP NTC
+### 3.5. IAT Calibration Example: Bosch `0 281 006 051` T-MAP NTC
 
 This section walks through the voltage produced by the Bosch `0 281 006 051` 4 bar / 130 °C
 T-MAP sensor's internal NTC thermistor when it is wired to the Motorsteuergerät 24P V1 `IAT_RAW`
@@ -553,6 +569,9 @@ network with a larger capacitor; see **§A.3.2 Thermistor Channels (CLT/IAT)**.
 
     **TVS at the connector:** The connector is the ESD/EMI entry point, so the TVS clamps transients
     before they spread onto the board. It is effectively out of the signal path when inactive.
+    This also protects $R_{\mathrm{series}}$ and $R_{\mathrm{shunt}}$ themselves — as thick-film
+    resistors, an unclamped ESD strike can damage the resistive film even if the resulting
+    attenuated pulse would have been survivable for the MCU (see **§3.3**).
 
     **Divider/filter near the MCU:** A long trace before a series resistor can pick up RF; the
     resistor, capacitance, and protection-diode nonlinearities can then rectify it into an ADC

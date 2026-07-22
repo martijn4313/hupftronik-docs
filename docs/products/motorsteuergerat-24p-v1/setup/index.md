@@ -1,6 +1,8 @@
 # Setup and Commissioning
 --8<-- "status-reviewed.md"
 
+---
+
 The sub-sections in this guide detail the process for bringing the Motorsteuergerät 24P V1 online.
 
 This page provides a brief outline of the steps involved and links to more detailed information.

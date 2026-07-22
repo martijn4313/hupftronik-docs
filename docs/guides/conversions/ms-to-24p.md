@@ -1,6 +1,8 @@
 # MegaSquirt to Motorsteuergerät 24P V1 Migration Guide
 --8<-- "status-ai-draft.md"
 
+---
+
 MegaSquirt is a different hardware platform running different firmware from the Motorsteuergerät
 24P V1 — this is a full hardware swap with a rewiring step, not a firmware update. This guide covers
 what carries over from an existing MegaSquirt install and what you need to redo, so you don't

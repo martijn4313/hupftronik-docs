@@ -1,6 +1,8 @@
 # Volvo B2xx Redblock
 --8<-- "status-reviewed.md"
 
+---
+
 > "Sturdy beast of burden" — a description that's followed this engine family around the Volvo community for decades, and one it's earned.
 
 <br>

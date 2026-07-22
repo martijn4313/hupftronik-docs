@@ -123,9 +123,9 @@ The PCB includes three simple 4-pin headers for board-level expansion and servic
 
 | Header | Pin | Signal | Description |
 |---|---|---|---|
-| H1 | 1 | SPARE_IN5_RAW | Spare digital input 5 |
-|  | 2 | SPARE_IN4_RAW | Spare digital input 4 |
-|  | 3 | SPARE_IN3_RAW | Spare digital input 3 |
+| H1 | 1 | SPARE_IN5_RAW | Spare digital-only input 5 |
+|  | 2 | SPARE_IN4_RAW | Spare digital-only input 4 |
+|  | 3 | SPARE_IN3_RAW | Spare digital-only input 3 |
 |  | 4 | GND | Ground reference |
 | H2 | 1 | +3V3 | 3.3 V power for SWD adapter |
 |  | 2 | SWDIO | SWD data line |
@@ -138,7 +138,7 @@ The PCB includes three simple 4-pin headers for board-level expansion and servic
 
 These headers make it easy to attach external debugging, logging or custom input wiring without modifying the main 24-pin automotive connector.
 
-`SPARE_IN3`–`SPARE_IN5` on H1 accept 0–5 V digital triggers, the same as `SPARE_IN1`/`SPARE_IN2` on
+`SPARE_IN3`–`SPARE_IN5` on H1 accept 0–5 V digital only triggers, the same as `SPARE_IN1`/`SPARE_IN2` on
 the main connector. You'll need to add your own connector to H1 to wire them up (a standard 2.54 mm
 pin header mates directly).
 

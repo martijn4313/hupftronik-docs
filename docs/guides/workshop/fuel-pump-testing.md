@@ -1,6 +1,8 @@
 # Fuel Pump Pressure and Flow Testing
 --8<-- "status-ai-draft.md"
 
+---
+
 Pump testing means measuring what a fuel pump actually delivers — pressure and flow, at realistic
 supply voltage — before it goes anywhere near the engine. A used pump of unknown history is the
 single most common weak link in a budget EFI build, and a pump that "runs" can still be down 40 %

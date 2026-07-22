@@ -1,6 +1,8 @@
 # Community Design Validation
 --8<-- "status-ai-draft.md"
 
+---
+
 Motorsteuergerät 24P V1 is an open-source project, not a production validation programme. Design
 confidence grows as builders test real boards, report results, and improve the design. There is no
 required board count, build batch, formal sign-off, or fixed evidence archive.
@@ -8,7 +10,9 @@ required board count, build batch, formal sign-off, or fixed evidence archive.
 Use the [Practical Hardware Checks](hardware-test-protocol.md) as a starting point. Contributors can
 test one area, one board, or one installation; partial results are still valuable.
 
-## What matters most
+---
+
+## 1. What matters most
 
 Prioritise evidence that helps builders use the board safely:
 
@@ -22,7 +26,9 @@ Prioritise evidence that helps builders use the board safely:
 Not every contributor needs to test every item. Start with the functions you use and expand testing
 when equipment and time allow.
 
-## Recording useful evidence
+---
+
+## 2. Recording useful evidence
 
 When reporting a result, include enough context for someone else to compare it:
 
@@ -35,7 +41,9 @@ When reporting a result, include enough context for someone else to compare it:
 
 Equipment serial numbers, formal test IDs, and prescribed folder layouts are unnecessary.
 
-## Building confidence
+---
+
+## 3. Building confidence
 
 Documentation should distinguish between:
 
@@ -47,7 +55,9 @@ These are descriptions of available evidence, not release gates. A single clear 
 a documentation question; repeated results provide more confidence where component tolerance,
 temperature, or assembly variation matters.
 
-## Handling problems
+---
+
+## 4. Handling problems
 
 If something fails:
 
@@ -59,7 +69,9 @@ If something fails:
 A design change only needs focused retesting of the affected function and a basic check that the
 board still powers up and communicates. Broader regression testing is welcome, not mandatory.
 
-## Deciding readiness
+---
+
+## 5. Deciding readiness
 
 There is no formal DVT exit criterion. Maintainers and builders should make a practical judgment
 from the evidence available, known limitations, and the risk of the intended use. Unverified values

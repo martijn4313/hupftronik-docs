@@ -1,6 +1,8 @@
 # B230F with Raised Compression and a Mild Aftermarket Cam
 --8<-- "status-ai-draft.md"
 
+---
+
 This build turns a B230F into a genuinely quick naturally aspirated street engine: compression
 raised to around $10.5:1$ and a mild aftermarket camshaft, tuned on the Motorsteuergerät 24P V1.
 Raised compression is the most efficient power modification there is — it improves torque

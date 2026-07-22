@@ -1,6 +1,8 @@
 # Open-Source & Community
 --8<-- "status-ai-draft.md"
 
+---
+
 This page explains what "open-source" means in practice for Hüpftronik, and how to get help or
 contribute back. Read this if you're stuck on a build, want to report a documentation gap, or want
 to help other builders.

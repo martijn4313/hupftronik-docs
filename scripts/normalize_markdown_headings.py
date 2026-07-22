@@ -6,6 +6,9 @@ numbering scheme to headings level 2 and deeper. Level 1 headings are left
 unchanged so page titles remain as-is. It also normalizes horizontal rules
 such as --- to a single standard separator with consistent spacing.
 
+It also ensures a horizontal separator appears after status block includes
+(--8<-- "status-*.md") to visually separate the status indicator from content.
+
 Use ``<!-- heading-numbering: appendix -->`` immediately before a terminal appendix to preserve
 its authored heading labels instead of adding global decimal numbering.
 """
@@ -21,6 +24,7 @@ HEADING_PATTERN = re.compile(r"^(#{1,6})\s+(.*)$")
 NUMBER_PREFIX_PATTERN = re.compile(r"^\d+(?:\.\d+)*\s*\.?\s+")
 FENCE_PATTERN = re.compile(r"^(```|~~~)")
 SEPARATOR_PATTERN = re.compile(r"^(?:-{3,}|\*{3,})$")
+STATUS_BLOCK_PATTERN = re.compile(r'--8<--\s+"status-.*\.md"')
 APPENDIX_MARKER = "<!-- heading-numbering: appendix -->"
 
 
@@ -30,6 +34,7 @@ def normalize_headings_in_file(path: Path) -> bool:
     new_lines: List[str] = []
     in_fence = False
     in_appendix = False
+    after_status_block = False
     counters = [0] * 7
 
     def add_separator() -> None:
@@ -62,6 +67,18 @@ def normalize_headings_in_file(path: Path) -> bool:
             new_lines.append(line)
             continue
 
+        # Check if this is a status block include
+        if STATUS_BLOCK_PATTERN.search(stripped):
+            new_lines.append(line)
+            after_status_block = True
+            continue
+
+        # If we just saw a status block and now see non-empty content, ensure separator after
+        if after_status_block and stripped != "" and not SEPARATOR_PATTERN.match(stripped):
+            # Add separator after status block if not already there
+            add_separator()
+            after_status_block = False
+
         if stripped == APPENDIX_MARKER:
             in_appendix = True
             new_lines.append(line)
@@ -69,21 +86,25 @@ def normalize_headings_in_file(path: Path) -> bool:
 
         if SEPARATOR_PATTERN.match(stripped):
             add_separator()
+            after_status_block = False
             continue
 
         match = HEADING_PATTERN.match(line)
         if not match:
             new_lines.append(line)
+            after_status_block = False
             continue
 
         hashes, heading = match.groups()
         level = len(hashes)
         if level == 1:
             new_lines.append(line)
+            after_status_block = False
             continue
 
         if in_appendix:
             new_lines.append(line)
+            after_status_block = False
             continue
 
         if level == 2:
@@ -114,6 +135,7 @@ def normalize_headings_in_file(path: Path) -> bool:
             number = f"{counters[2]}.{counters[3]}.{counters[4]}.{counters[5]}.{counters[6]}"
 
         new_lines.append(f"{'#' * level} {number}. {heading_text}")
+        after_status_block = False
 
     new_text = "\n".join(new_lines)
     if not text.endswith("\n"):
