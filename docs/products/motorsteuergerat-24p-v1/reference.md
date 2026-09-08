@@ -444,8 +444,8 @@ with the ADC reference.
 
 ## 8. Communications and Storage
 
-Three ways in and out of the board: CAN for the rest of the vehicle, the SD card for the logs, and
-USB for you.
+Four ways in and out of the board: CAN for the rest of the vehicle, the SD card for the logs, USB
+for you, and an RS232 serial header for anything that stays wired in permanently.
 
 ### 8.1. CAN bus
 
@@ -471,6 +471,35 @@ analyzed on a PC with the same tools used for TunerStudio datalogs.
 The full-speed USB port serves three roles: the TunerStudio/console connection during setup and
 tuning, firmware console access, and DFU firmware flashing (see
 [Flashing the PCB](setup/flashing.md#2-usb-dfu-bootloader)).
+
+### 8.4. RS232 serial
+
+A serial port is brought out on the 4-pin expansion header **H3**. It carries the same kind of
+traffic as the USB port, but with no laptop expected on the other end: this is the link to leave
+permanently wired to a dash display, a telemetry module, or a Bluetooth/WiFi serial adapter tucked
+behind the trim.
+
+| H3 pin | Signal | Direction |
+| :--- | :--- | :--- |
+| 1 | `+5V` | Output (from the $+5\ \text{V}$ rail, see [§7.2](#72-internal-rails)) |
+| 2 | `RS232_RX` | Input to the ECU |
+| 3 | `RS232_TX` | Output from the ECU |
+| 4 | `GND` | Ground reference |
+
+H3 is a bare $2.54\ \text{mm}$ pin header — as with H1, you supply the mating connector (see the
+[product overview](24p_v1_overview.md#4-expansion-headers)). `RX` and `TX` are named from the
+board's point of view, so cross them at the far end: the ECU's `TX` drives the other device's `RX`.
+Take the ground for the link from H3 pin 4 rather than from a chassis point, and keep the +5 V pin
+for small logic-level adapters only — it shares the sensor reference rail, so a hungry accessory on
+it moves your sensor readings.
+
+!!! note "Signal levels and baud rate: to be confirmed"
+    Whether H3 presents true RS232 line levels (via a transceiver) or 5 V logic levels, and what
+    baud rate the firmware defaults to, will be documented here once confirmed against the
+    production board. The distinction matters: wiring a $\pm 12\ \text{V}$ RS232 device to a
+    logic-level pin destroys it. Until confirmed, measure the idle voltage on `RS232_TX` against `GND`
+    with the board powered and the firmware running — idle near $+5\ \text{V}$ means logic levels,
+    idle at a negative voltage means true RS232.
 
 ---
 
