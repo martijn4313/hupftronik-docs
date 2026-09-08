@@ -2,6 +2,15 @@
    draw() returns inner SVG (inline attributes only, so the
    SVG export is self-contained). Local origin = top-left.   */
 
+/* a straight lead from a pin to the edge of the part's body, in the
+   part's default (unrotated) stroke color — used by the simpler two/
+   three-pin parts below. Not applied library-wide: most parts' bodies
+   are unique hand-tuned SVG art, and rewriting all of them without a
+   visual regression test would risk silently mis-drawing a symbol. */
+function stub(x1,y1,x2,y2,color='#d7dde3'){
+  return `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${color}" stroke-width="2"/>`;
+}
+
 function relayArt(spdt){
   const w = spdt?140:120;
   const noX = 90, comX = 90;
@@ -523,45 +532,45 @@ export const LIB = {
   sensor2:{name:'Sensor (2-pin)',prefix:'B',w:40,h:40,
     pins:[{id:'1',label:'1',x:10,y:0},{id:'2',label:'2',x:30,y:0}],
     draw:()=>`
-      <line x1="10" y1="0" x2="10" y2="14" stroke="#d7dde3" stroke-width="2"/>
-      <line x1="30" y1="0" x2="30" y2="14" stroke="#d7dde3" stroke-width="2"/>
+      ${stub(10,0,10,14)}
+      ${stub(30,0,30,14)}
       <circle cx="20" cy="24" r="14" fill="#182529" stroke="#4dd0e1" stroke-width="2"/>
       <path d="M12 26 Q16 20 20 26 T28 26" fill="none" stroke="#4dd0e1" stroke-width="1.5"/>`},
   sensor3:{name:'Sensor (3-pin)',prefix:'B',w:60,h:40,
     pins:[{id:'5v',label:'5V',x:10,y:0},{id:'sig',label:'S',x:30,y:0},{id:'gnd',label:'G',x:50,y:0}],
     draw:()=>`
-      <line x1="10" y1="0" x2="10" y2="14" stroke="#d7dde3" stroke-width="2"/>
-      <line x1="30" y1="0" x2="30" y2="14" stroke="#d7dde3" stroke-width="2"/>
-      <line x1="50" y1="0" x2="50" y2="14" stroke="#d7dde3" stroke-width="2"/>
+      ${stub(10,0,10,14)}
+      ${stub(30,0,30,14)}
+      ${stub(50,0,50,14)}
       <path d="M4 14 h52 v14 a10 10 0 0 1 -10 10 h-32 a10 10 0 0 1 -10 -10 z" fill="#182529" stroke="#4dd0e1" stroke-width="2"/>
       <circle cx="30" cy="26" r="4" fill="none" stroke="#4dd0e1" stroke-width="1.5"/>`},
   o2sensor3:{name:'Oxygen Sensor (3-pin)',prefix:'B',w:60,h:52,
     pins:[{id:'ht+',label:'HT+',x:12,y:0},{id:'sig',label:'S',x:30,y:0},{id:'gnd',label:'G',x:48,y:0}],
     draw:()=>`
-      <line x1="12" y1="0" x2="12" y2="14" stroke="#d7dde3" stroke-width="2"/>
-      <line x1="30" y1="0" x2="30" y2="14" stroke="#d7dde3" stroke-width="2"/>
-      <line x1="48" y1="0" x2="48" y2="14" stroke="#d7dde3" stroke-width="2"/>
+      ${stub(12,0,12,14)}
+      ${stub(30,0,30,14)}
+      ${stub(48,0,48,14)}
       <rect x="8" y="14" width="44" height="28" rx="8" fill="#202620" stroke="#a5d6a7" stroke-width="2"/>
       <path d="M18 30 h24" stroke="#a5d6a7" stroke-width="1.4"/>
       <circle cx="30" cy="48" r="3.5" fill="#202620" stroke="#a5d6a7" stroke-width="1.4"/>`},
   o2sensor4:{name:'Oxygen Sensor (4-pin)',prefix:'B',w:74,h:52,
     pins:[{id:'ht1',label:'H1',x:10,y:0},{id:'ht2',label:'H2',x:28,y:0},{id:'sig',label:'S',x:46,y:0},{id:'gnd',label:'G',x:64,y:0}],
     draw:()=>`
-      <line x1="10" y1="0" x2="10" y2="14" stroke="#d7dde3" stroke-width="2"/>
-      <line x1="28" y1="0" x2="28" y2="14" stroke="#d7dde3" stroke-width="2"/>
-      <line x1="46" y1="0" x2="46" y2="14" stroke="#d7dde3" stroke-width="2"/>
-      <line x1="64" y1="0" x2="64" y2="14" stroke="#d7dde3" stroke-width="2"/>
+      ${stub(10,0,10,14)}
+      ${stub(28,0,28,14)}
+      ${stub(46,0,46,14)}
+      ${stub(64,0,64,14)}
       <rect x="6" y="14" width="62" height="28" rx="8" fill="#202620" stroke="#a5d6a7" stroke-width="2"/>
       <path d="M18 30 h38" stroke="#a5d6a7" stroke-width="1.4"/>
       <circle cx="37" cy="48" r="3.5" fill="#202620" stroke="#a5d6a7" stroke-width="1.4"/>`},
   o2sensor5:{name:'Oxygen Sensor (5-pin)',prefix:'B',w:90,h:52,
     pins:[{id:'ip+',label:'IP+',x:9,y:0},{id:'ip-',label:'IP-',x:27,y:0},{id:'vm',label:'VM',x:45,y:0},{id:'rc',label:'RC',x:63,y:0},{id:'ht',label:'HT',x:81,y:0}],
     draw:()=>`
-      <line x1="9" y1="0" x2="9" y2="14" stroke="#d7dde3" stroke-width="2"/>
-      <line x1="27" y1="0" x2="27" y2="14" stroke="#d7dde3" stroke-width="2"/>
-      <line x1="45" y1="0" x2="45" y2="14" stroke="#d7dde3" stroke-width="2"/>
-      <line x1="63" y1="0" x2="63" y2="14" stroke="#d7dde3" stroke-width="2"/>
-      <line x1="81" y1="0" x2="81" y2="14" stroke="#d7dde3" stroke-width="2"/>
+      ${stub(9,0,9,14)}
+      ${stub(27,0,27,14)}
+      ${stub(45,0,45,14)}
+      ${stub(63,0,63,14)}
+      ${stub(81,0,81,14)}
       <rect x="5" y="14" width="80" height="28" rx="8" fill="#202620" stroke="#a5d6a7" stroke-width="2"/>
       <path d="M18 30 h54" stroke="#a5d6a7" stroke-width="1.4"/>
       <circle cx="45" cy="48" r="3.5" fill="#202620" stroke="#a5d6a7" stroke-width="1.4"/>`},

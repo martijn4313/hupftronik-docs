@@ -2,9 +2,11 @@
 
 import { DIN, GAUGES } from './constants.js';
 import { LIB, IGN_POSITIONS, hasPins } from './components.js';
-import { state, esc, comp, uid, hooks } from './state.js';
+import { state, esc, comp } from './state.js';
 import { pinPos, pinAxis, textAnchor, textOffset, wirePath, routePoints, pinTextAnchor, pinTextOffset } from './geometry.js';
 import { historyPush } from './history.js';
+import { sanitizeSvgFragment } from './sanitize.js';
+import { simulate } from './sim.js';
 
 // DOM references
 export let svg, wiresL, compsL, tempL, handleL;
@@ -97,16 +99,13 @@ export function renderWires(){
 export function renderComps(){
   compsL.innerHTML = state.comps.map(c=>{
     const d=LIB[c.type];
-    
-    // For components with a configurable pin count (ECU, Schildknappe), regenerate
-    // by count; for all other getPins components regenerate by variant.
-    if(d.getHeight && d.getPins){
-      if(!c.pins||!Array.isArray(c.pins)){
-        c.pins=d.getPins(c.ioCount ?? c.pinCount ?? 4);
-      }
-    } else if(d.getPins && !hasPins(c.pins)){
-      c.pins=d.getPins(c.variant);
-    }
+
+    /* pins are normally populated on load (applyLoadedData) and on
+       creation (addComp); this is a read-only fallback for the rare edge
+       case where an instance reaches render without them, computed
+       locally so render never mutates state as a side effect */
+    const compPins = hasPins(c.pins) ? c.pins
+      : (d.getPins ? d.getPins(d.getHeight ? (c.ioCount ?? c.pinCount ?? 4) : c.variant) : d.pins);
 
     // Calculate component dimensions
     let compW = d.w;
@@ -151,7 +150,7 @@ export function renderComps(){
             font-family="inherit" pointer-events="all">${esc(c.value)}</text>`
       : '';
     
-    const pins = (c.pins||d.pins).map(p=>{
+    const pins = compPins.map(p=>{
       const pinBase = pinTextAnchor(d, p, c);
       const pinOff = pinTextOffset(c, p.id);
       const pinCandidate = !!(
@@ -176,7 +175,7 @@ export function renderComps(){
       ? `<rect class="note-resize-handle" data-comp="${c.id}" data-handle="se" x="${compW-6}" y="${compH-6}" width="12" height="12" rx="2"
           fill="#15181b" stroke="#66bb6a" stroke-width="1.8"/>`
       : '';
-    const primaryPin = (c.pins||d.pins)[0];
+    const primaryPin = compPins[0];
     const orientDot = primaryPin
       ? `<circle cx="${primaryPin.x}" cy="${primaryPin.y-6}" r="2" fill="#f9a825" opacity="0.95" pointer-events="none"/>`
       : '';
@@ -319,11 +318,14 @@ function openSymbolEditor(c){
   wrap.style.width  = pw + 'px';
   wrap.style.height = ph + 'px';
 
-  /* Render the preview by loading the SVG fragment into a sandboxed <img>.
-     SVG loaded via blob: URL in an <img> cannot execute scripts or access the
-     parent document, so no sanitization of user content is needed beyond
-     constructing a valid SVG envelope. Any previous object URL is revoked to
-     avoid memory leaks. */
+  /* Render the live-typing preview by loading the SVG fragment into a
+     sandboxed <img>. SVG loaded via blob: URL in an <img> cannot execute
+     scripts or access the parent document, so this preview alone needs no
+     sanitization — it's safe to show work-in-progress/invalid markup here.
+     That sandbox does NOT extend to the real canvas, though: Apply below
+     sanitizes before the fragment is stored, since renderComps() injects
+     customDraw directly into the live DOM. Any previous object URL is
+     revoked to avoid memory leaks. */
   let previewBlobUrl = null;
   function safeSetPreview(svgFragment){
     if(previewBlobUrl){ URL.revokeObjectURL(previewBlobUrl); previewBlobUrl=null; }
@@ -341,7 +343,14 @@ function openSymbolEditor(c){
   ta.oninput = ()=>{ safeSetPreview(ta.value); };
 
   symModal.querySelector('#btnSymApply').onclick = ()=>{
-    c.customDraw = ta.value;
+    /* the live preview above is safely sandboxed via a blob: <img>, but
+       renderComps() injects customDraw straight into the live canvas via
+       innerHTML — sanitize here, at the point it's actually persisted,
+       so scripting hooks (onerror/onload, <script>, ...) never reach it */
+    const cleaned = sanitizeSvgFragment(ta.value);
+    c.customDraw = cleaned || null;
+    ta.value = c.customDraw ?? d.draw(c);
+    safeSetPreview(ta.value);
     historyPush();
     renderComps();
   };
@@ -535,7 +544,7 @@ export function renderProps(){
         }
         if(c.pinStates) for(const k of Object.keys(c.pinStates))
           if(!c.pins.some(p=>p.id===k)) delete c.pinStates[k];
-        if(state.trace&&hooks.simulate) hooks.simulate();
+        if(state.trace) simulate();
         render();
       };
     }
@@ -550,7 +559,7 @@ export function renderProps(){
         c.pinStates=c.pinStates||{};
         if(e.target.value) c.pinStates[sel.dataset.pin]=e.target.value;
         else delete c.pinStates[sel.dataset.pin];
-        if(state.trace&&hooks.simulate) hooks.simulate();
+        if(state.trace) simulate();
         renderWires();renderComps();
       };
     });
@@ -558,7 +567,7 @@ export function renderProps(){
     if(fsw){
       fsw.onchange=e=>{
         c.on=!!e.target.checked;
-        if(state.trace&&hooks.simulate) hooks.simulate();
+        if(state.trace) simulate();
         renderWires();renderComps();
       };
     }
@@ -566,7 +575,7 @@ export function renderProps(){
     if(fkp){
       fkp.onchange=e=>{
         c.keyPos=Math.max(0,Math.min(3,+e.target.value||0));
-        if(state.trace&&hooks.simulate) hooks.simulate();
+        if(state.trace) simulate();
         renderWires();renderComps();
       };
     }

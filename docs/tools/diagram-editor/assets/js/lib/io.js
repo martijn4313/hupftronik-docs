@@ -5,6 +5,7 @@ import { state } from './state.js';
 import { render, svg, wiresL, compsL, renderWires, renderComps, applyView } from './render.js';
 import { historyInit, historyUndo, historyRedo } from './history.js';
 import { buildMermaid } from './mermaid.js';
+import { sanitizeSvgFragment } from './sanitize.js';
 
 let modalFile='export.txt';
 
@@ -62,8 +63,17 @@ export function applyLoadedData(j){
       // overwriting it with the first preset's name
       c.variant='custom';
     }
-    if(shouldApplyPresetPins(c,LIB[c.type])){
+    // components with a configurable pin count (ecu/schildknappe, handled
+    // above via getHeight) derive their pins from that count, not from a
+    // variant id — running shouldApplyPresetPins for them too would pass
+    // c.variant (undefined, or a string like "generic") into a function
+    // that expects a pin count, silently corrupting their pin layout
+    if(!LIB[c.type]?.getHeight && shouldApplyPresetPins(c,LIB[c.type])){
       c.pins=LIB[c.type].getPins(c.variant);
+    }
+    if(typeof c.customDraw === 'string'){
+      // untrusted markup from a shared/loaded save file — see sanitize.js
+      c.customDraw = sanitizeSvgFragment(c.customDraw) || null;
     }
   });
 
