@@ -83,7 +83,7 @@ Boost multiplies airflow; the fuel system must lead it, never trail it.
 
 | Item | Choice | Notes |
 |------|--------|-------|
-| T-MAP | **$3.0\,\text{bar}$ Bosch `0 281 002 437`** | Covers this boost range with margin. Mount it after the intercooler, close to the plenum. (See [Volvo B2xx §6.1](../volvo-b2xx.md#61-quick-scan)). |
+| T-MAP | **$3.0\,\text{bar}$ Bosch `0 281 006 076` (supersedes `0 281 002 437`)** | Covers this boost range with margin. Mount it after the intercooler, close to the plenum. (See [Volvo B2xx §6.1](../volvo-b2xx.md#61-quick-scan)). |
 | Ignition | **Wasted spark** | Unchanged from the base guide. Fit spark plugs two heat ranges colder than **stock NA** and close the gaps to $0.6$–$0.7\,\text{mm}$ — boost pressure blows out wide gaps. |
 | Camshaft | **`D`, `K`, `VX3`, `VX` or Aftermarket** | On a high-compression B230F with a Holset, you must take advantage of the low exhaust backpressure. Run longer duration cams with overlap. The OEM `D`, `K`, `VX3`, and `VX` cams work very well. The `A` cam is acceptable for lower boost limits. Aftermarket options like KG2T, Stage 2/3 regrinds, or IPD Turbo are excellent. **Do NOT use the factory turbo `T` cam**, it will choke the engine and increase risk. |
 
@@ -144,7 +144,7 @@ To make sourcing parts easier, here is a summary of the specific components and 
 | Category | Component | Part Number / Specification |
 |----------|-----------|-----------------------------|
 | **Turbo** | Holset Turbos | HE351CW, (super)HX40, or HX35 |
-| **Sensors** | T-MAP Sensor ($3.0\,\text{bar}$) | Bosch `0 281 002 437` |
+| **Sensors** | T-MAP Sensor ($3.0\,\text{bar}$) | Bosch `0 281 006 076` (supersedes `0 281 002 437`) |
 | **Fueling** | In-tank Fuel Pump | Walbro `GSS342` ($255\,\text{L/hr}$) |
 | | Injectors ($630\,\text{cc/min}$) | Siemens Deka `FI114961` or Bosch EV14 equivalents |
 | | Injectors ($1000\,\text{cc/min}$) | Bosch EV14 `0 280 158 117` (common 980/1000cc) |

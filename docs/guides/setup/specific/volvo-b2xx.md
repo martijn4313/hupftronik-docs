@@ -186,7 +186,7 @@ The Volvo 850 TPS is cheap, widely available, and its signal range perfectly mat
 | Application | Sensor Type | Bosch Part Number | Range (Absolute) |
 |-------------|-------------|-------------------|------------------|
 | Naturally Aspirated | MAP | `0 261 230 004` | $0 - 1.05\,\text{bar}$ |
-| Mild Boost | T-MAP | `0 281 002 437` | $0.2 - 3.0\,\text{bar}$ |
+| Mild Boost | T-MAP | `0 281 006 076` (supersedes `0 281 002 437`) | $0.2 - 3.0\,\text{bar}$ |
 | High Boost | T-MAP | `0 281 006 059` | $0.5 - 4.0\,\text{bar}$ |
 
 ### 6.2. Technical Detail
@@ -194,7 +194,7 @@ The Volvo 850 TPS is cheap, widely available, and its signal range perfectly mat
 Leave the stock AMM disconnected. It serves no purpose in this installation. The 24P V1 supports Speed-Density natively using MAP and IAT. 
 
 **Combined T-MAP Sensor**
-A T-MAP sensor packages both MAP and IAT elements into a single body. The Bosch `0 281 002 437` provides a $3.0\,\text{bar}$ absolute range, sufficient for $2.0\,\text{bar}$ of boost. Thread it into an M12 bung in the intake manifold. 
+A T-MAP sensor packages both MAP and IAT elements into a single body. The Bosch `0 281 006 076` (supersedes `0 281 002 437`) provides a $3.0\,\text{bar}$ absolute range, sufficient for $2.0\,\text{bar}$ of boost. Thread it into an M12 bung in the intake manifold.
 *   **Pin 1 (GND):** Sensor ground
 *   **Pin 2 (NTC):** IAT analog input
 *   **Pin 3 (VCC):** 5V sensor reference
