@@ -505,7 +505,8 @@ your firmware build configures it.
 | 4 | `GND` | Ground reference |
 
 An onboard **SP3232E** transceiver, powered from the $+5\ \text{V}$ rail, sits between H3 and the
-MCU's `USART1`. It puts **true RS232 line levels** on pins 2 and 3 — at least $\pm 5\ \text{V}$ into
+MCU's `USART1` on `PB6` (TX) / `PB7` (RX) — the pins your firmware's board configuration must assign
+to this port. It puts **true RS232 line levels** on pins 2 and 3 — at least $\pm 5\ \text{V}$ into
 a $3\ \text{k}\Omega$ load, not the MCU's logic levels — and gives both pins ESD protection up to
 $\pm 15\ \text{kV}$ (human-body model). On the MCU side, a divider (`R55` $1.8\ \text{k}\Omega$ /
 `R53` $3.3\ \text{k}\Omega$) scales the receiver's 5 V output down to $3.24\ \text{V}$ for the RX pin.
