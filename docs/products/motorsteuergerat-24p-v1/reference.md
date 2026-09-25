@@ -474,10 +474,10 @@ tuning, firmware console access, and DFU firmware flashing (see
 
 ### 8.4. RS232 serial
 
-A serial port is brought out on the 4-pin expansion header **H3**. It carries the same kind of
-traffic as the USB port, but with no laptop expected on the other end: this is the link to leave
-permanently wired to a dash display, a telemetry module, or an RS232 Bluetooth adapter tucked
-behind the trim.
+A serial port is brought out on the 4-pin expansion header **H3**. Where USB is the connection
+for a laptop during setup, H3 suits a link that stays wired in: a dash display, a telemetry module,
+or an RS232 Bluetooth adapter tucked behind the trim. What the port actually carries depends on how
+your firmware build configures it.
 
 | H3 pin | Signal | Direction |
 | :--- | :--- | :--- |
@@ -493,23 +493,25 @@ connecting it straight to the header.
 
 !!! danger "Do not wire a 3.3 V or 5 V TTL adapter directly to H3"
     The cheap FTDI/CP2102/CH340 breakout boards and TTL Bluetooth modules (HC-05 and friends)
-    expect logic levels. RS232 idles at a *negative* voltage and swings across zero, so connecting
-    one of these to `RS232_TX` drives the adapter's input well outside its rated range and
-    typically destroys it. If in doubt, confirm before wiring: with the board powered and the
-    firmware running, `RS232_TX` measured against `GND` rests at a negative voltage.
+    expect logic levels. RS232 idles at a *negative* voltage and swings across zero with inverted
+    logic, so one of these on `RS232_TX` sees its input driven below ground: at best it reads
+    garbage, at worst the input is damaged. To identify the pin before wiring anything, measure
+    against `GND` with the board powered and the firmware running — `RS232_TX` rests at a
+    negative voltage.
 
 H3 is a bare $2.54\ \text{mm}$ pin header — as with H1, you supply the mating connector (see the
 [product overview](24p_v1_overview.md#4-expansion-headers)). `RX` and `TX` are named from the
 board's point of view, so cross them at the far end: the ECU's `TX` drives the other device's `RX`.
 Only the two data lines and ground are brought out, so the link is a three-wire connection with no
 hardware flow control — configure the far end for none. Take the ground for the link from H3 pin 4
-rather than from a chassis point, and treat the +5 V pin as a small accessory tap only: it shares
-the sensor reference rail, so a hungry load on it moves your sensor readings.
+rather than from a chassis point. The +5 V pin is the same rail as the sensor reference on C5, whose
+external current budget is not yet published (see [§7.2](#72-internal-rails)) — power only a small
+accessory from it.
 
 !!! note "Baud rate: to be confirmed"
-    The baud rate the firmware defaults to on this port has not been published yet and will be
-    documented here once confirmed. Both rusEFI and Speeduino make the serial rate a firmware
-    setting, so check the value your build is configured for and match it at the far end.
+    The baud rate the firmware uses on this port has not been published yet and will be documented
+    here once confirmed. Until then, check the rate your firmware build uses and match it at the
+    far end.
 
 ---
 
