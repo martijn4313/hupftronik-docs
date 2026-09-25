@@ -427,7 +427,7 @@ Behind the protection stage, onboard LDO regulators derive two logic rails:
 
 | Rail | Used for | Exposed on |
 | :--- | :--- | :--- |
-| $+5\ \text{V}$ | Sensor supply, output buffer, RS232 header | Pin C5, header H3 |
+| $+5\ \text{V}$ | Sensor supply, output buffer, RS232 transceiver and header | Pin C5, header H3 |
 | $+3.3\ \text{V}$ | MCU, logic, ADC reference (`VDDA`, through a ferrite bead) | Header H2 (SWD) |
 
 The $+5\ \text{V}$ rail on pin C5 is the **sensor supply** — power your TPS, MAP/T-MAP, and other
@@ -504,8 +504,13 @@ your firmware build configures it.
 | 3 | `RS232_TX` | Output from the ECU |
 | 4 | `GND` | Ground reference |
 
-An onboard transceiver puts **true RS232 line levels** on pins 2 and 3 — not the MCU's logic
-levels. Wire H3 to a genuine RS232 device (a USB-to-RS232 cable, a DE-9 dash or telemetry module,
+An onboard **SP3232E** transceiver, powered from the $+5\ \text{V}$ rail, sits between H3 and the
+MCU's `USART1`. It puts **true RS232 line levels** on pins 2 and 3 — at least $\pm 5\ \text{V}$ into
+a $3\ \text{k}\Omega$ load, not the MCU's logic levels — and gives both pins ESD protection up to
+$\pm 15\ \text{kV}$ (human-body model). On the MCU side, a divider (`R55` $1.8\ \text{k}\Omega$ /
+`R53` $3.3\ \text{k}\Omega$) scales the receiver's 5 V output down to $3.24\ \text{V}$ for the RX pin.
+
+Wire H3 to a genuine RS232 device (a USB-to-RS232 cable, a DE-9 dash or telemetry module,
 an RS232-level Bluetooth adapter), and give a TTL peripheral its own RS232 converter rather than
 connecting it straight to the header.
 
@@ -527,10 +532,9 @@ sensor readings are not ratiometric (see [§7.2](#72-internal-rails)): current d
 every 5 V sensor's reading, and the rail's external current budget is not yet published. Power only
 a small accessory from it.
 
-!!! note "Baud rate: to be confirmed"
-    The baud rate the firmware uses on this port has not been published yet and will be documented
-    here once confirmed. Until then, check the rate your firmware build uses and match it at the
-    far end.
+**Baud rate** is a firmware setting, not a property of the hardware: the firmware you run (rusEFI or
+Speeduino) sets it, and the far end must match. The transceiver handles the standard rates up to
+115 200 baud with margin.
 
 ---
 
