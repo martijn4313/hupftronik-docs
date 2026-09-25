@@ -1,6 +1,6 @@
 /* ============ geometry and coordinate helpers ============ */
 
-import { LIB } from './components.js';
+import { LIB, pinsOf } from './components.js';
 import { state } from './state.js';
 
 function compSize(c,d=LIB[c.type]){
@@ -25,9 +25,7 @@ export function comp(id){
 export function pinPos(c,pinId){
   const d=LIB[c.type];
   const size = compSize(c,d);
-  // For ECU and other components with dynamic pins, use instance pins
-  const pins = c.pins || d.pins;
-  const p=pins.find(p=>p.id===pinId);
+  const p=pinsOf(c).find(p=>p.id===pinId);
   if(!p) return {x: c.x, y: c.y}; // fallback if pin not found
   let px=p.x, py=p.y;
   const r = c.r || 0;
@@ -104,8 +102,7 @@ export function pinAxis(c,pinId){
   if(!c) return null;
   const d=LIB[c.type];
   const size=compSize(c,d);
-  const pins=c.pins||d.pins;
-  const p=pins.find(p=>p.id===pinId);
+  const p=pinsOf(c).find(p=>p.id===pinId);
   if(!p) return 'v';
   let axis;
   if(p.y<=4||p.y>=size.h-4) axis='v';

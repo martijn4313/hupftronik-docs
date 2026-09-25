@@ -3,7 +3,7 @@
    exercised headlessly against the real mermaid parser. */
 
 import { DIN_MERMAID } from './constants.js';
-import { LIB, IGN_POSITIONS } from './components.js';
+import { IGN_POSITIONS, pinsOf } from './components.js';
 import { state, esc, comp } from './state.js';
 
 /* words the flowchart parser treats specially when they appear as a bare
@@ -24,11 +24,6 @@ function mermaidIds(){
     used.add(id);ids.set(c.id,id);
   }
   return ids;
-}
-
-function pinsOf(c){
-  const d=LIB[c.type];
-  return (Array.isArray(c.pins)&&c.pins.length)?c.pins:(d?.pins||[]);
 }
 
 /* "A1:5" pin reference for a wire end, so multi-pin parts keep their

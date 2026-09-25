@@ -5,21 +5,18 @@ import { state } from './state.js';
 import { render, svg, wiresL, compsL, renderWires, renderComps, applyView } from './render.js';
 import { historyInit, historyUndo, historyRedo } from './history.js';
 import { buildMermaid } from './mermaid.js';
+import { sanitizeSvgFragment } from './sanitize.js';
+import { normalizeDiagram } from './validate.js';
 
 let modalFile='export.txt';
 
 /* shared by the file-load handler and the startup demo seed */
 export function applyLoadedData(j){
-  if(!Array.isArray(j.comps)||!Array.isArray(j.wires)) throw 0;
-  state.comps=j.comps;state.wires=j.wires;state.counters=j.counters||{};state.nextId=j.nextId||1000;
-  state.showWireLabels = j.showWireLabels !== false;
-  state.wireDefaults = {
-    color: j.wireDefaults?.color || state.wireDefaults.color,
-    tracer: j.wireDefaults?.tracer || '',
-    gauge: j.wireDefaults?.gauge || state.wireDefaults.gauge,
-    lengthMm: j.wireDefaults?.lengthMm || ''
-  };
-  state.wires.forEach(w=>{w.wp=w.wp||[];w.lengthMm=w.lengthMm||'';});
+  // type-check and coerce every rendered field first — see validate.js
+  const d=normalizeDiagram(j, state.wireDefaults);
+  state.comps=d.comps;state.wires=d.wires;state.counters=d.counters;state.nextId=d.nextId;
+  state.showWireLabels=d.showWireLabels;
+  state.wireDefaults=d.wireDefaults;
 
   // Ensure ECU components have proper pins initialized
   state.comps.forEach(c=>{
@@ -30,31 +27,20 @@ export function applyLoadedData(j){
       const old=Array.isArray(c.pins)?c.pins:[];
       c.pins=LIB.ecu.getPins(c.pinCount);
       c.pins.forEach((p,i)=>{ if(old[i]&&old[i].label) p.label=old[i].label; });
-      c.pinStates=c.pinStates&&typeof c.pinStates==='object'?c.pinStates:{};
+      c.pinStates=c.pinStates||{};
     }
     if(c.type==='schildknappe'){
       c.ioCount=c.ioCount||4;
       const old=Array.isArray(c.pins)?c.pins.filter(p=>p.io):[];
       c.pins=LIB.schildknappe.getPins(c.ioCount);
       c.pins.filter(p=>p.io).forEach((p,i)=>{ if(old[i]&&old[i].label) p.label=old[i].label; });
-      c.pinStates=c.pinStates&&typeof c.pinStates==='object'?c.pinStates:{};
+      c.pinStates=c.pinStates||{};
     }
     if(c.type==='switch'){
       c.on=!!c.on;
     }
     if(c.type==='ignition'){
-      c.keyPos=Math.max(0,Math.min(3,+c.keyPos||0));
-    }
-    if(c.type==='note'){
-      c.noteText = c.noteText ?? 'Note';
-      c.bgColor = c.bgColor || '#1e1a2e';
-      c.textColor = c.textColor || '#b39ddb';
-      c.hAlign = c.hAlign || 'center';
-      c.vAlign = c.vAlign || 'middle';
-      c.noteW = Math.max(80, +c.noteW || 200);
-      c.noteH = Math.max(40, +c.noteH || 60);
-      c.noteFont = c.noteFont || 'inherit';
-      c.noteFontSize = Math.max(8, +c.noteFontSize || 11);
+      c.keyPos=c.keyPos||0;
     }
     if(LIB[c.type]?.variants && !c.variant){
       // older saves predate the variant dropdown — treat their existing
@@ -62,8 +48,17 @@ export function applyLoadedData(j){
       // overwriting it with the first preset's name
       c.variant='custom';
     }
-    if(shouldApplyPresetPins(c,LIB[c.type])){
+    // components with a configurable pin count (ecu/schildknappe, handled
+    // above via getHeight) derive their pins from that count, not from a
+    // variant id — running shouldApplyPresetPins for them too would pass
+    // c.variant (undefined, or a string like "generic") into a function
+    // that expects a pin count, silently corrupting their pin layout
+    if(!LIB[c.type]?.getHeight && shouldApplyPresetPins(c,LIB[c.type])){
       c.pins=LIB[c.type].getPins(c.variant);
+    }
+    if(typeof c.customDraw === 'string'){
+      // untrusted markup from a shared/loaded save file — see sanitize.js
+      c.customDraw = sanitizeSvgFragment(c.customDraw) || null;
     }
   });
 
