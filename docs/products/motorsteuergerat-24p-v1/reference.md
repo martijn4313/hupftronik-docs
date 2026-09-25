@@ -427,12 +427,30 @@ Behind the protection stage, onboard LDO regulators derive two logic rails:
 
 | Rail | Used for | Exposed on |
 | :--- | :--- | :--- |
-| $+5\ \text{V}$ | Sensor reference, output buffer, RS232 header | Pin C5, header H3 |
-| $+3.3\ \text{V}$ | MCU, logic | Header H2 (SWD) |
+| $+5\ \text{V}$ | Sensor supply, output buffer, RS232 header | Pin C5, header H3 |
+| $+3.3\ \text{V}$ | MCU, logic, ADC reference (`VDDA`, through a ferrite bead) | Header H2 (SWD) |
 
-The $+5\ \text{V}$ rail on pin C5 is the **sensor reference** — power your TPS, MAP/T-MAP, and other
-5 V sensors from it (never from switched +12 V through a divider) so sensor readings stay ratiometric
-with the ADC reference.
+The $+5\ \text{V}$ rail on pin C5 is the **sensor supply** — power your TPS, MAP/T-MAP, and other
+5 V sensors from it, never from switched +12 V through a divider, so they get a regulated, quiet
+supply.
+
+The ADC does **not** measure against this rail. The `STM32F405RGT6` in its 64-pin package has no
+separate `VREF+` pin: the ADC reference is `VDDA`, fed from the $+3.3\ \text{V}$ LDO through a
+$120\ \Omega$ @ 100 MHz ferrite bead and decoupled with $10\ \mu\text{F}$ + $100\ \text{nF}$. The bead
+keeps high-frequency noise off the reference but leaves its DC value unchanged, so the reference is
+as accurate as the 3.3 V LDO.
+
+!!! warning "Sensor readings are not ratiometric"
+    Sensors powered from or pulled up to $+5\ \text{V}$ — `TPS`, `MAP`/`T-MAP`, `CLT`, `IAT` —
+    produce an output proportional to that rail, but the ADC converts it against the independent
+    3.3 V rail. Any deviation of the $+5\ \text{V}$ rail therefore shows up directly as sensor error:
+    a rail 2 % low reads as roughly 2 % less throttle, pressure, or thermistor voltage. Sources
+    include the LDO's initial tolerance, load on the rail, and harness faults such as a chafed
+    sensor-supply wire.
+
+    The board does not measure the $+5\ \text{V}$ rail itself. To check it on a running system,
+    jumper C5 to a spare analog input (`SPARE_IN1`, pin C2) in the harness and log that channel —
+    the input's divider scales 5 V into the ADC range like any other sensor.
 
 !!! note "Sensor rail current budget: to be confirmed"
     The rated external load of the $+5\ \text{V}$ sensor rail has not been published yet. A typical
@@ -504,9 +522,10 @@ H3 is a bare $2.54\ \text{mm}$ pin header — as with H1, you supply the mating 
 board's point of view, so cross them at the far end: the ECU's `TX` drives the other device's `RX`.
 Only the two data lines and ground are brought out, so the link is a three-wire connection with no
 hardware flow control — configure the far end for none. Take the ground for the link from H3 pin 4
-rather than from a chassis point. The +5 V pin is the same rail as the sensor reference on C5, whose
-external current budget is not yet published (see [§7.2](#72-internal-rails)) — power only a small
-accessory from it.
+rather than from a chassis point. The +5 V pin is the same rail as the sensor supply on C5, and
+sensor readings are not ratiometric (see [§7.2](#72-internal-rails)): current drawn here shifts
+every 5 V sensor's reading, and the rail's external current budget is not yet published. Power only
+a small accessory from it.
 
 !!! note "Baud rate: to be confirmed"
     The baud rate the firmware uses on this port has not been published yet and will be documented
