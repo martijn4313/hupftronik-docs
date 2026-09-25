@@ -56,6 +56,18 @@ export function hasPins(pins){
   return Array.isArray(pins) && pins.length>0;
 }
 
+/* the pins a component instance actually has. Every reader (render,
+   hit-testing, wire routing, simulation, Mermaid export) must go through
+   this so they can't disagree about which pins exist: instance pins when
+   present, else the preset for its pin count / variant, else the
+   library's static pins. Read-only — never assigns into c. */
+export function pinsOf(c){
+  const d=LIB[c.type];
+  if(hasPins(c.pins)) return c.pins;
+  if(d?.getPins) return d.getPins(d.getHeight ? (c.ioCount ?? c.pinCount ?? 4) : c.variant);
+  return d?.pins || [];
+}
+
 export function shouldApplyPresetPins(c,d){
   return !!d?.getPins && (!hasPins(c.pins) || c.variant!=='custom');
 }

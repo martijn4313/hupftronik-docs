@@ -10,7 +10,7 @@
    simulate() directly, without the late-bound state.hooks indirection
    that used to work around their circular import. */
 
-import { LIB, IGN_CONDUCT } from './components.js';
+import { IGN_CONDUCT, pinsOf } from './components.js';
 import { state } from './state.js';
 
 const SIM_LOADS = new Set(['motor','pump','lamp','injector','valve',
@@ -170,7 +170,7 @@ export function simulate(){
   }
   for(const c of state.comps){
     if(SIM_LOADS.has(c.type)){
-      const pins=c.pins||LIB[c.type].pins;
+      const pins=pinsOf(c);
       const hasPlus=pins.some(p=>plus.seen[key(c.id,p.id)]);
       const hasMinus=pins.some(p=>minus.seen[key(c.id,p.id)]);
       if(hasPlus&&hasMinus) litCompIds[c.id]=true;

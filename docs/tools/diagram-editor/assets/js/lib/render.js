@@ -1,7 +1,7 @@
 /* ============ rendering layer ============ */
 
 import { DIN, GAUGES } from './constants.js';
-import { LIB, IGN_POSITIONS, hasPins } from './components.js';
+import { LIB, IGN_POSITIONS, hasPins, pinsOf } from './components.js';
 import { state, esc, comp } from './state.js';
 import { pinPos, pinAxis, textAnchor, textOffset, wirePath, routePoints, pinTextAnchor, pinTextOffset } from './geometry.js';
 import { historyPush } from './history.js';
@@ -100,12 +100,7 @@ export function renderComps(){
   compsL.innerHTML = state.comps.map(c=>{
     const d=LIB[c.type];
 
-    /* pins are normally populated on load (applyLoadedData) and on
-       creation (addComp); this is a read-only fallback for the rare edge
-       case where an instance reaches render without them, computed
-       locally so render never mutates state as a side effect */
-    const compPins = hasPins(c.pins) ? c.pins
-      : (d.getPins ? d.getPins(d.getHeight ? (c.ioCount ?? c.pinCount ?? 4) : c.variant) : d.pins);
+    const compPins = pinsOf(c);
 
     // Calculate component dimensions
     let compW = d.w;

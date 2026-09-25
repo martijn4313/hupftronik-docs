@@ -1,15 +1,14 @@
 /* ============ mermaid.js tests ============
    mermaid.js is deliberately kept free of DOM dependencies (see its own
    header comment) so it can be exercised headlessly, against a plain
-   in-memory diagram, without a browser. Run with:
-     node docs/tools/diagram-editor/assets/js/test/mermaid.test.mjs
-   or, for the whole test/ directory:
-     node --test docs/tools/diagram-editor/assets/js/test */
+   in-memory diagram, without a browser. Run from the repo root with:
+     node --test tests/diagram-editor/*.test.mjs
+   (also run in CI by .github/workflows/test.yml) */
 
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { state, freshState } from '../lib/state.js';
-import { buildMermaid } from '../lib/mermaid.js';
+import { state, freshState } from '../../docs/tools/diagram-editor/assets/js/lib/state.js';
+import { buildMermaid } from '../../docs/tools/diagram-editor/assets/js/lib/mermaid.js';
 
 function reset(){
   Object.assign(state, freshState());

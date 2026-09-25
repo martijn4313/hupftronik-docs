@@ -1,12 +1,11 @@
 /* ============ geometry.js tests ============
-   Pure/DOM-free, so these run headlessly. Run with:
-     node docs/tools/diagram-editor/assets/js/test/geometry.test.mjs
-   or, for the whole test/ directory:
-     node --test docs/tools/diagram-editor/assets/js/test */
+   Pure/DOM-free, so these run headlessly. Run from the repo root with:
+     node --test tests/diagram-editor/*.test.mjs
+   (also run in CI by .github/workflows/test.yml) */
 
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { snap, routePoints, wirePath } from '../lib/geometry.js';
+import { snap, routePoints, wirePath } from '../../docs/tools/diagram-editor/assets/js/lib/geometry.js';
 
 test('snap rounds to the nearest 10px grid line', () => {
   assert.equal(snap(4), 0);

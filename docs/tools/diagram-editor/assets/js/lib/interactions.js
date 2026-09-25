@@ -1,6 +1,6 @@
 /* ============ interactions layer ============ */
 
-import { LIB } from './components.js';
+import { LIB, pinsOf } from './components.js';
 import { GAUGES, DIN } from './constants.js';
 import { state, uid, comp, esc, clipboard, setClipboard } from './state.js';
 import { snap, pinPos, localPointFromWorld, textAnchor, pinTextAnchor, pinTextOffset } from './geometry.js';
@@ -124,9 +124,7 @@ function nearestPinCandidate(p,exclude){
   let best = null;
   let bestDist = maxDist;
   for(const c of state.comps){
-    const d = LIB[c.type];
-    const pins = c.pins || d.pins;
-    for(const pin of pins){
+    for(const pin of pinsOf(c)){
       if(exclude && exclude.compId===c.id && exclude.pinId===pin.id) continue;
       const pp = pinPos(c,pin.id);
       const dist = Math.hypot(pp.x-p.x, pp.y-p.y);
@@ -247,7 +245,7 @@ export function setupSVGHandlers(){
     const compId=+pin.dataset.comp, pinId=pin.dataset.pin;
     if(state.trace){
       const c=comp(compId);
-      const pinObj = c && (c.pins||[]).find(p=>p.id===pinId);
+      const pinObj = c && pinsOf(c).find(p=>p.id===pinId);
       const drivable = c && (c.type==='ecu' || (c.type==='schildknappe' && pinObj && pinObj.io));
       if(drivable){
         /* interactive mode: clicking a drivable pin cycles off → +12V → GND
@@ -383,7 +381,7 @@ svg.addEventListener('pointermove',e=>{
     const local=localPointFromWorld(drag.c,p);
     if(drag.role==='pin'){
       const d=LIB[drag.c.type];
-      const pin=(drag.c.pins||d.pins).find(pin=>pin.id===drag.pinId);
+      const pin=pinsOf(drag.c).find(pin=>pin.id===drag.pinId);
       const base=pinTextAnchor(d,pin,drag.c);
       drag.c.pinTextOffsets = drag.c.pinTextOffsets || {};
       drag.c.pinTextOffsets[drag.pinId]={

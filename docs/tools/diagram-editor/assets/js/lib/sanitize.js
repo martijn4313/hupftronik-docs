@@ -6,40 +6,53 @@
    io.js). Unlike inert <script> tags, event-handler attributes on
    elements inserted via innerHTML (onerror, onload, ...) DO fire as the
    markup is parsed, so a crafted fragment can run arbitrary JS the
-   moment a diagram is opened. This strips that class of payload before
-   a fragment is ever stored in c.customDraw.
+   moment a diagram is opened.
+
+   This is an allowlist, not a blocklist: only plain SVG drawing elements
+   in the SVG namespace survive. That matters because <title> and <desc>
+   are HTML integration points — their content is parsed as HTML, so a
+   blocklist lets e.g. <desc><meta http-equiv="refresh" …></desc> through,
+   which navigates the page when inserted. Requiring the SVG namespace
+   drops any HTML element nested that way.
 
    Parsing happens inside an inert <template>: template content is never
    part of the active document, so images don't load and nothing
    executes while we inspect and clean the tree. */
 
-const FORBIDDEN_TAGS = new Set([
-  'script','foreignobject','iframe','embed','object',
-  'use','animate','animatetransform','animatemotion','set','style'
+const SVG_NS = 'http://www.w3.org/2000/svg';
+
+/* lowercased localName; everything else (script, foreignObject, use,
+   image, a, animate*, set, style, …) is removed together with its
+   content */
+const ALLOWED_TAGS = new Set([
+  'g','path','rect','circle','ellipse','line','polyline','polygon',
+  'text','tspan','title','desc','defs','symbol','marker','clippath','mask',
+  'lineargradient','radialgradient','stop','pattern'
 ]);
 
 const URL_ATTRS = new Set(['href','xlink:href']);
 
-function isSafeUrl(value){
+/* url(...) references other than same-document "#id" ones would let a
+   symbol fetch external resources (tracking) via fill/style/etc. */
+const EXTERNAL_URL_REF = /url\s*\(\s*(?!['"]?\s*#)/i;
+
+function isSafeHref(value){
   const v = String(value ?? '').trim();
-  // only same-document fragment references (e.g. "#some-gradient") are
-  // allowed; everything else (http:, data:, javascript:, relative paths)
-  // is rejected since these symbols are meant to be self-contained
+  // only same-document fragment references (e.g. "#some-gradient")
   return v === '' || v.startsWith('#');
 }
 
 function clean(el){
   for(const child of [...el.children]){
-    const tag = child.tagName.toLowerCase();
-    if(FORBIDDEN_TAGS.has(tag)){
+    if(child.namespaceURI !== SVG_NS || !ALLOWED_TAGS.has(child.localName.toLowerCase())){
       child.remove();
       continue;
     }
     for(const attr of [...child.attributes]){
       const name = attr.name.toLowerCase();
-      if(name.startsWith('on')){
-        child.removeAttribute(attr.name);
-      } else if(URL_ATTRS.has(name) && !isSafeUrl(attr.value)){
+      if(name.startsWith('on')
+        || (URL_ATTRS.has(name) && !isSafeHref(attr.value))
+        || EXTERNAL_URL_REF.test(attr.value)){
         child.removeAttribute(attr.name);
       }
     }
@@ -48,14 +61,14 @@ function clean(el){
 }
 
 /**
- * Returns a cleaned copy of an inline-SVG fragment with scripting hooks
- * removed: <script>/<foreignObject>/<iframe>/... elements, "on*" event
- * handler attributes, and href/xlink:href values other than local
- * "#..." fragment references. Returns '' if the fragment doesn't parse.
+ * Returns a cleaned copy of an inline-SVG fragment: only allowlisted SVG
+ * drawing elements are kept, with "on*" event handlers, non-"#" hrefs
+ * and external url(...) references removed. Returns '' if nothing
+ * usable remains.
  */
 export function sanitizeSvgFragment(svgFragment){
   const template = document.createElement('template');
-  template.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg">${svgFragment}</svg>`;
+  template.innerHTML = `<svg xmlns="${SVG_NS}">${svgFragment}</svg>`;
   const root = template.content.querySelector('svg');
   if(!root) return '';
   clean(root);
