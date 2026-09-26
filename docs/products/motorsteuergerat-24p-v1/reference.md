@@ -427,12 +427,30 @@ Behind the protection stage, onboard LDO regulators derive two logic rails:
 
 | Rail | Used for | Exposed on |
 | :--- | :--- | :--- |
-| $+5\ \text{V}$ | Sensor reference, output buffer, RS232 header | Pin C5, header H3 |
-| $+3.3\ \text{V}$ | MCU, logic | Header H2 (SWD) |
+| $+5\ \text{V}$ | Sensor supply, output buffer, RS232 transceiver and header | Pin C5, header H3 |
+| $+3.3\ \text{V}$ | MCU, logic, ADC reference (`VDDA`, through a ferrite bead) | Header H2 (SWD) |
 
-The $+5\ \text{V}$ rail on pin C5 is the **sensor reference** — power your TPS, MAP/T-MAP, and other
-5 V sensors from it (never from switched +12 V through a divider) so sensor readings stay ratiometric
-with the ADC reference.
+The $+5\ \text{V}$ rail on pin C5 is the **sensor supply** — power your TPS, MAP/T-MAP, and other
+5 V sensors from it, never from switched +12 V through a divider, so they get a regulated, quiet
+supply.
+
+The ADC does **not** measure against this rail. The `STM32F405RGT6` in its 64-pin package has no
+separate `VREF+` pin: the ADC reference is `VDDA`, fed from the $+3.3\ \text{V}$ LDO through a
+$120\ \Omega$ @ 100 MHz ferrite bead and decoupled with $10\ \mu\text{F}$ + $100\ \text{nF}$. The bead
+keeps high-frequency noise off the reference but leaves its DC value unchanged, so the reference is
+as accurate as the 3.3 V LDO.
+
+!!! warning "Sensor readings are not ratiometric"
+    Sensors powered from or pulled up to $+5\ \text{V}$ — `TPS`, `MAP`/`T-MAP`, `CLT`, `IAT` —
+    produce an output proportional to that rail, but the ADC converts it against the independent
+    3.3 V rail. Any deviation of the $+5\ \text{V}$ rail therefore shows up directly as sensor error:
+    a rail 2 % low reads as roughly 2 % less throttle, pressure, or thermistor voltage. Sources
+    include the LDO's initial tolerance, load on the rail, and harness faults such as a chafed
+    sensor-supply wire.
+
+    The board does not measure the $+5\ \text{V}$ rail itself. To check it on a running system,
+    jumper C5 to a spare analog input (`SPARE_IN1`, pin C2) in the harness and log that channel —
+    the input's divider scales 5 V into the ADC range like any other sensor.
 
 !!! note "Sensor rail current budget: to be confirmed"
     The rated external load of the $+5\ \text{V}$ sensor rail has not been published yet. A typical
@@ -444,8 +462,8 @@ with the ADC reference.
 
 ## 8. Communications and Storage
 
-Three ways in and out of the board: CAN for the rest of the vehicle, the SD card for the logs, and
-USB for you.
+Four ways in and out of the board: CAN for the rest of the vehicle, the SD card for the logs, USB
+for you, and an RS232 serial header for anything that stays wired in permanently.
 
 ### 8.1. CAN bus
 
@@ -471,6 +489,53 @@ analyzed on a PC with the same tools used for TunerStudio datalogs.
 The full-speed USB port serves three roles: the TunerStudio/console connection during setup and
 tuning, firmware console access, and DFU firmware flashing (see
 [Flashing the PCB](setup/flashing.md#2-usb-dfu-bootloader)).
+
+### 8.4. RS232 serial
+
+A serial port is brought out on the 4-pin expansion header **H3**. Where USB is the connection
+for a laptop during setup, H3 suits a link that stays wired in: a dash display, a telemetry module,
+or an RS232 Bluetooth adapter tucked behind the trim. What the port actually carries depends on how
+your firmware build configures it.
+
+| H3 pin | Signal | Direction |
+| :--- | :--- | :--- |
+| 1 | `+5V` | Output (from the $+5\ \text{V}$ rail, see [§7.2](#72-internal-rails)) |
+| 2 | `RS232_RX` | Input to the ECU |
+| 3 | `RS232_TX` | Output from the ECU |
+| 4 | `GND` | Ground reference |
+
+An onboard **SP3232E** transceiver, powered from the $+5\ \text{V}$ rail, sits between H3 and the
+MCU's `USART1` on `PB6` (TX) / `PB7` (RX) — the pins your firmware's board configuration must assign
+to this port. It puts **true RS232 line levels** on pins 2 and 3 — at least $\pm 5\ \text{V}$ into
+a $3\ \text{k}\Omega$ load, not the MCU's logic levels — and gives both pins ESD protection up to
+$\pm 15\ \text{kV}$ (human-body model). On the MCU side, a divider (`R55` $1.8\ \text{k}\Omega$ /
+`R53` $3.3\ \text{k}\Omega$) scales the receiver's 5 V output down to $3.24\ \text{V}$ for the RX pin.
+
+Wire H3 to a genuine RS232 device (a USB-to-RS232 cable, a DE-9 dash or telemetry module,
+an RS232-level Bluetooth adapter), and give a TTL peripheral its own RS232 converter rather than
+connecting it straight to the header.
+
+!!! danger "Do not wire a 3.3 V or 5 V TTL adapter directly to H3"
+    The cheap FTDI/CP2102/CH340 breakout boards and TTL Bluetooth modules (HC-05 and friends)
+    expect logic levels. RS232 idles at a *negative* voltage and swings across zero with inverted
+    logic, so one of these on `RS232_TX` sees its input driven below ground: at best it reads
+    garbage, at worst the input is damaged. To identify the pin before wiring anything, measure
+    against `GND` with the board powered and the firmware running — `RS232_TX` rests at a
+    negative voltage.
+
+H3 is a bare $2.54\ \text{mm}$ pin header — as with H1, you supply the mating connector (see the
+[product overview](24p_v1_overview.md#4-expansion-headers)). `RX` and `TX` are named from the
+board's point of view, so cross them at the far end: the ECU's `TX` drives the other device's `RX`.
+Only the two data lines and ground are brought out, so the link is a three-wire connection with no
+hardware flow control — configure the far end for none. Take the ground for the link from H3 pin 4
+rather than from a chassis point. The +5 V pin is the same rail as the sensor supply on C5, and
+sensor readings are not ratiometric (see [§7.2](#72-internal-rails)): current drawn here shifts
+every 5 V sensor's reading, and the rail's external current budget is not yet published. Power only
+a small accessory from it.
+
+**Baud rate** is a firmware setting, not a property of the hardware: the firmware you run (rusEFI or
+Speeduino) sets it, and the far end must match. The transceiver handles the standard rates up to
+115 200 baud with margin.
 
 ---
 
