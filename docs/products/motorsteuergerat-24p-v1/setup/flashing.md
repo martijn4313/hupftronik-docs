@@ -27,7 +27,9 @@ There are two flashing options:
       power the board is *to be confirmed* — do not rely on it.
     - Verify the firmware file matches the STM32F405 and your intended firmware (rusEFI or
       Speeduino) — flashing the wrong image can leave the board unresponsive until re-flashed.
-    - The position of the boot switch on the PCB is *to be confirmed*; a photo will be added here.
+    - The boot switch is `SW1`, the only push-button on the board — see the
+      [board layout](../24p_v1_overview.md#5-board-layout). (Its BOOT0 function is *to be
+      confirmed* against the schematic.)
 
 1. Hold the boot switch, then switch on the board's power. The MCU checks the switch only at
    power-up, so you can release it once the board is powered.

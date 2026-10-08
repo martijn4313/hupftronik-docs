@@ -15,6 +15,7 @@ The site uses smaller derived copies:
 | `settings-dark.png` | `assets/icons/cards/tools.png` |
 | `info_reading.png` | `assets/icons/cards/getting-started.png` |
 | `welcome_banner.png` | not used yet |
+| `board-photo-24p-v1.jpg` | `products/motorsteuergerat-24p-v1/board-layout.webp` (annotated, cropped, 1100 px wide) |
 
 When you change a source image, regenerate its derived copies: WebP at quality 85–90 for
 illustrations shown on pages, and PNG scaled to display size (128 px high for cards) for small

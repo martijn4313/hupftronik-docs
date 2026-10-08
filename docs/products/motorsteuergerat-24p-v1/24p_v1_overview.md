@@ -29,8 +29,8 @@ timing, and auxiliary outputs through a single sealed 24-pin connector.
 | Power input | 12 V automotive nominal — KL30 (permanent) + KL15 (switched) |
 | SD card logging | Native SDIO — supports Class 10 cards |
 | CAN bus | 1× ISO 11898 channel |
-| USB | Full-speed — console access and firmware flashing |
-| Status LEDs | *To be confirmed* — count, colors, and the meaning of each blink pattern will be documented here |
+| USB | Full-speed, USB-C connector (`USB1`) — console access and firmware flashing |
+| Status LEDs | Four, labeled `LED_3V3`, `LED_5V`, `LED_TR_1`, and `LED_TR_2` (see [§5](#5-board-layout)). What each one indicates is *to be confirmed* |
 
 **Mechanical and environmental**
 
@@ -135,10 +135,10 @@ The PCB includes three simple 4-pin headers for board-level expansion and servic
 
 | Header | Pin | Signal | Description |
 |---|---|---|---|
-| H1 | 1 | SPARE_IN5_RAW | Spare digital-only input 5 |
-|  | 2 | SPARE_IN4_RAW | Spare digital-only input 4 |
-|  | 3 | SPARE_IN3_RAW | Spare digital-only input 3 |
-|  | 4 | GND | Ground reference |
+| H1 | 1 | GND | Ground reference |
+|  | 2 | SPARE_IN3_RAW | Spare digital-only input 3 |
+|  | 3 | SPARE_IN4_RAW | Spare digital-only input 4 |
+|  | 4 | SPARE_IN5_RAW | Spare digital-only input 5 |
 | H2 | 1 | +3V3 | 3.3 V power for SWD adapter |
 |  | 2 | SWDIO | SWD data line |
 |  | 3 | SWCLK | SWD clock line |
@@ -150,9 +150,13 @@ The PCB includes three simple 4-pin headers for board-level expansion and servic
 
 These headers make it easy to attach external debugging, logging or custom input wiring without modifying the main 24-pin automotive connector.
 
+On the board, H3, H2, and H1 sit in one row of twelve 2.54 mm pins (see [§5](#5-board-layout)). Pin 1
+of each header is the square pad, and every pin is labeled on the silkscreen — check those labels
+before you connect anything.
+
 `SPARE_IN3`–`SPARE_IN5` on H1 accept 0–5 V **digital** signals only. Unlike `SPARE_IN1`/`SPARE_IN2`
-on the main connector, they cannot be used as analog inputs. You'll need to add your own connector to H1 to wire them up (a standard 2.54 mm
-pin header mates directly).
+on the main connector, they cannot be used as analog inputs. To wire them up, you supply the mating
+2.54 mm connector.
 
 !!! warning "H1 spare inputs have no dedicated ESD protection"
     Unlike the main connector's analog inputs (protected by a TVS diode — see the
@@ -162,7 +166,30 @@ pin header mates directly).
 
 ---
 
-## 5. Next steps
+## 5. Board layout
+
+![Motorsteuergerät 24P V1 board in its aluminum enclosure, with numbered markers on the main components](board-layout.webp)
+
+*Motorsteuergerät 24P V1 in its enclosure, main connector at the bottom. Numbers match the table
+below.*
+
+| # | Part | Silkscreen | Notes |
+|---|---|---|---|
+| 1 | Main 24-pin connector | `CN1` | Pinout in [§3](#3-io-overview). Shown here without the connector fitted. |
+| 2 | Push-button | `SW1` | The only push-button on the board — the boot switch used for [DFU flashing](setup/flashing.md#2-usb-dfu-bootloader). Its BOOT0 function is *to be confirmed* against the schematic. |
+| 3 | USB-C port | `USB1` | TunerStudio connection and DFU flashing. |
+| 4 | microSD card slot | `CARD1` | SD logging — see [Hardware Reference §8.2](reference.md#82-sd-card-logging). |
+| 5 | Header H3 — RS232 | `H3` | `GROUND`, `RS232_TX`, `RS232_RX`, `5V OUT` — see [§4](#4-expansion-headers). |
+| 6 | Header H2 — SWD | `H2` | `GROUND`, `SWCLK`, `SWDIO`, `3V3 OUT` — for an ST-Link programmer. |
+| 7 | Header H1 — spare inputs | `H1` | `SPARE_IN5`, `SPARE_IN4`, `SPARE_IN3`, `GROUND`. |
+| 8 | Supply LEDs | `LED_3V3`, `LED_5V` | Function *to be confirmed*. |
+| 9 | Status LEDs | `LED_TR_1`, `LED_TR_2` | Function *to be confirmed*. |
+| 10 | Injector driver MOSFETs | `INJ CH1`, `INJ CH2` | `IRLR2905` drivers for `INJ1_DRV`/`INJ2_DRV` — see [Hardware Reference §4](reference.md#4-outputs-low-side-drivers). |
+| 11 | Microcontroller | `U17` | `STM32F405RGT6`. |
+
+---
+
+## 6. Next steps
 
 To build with this board, start at [Setup and Commissioning](setup/index.md) — the roadmap for
 the numbered **Getting Started** pages. For circuit-level detail behind the specifications above,

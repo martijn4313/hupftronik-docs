@@ -110,7 +110,7 @@ Why do we enforce strict ground separation and offer no reverse-polarity hand-ho
 
 Once powered, perform a staged verification. Do not rush this process.
 
-1.  **Heartbeat:** Observe the status LEDs to confirm the MCU successfully executes code (LED meanings are *to be confirmed* — see the [Specifications](../24p_v1_overview.md#2-specifications)).
+1.  **Heartbeat:** Observe the status LEDs to confirm the MCU successfully executes code (the four LEDs are shown in the [board layout](../24p_v1_overview.md#5-board-layout); what each indicates is *to be confirmed*).
 2.  **Communication:** Connect to your tuning dashboard (e.g., TunerStudio) to verify active serial/USB communication.
 3.  **Diagnostics:** Check for fault LEDs or software-reported configuration errors in the dashboard.
 4.  **I/O Validation:** Verify that sensor inputs read within expected physical ranges (e.g., Coolant and Intake Air temperatures match ambient) and trigger outputs correctly in test mode.
