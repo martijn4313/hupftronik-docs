@@ -23,17 +23,18 @@ There are two flashing options:
 ## 2. USB DFU bootloader
 
 !!! note "Before you flash"
-    - Power the board from its normal supply (`VIN_KL30` and `VIN_KL15`). Whether USB alone can
-      power the board is *to be confirmed* — do not rely on it.
+    - The USB cable can power the board on its own: with `VIN_KL15` off (below about 6 V), the
+      board runs from USB. You can also power it from its normal supply (`VIN_KL15`) while
+      flashing.
     - Verify the firmware file matches the STM32F405 and your intended firmware (rusEFI or
       Speeduino) — flashing the wrong image can leave the board unresponsive until re-flashed.
-    - The boot switch is `SW1`, the only push-button on the board — see the
-      [board layout](../24p_v1_overview.md#5-board-layout). (Its BOOT0 function is *to be
-      confirmed* against the schematic.)
+    - The boot switch is `SW1` — see the [board layout](../24p_v1_overview.md#5-board-layout). It
+      pulls the MCU's `BOOT0` pin high while pressed.
 
-1. Hold the boot switch, then switch on the board's power. The MCU checks the switch only at
-   power-up, so you can release it once the board is powered.
-2. Connect the board to your computer over USB. It should appear as an STM32 DFU device.
+1. Hold the boot switch, then power the board — plugging in the USB cable is enough. The MCU
+   checks the switch only at power-up, so you can release it once the board is powered.
+2. If you powered the board from `VIN_KL15`, connect the USB cable now. The board should appear
+   on your computer as an STM32 DFU device.
 3. Upload the firmware file to address `0x08000000` using either STM32CubeProgrammer or `dfu-util`:
 
    ```bash
@@ -62,7 +63,8 @@ Requirements:
    - H2 pin 4 `GND` → ST-Link GND
    - H2 pin 1 `+3V3` → ST-Link target-voltage sense (VTref / VAPP)
 
-   Power the board from its normal supply while flashing.
+   Power the board while flashing — over USB or from `VIN_KL15`. The ST-Link's VTref pin only
+   senses the board voltage; it does not power the board.
 2. Open STM32CubeProgrammer.
 3. Select **ST-LINK** as the connection type.
 4. Click **Connect**.

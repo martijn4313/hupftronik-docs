@@ -248,7 +248,7 @@ The STM32 runs 3.3 V logic, but the MOSFETs switch harder and faster with 5 V on
 ### 4.3. Safety & Protection
 
 #### 4.3.1. Active Clamping (Injectors & Solenoids)
-When an injector or solenoid turns off, its collapsing field generates a high-voltage inductive kickback. Injector channels use **active clamping**: a Zener feedback path from Drain to Gate.
+When an injector or solenoid turns off, its collapsing field generates a high-voltage inductive kickback. Every low-side channel — injectors, IAC, boost, fuel pump relay, and fan relay — uses **active clamping**: a 36 V Zener (`BZT52C36S`) in series with a `1N4148WS` diode, from Drain to Gate.
 
 *   **How it works:** Once the turn-off spike exceeds the Zener threshold, current feeds back into the Gate and turns the MOSFET slightly back on (into its linear region), dissipating the inductive energy safely in the silicon.
 
@@ -257,9 +257,11 @@ When an injector or solenoid turns off, its collapsing field generates a high-vo
 *   **Energy handling:** The MOSFET die absorbs the energy spike instead of small discrete diodes.
 
 #### 4.3.2. The IAC Diode (Freewheeling)
-The Idle Air Control (`IAC`) channel uses continuous high-frequency PWM. Active clamping would continuously heat the MOSFET.
+The Idle Air Control (`IAC`) channel uses continuous high-frequency PWM. If the active clamp absorbed every turn-off pulse, it would continuously heat the MOSFET.
 
-Instead, its dedicated **freewheeling diode** to $+12\ \text{V}$ recirculates turn-off current at a low voltage drop ($\approx 0.7\ \text{V}$), keeping the MOSFET cool during sustained PWM.
+So the `IAC` channel also has a dedicated **freewheeling diode** (`D9`, `SS210`) from its drain to `VIN_KL30` (pin B1). It recirculates turn-off current at a low voltage drop before the clamp threshold is reached, keeping the MOSFET cool during sustained PWM. The diode returns to `VIN_KL30`, so keep `VIN_KL30` connected when you drive an IAC valve.
+
+This diode is also why the `IAC` channel cannot drive an injector as built: recirculating current holds the injector open and slows its closing. The schematic notes that removing `D9` lets the channel drive an injector — see [Wiring guide §4.3.4](wiring.md#434-4-channel-sequential-using-the-iac-channel-hardware-modification).
 
 #### 4.3.3. Clamp & Switching Verification
 Both the active clamp and the turn-on performance have been verified on the oscilloscope.
@@ -406,29 +408,39 @@ For a Hall-effect **cam sync** sensor, use one of the general-purpose inputs `SP
 inductive spikes, and can surge during a load dump. The board takes that abuse on two protected
 inputs (see the [IO Overview](24p_v1_overview.md#3-io-overview)):
 
-*   **`VIN_KL30`** — permanent battery feed. Keeps the MCU alive for functions that must survive
-    ignition-off (e.g. closing the SD log file cleanly).
-*   **`VIN_KL15`** — ignition-switched feed. Tells the ECU the key is on.
+*   **`VIN_KL15`** — ignition-switched feed and the **main power input**. Everything on the board
+    runs from it: the 5 V and 3.3 V rails, the MCU, sensors, and drivers.
+*   **`VIN_KL30`** — permanent battery feed. It powers only a separate low-current 3.3 V regulator
+    (`GM7333`, output `+3V3_VBAT`) for the MCU's battery-backed domain (real-time clock and backup
+    registers). It does not keep the rest of the board running after ignition-off.
+
+A third source exists for the bench: **USB**. When `VIN_KL15` is below about 6 V, a switch
+(`Q1`/`Q2`) powers the board's 5 V rail from the USB connector, so you can flash and configure the
+board with only a USB cable connected.
 
 ### 7.1. Input protection
 
-Both inputs pass through a series Schottky diode (reverse-polarity protection) followed by a TVS
-crowbar that clips short transient surges before they reach the voltage regulators — the standard
-load-dump environment of an automotive supply is handled by design.
+Both inputs pass through a series Schottky diode (`SS210`, reverse-polarity protection) followed by
+a TVS diode (`SMBJ24A`) that clips short transient surges before they reach the voltage regulators.
+`VIN_KL15` also passes an LC filter (`L2`, $3.3\ \mu\text{H}$, with bulk capacitance) ahead of the
+5 V regulator.
 
 !!! warning "Long-term overvoltage"
-    The TVS crowbar protects against *short* surges. Sustained overvoltage above $\sim 20\ \text{V}$
+    The TVS diode protects against *short* surges. Sustained overvoltage above $\sim 20\ \text{V}$
     (e.g. a 24 V jump start) overheats the TVS diode until it fails short. See the
     [product overview](24p_v1_overview.md#3-io-overview).
 
 ### 7.2. Internal rails
 
-Behind the protection stage, onboard LDO regulators derive two logic rails:
+Behind the protection stage, two regulators derive the logic rails:
 
-| Rail | Used for | Exposed on |
-| :--- | :--- | :--- |
-| $+5\ \text{V}$ | Sensor supply, output buffer, RS232 transceiver and header | Pin C5, header H3 |
-| $+3.3\ \text{V}$ | MCU, logic, ADC reference (`VDDA`, through a ferrite bead) | Header H2 (SWD) |
+| Rail | Regulator | Used for | Exposed on |
+| :--- | :--- | :--- | :--- |
+| $+5\ \text{V}$ | `TPS560430` switching (buck) regulator from `VIN_KL15`, or USB on the bench | Sensor supply, output buffer, ignition driver, CAN and RS232 transceivers | Pin C5, header H3 |
+| $+3.3\ \text{V}$ | `AMS1117-3.3` LDO, fed from $+5\ \text{V}$ | MCU, logic, ADC reference (`VDDA`, through a ferrite bead) | Header H2 (SWD) |
+| `+3V3_VBAT` | `GM7333` low-quiescent LDO from `VIN_KL30` | MCU backup domain (`VBAT`) only | — |
+
+Two LEDs show the rails: `LED_5V` and `LED_3V3` light when their rail is present.
 
 The $+5\ \text{V}$ rail on pin C5 is the **sensor supply** — power your TPS, MAP/T-MAP, and other
 5 V sensors from it, never from switched +12 V through a divider, so they get a regulated, quiet
@@ -445,17 +457,19 @@ as accurate as the 3.3 V LDO.
     produce an output proportional to that rail, but the ADC converts it against the independent
     3.3 V rail. Any deviation of the $+5\ \text{V}$ rail therefore shows up directly as sensor error:
     a rail 2 % low reads as roughly 2 % less throttle, pressure, or thermistor voltage. Sources
-    include the LDO's initial tolerance, load on the rail, and harness faults such as a chafed
+    include the 5 V regulator's tolerance, load on the rail, and harness faults such as a chafed
     sensor-supply wire.
 
-    The board does not measure the $+5\ \text{V}$ rail itself. To check it on a running system,
+    The board measures battery voltage (`BAT_SENS`, MCU pin `PA4`, taken from `VIN_KL15` after the
+    input filter through a $10\ \text{k}\Omega$ / $1.8\ \text{k}\Omega$ divider), but not the
+    $+5\ \text{V}$ rail itself. To check it on a running system,
     jumper C5 to a spare analog input (`SPARE_IN1`, pin C2) in the harness and log that channel —
     the input's divider scales 5 V into the ADC range like any other sensor.
 
 !!! note "Sensor rail current budget: to be confirmed"
     The rated external load of the $+5\ \text{V}$ sensor rail has not been published yet. A typical
-    passive-sensor set (TPS + T-MAP + CLT) draws only a few tens of mA and is well within any LDO's
-    capability; for unusual loads (many active sensors, external modules), wait for the confirmed
+    passive-sensor set (TPS + T-MAP + CLT) draws only a few tens of mA and is well within the
+    regulator's capability; for unusual loads (many active sensors, external modules), wait for the confirmed
     figure or measure your own draw.
 
 ---
@@ -467,15 +481,15 @@ for you, and an RS232 serial header for anything that stays wired in permanently
 
 ### 8.1. CAN bus
 
-One ISO 11898 CAN channel is exposed on pins A5/B5 (`CAN_H`/`CAN_L`). See
+One ISO 11898 CAN channel is exposed on pins A5/B5 (`CAN_H`/`CAN_L`), driven by a `TJA1051T/3`
+transceiver on MCU pins `PB8` (RX) / `PB9` (TX). See
 [CAN Bus Basics](../../guides/setup/canbus-basics.md) for wiring and termination rules.
 
-!!! note "Onboard termination: to be confirmed"
-    Whether the board fits an onboard $120\ \Omega$ terminator (and whether it is jumper-selectable)
-    will be documented here once confirmed against the production board. Until then, verify your bus
-    empirically: with everything powered off, measure across `CAN_H`/`CAN_L` — $\approx 60\ \Omega$
-    means two terminators are present (correct), $\approx 120\ \Omega$ means only one, open means
-    none.
+!!! warning "Fixed onboard termination"
+    The board has a fixed $120\ \Omega$ terminator (`R54`) across `CAN_H`/`CAN_L`. It is not
+    switchable, so place the 24P V1 at one physical end of the bus. With everything powered off,
+    measure across `CAN_H`/`CAN_L`: $\approx 60\ \Omega$ means two terminators (correct),
+    $\approx 120\ \Omega$ means only the ECU's, and $\approx 40\ \Omega$ means one too many.
 
 ### 8.2. SD card logging
 

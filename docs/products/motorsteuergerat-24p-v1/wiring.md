@@ -112,7 +112,7 @@ To run a 4-cylinder engine in fully sequential mode, you need four independent i
 When mapping the final two injector channels, three strict rules apply:
 
 1. The Thermal Rule: you can only drive one injector per `NCE6005AS` package.
-2. The `Q3` (IAC) Restriction: package `Q3` houses the `FANRELAY_DRV` and `IAC` channels. Because the `IAC` channel has a dedicated freewheeling diode, it cannot be used for an injector without causing slow closing and unstable fueling.
+2. The `Q3` (IAC) Restriction: package `Q3` houses the `FANRELAY_DRV` and `IAC` channels. Because the `IAC` channel has a dedicated freewheeling diode (`D9`), it cannot be used for an injector as built — the diode causes slow closing and unstable fueling. Removing `D9` lifts this restriction (see [§4.3.4](#434-4-channel-sequential-using-the-iac-channel-hardware-modification)).
 3. The IAC Downgrade: while `IAC` cannot drive an injector, it can be repurposed to drive a standard low-current relay such as a fan or fuel pump.
 
 #### 4.3.2. Valid Sequential Combinations
@@ -163,6 +163,33 @@ This configuration is workable, but it places a continuous PWM load on `Q3` alon
     - Add a small adhesive heatsink to `Q3` if the IAC is used continuously.
     - Use high-impedance injectors only, typically above $10\,\Omega$, to keep current draw modest.
     - Make sure the IAC valve is healthy and not shorting or drawing excessive current.
+
+#### 4.3.4. 4-Channel Sequential Using the IAC Channel (Hardware Modification)
+
+The board's schematic notes a third option: drive injector 3 from the `IAC` channel after removing
+its freewheeling diode `D9`. Every low-side channel already has an active clamp
+([Hardware Reference §4.3](reference.md#43-safety-protection)), so without `D9` the `IAC` channel
+closes an injector as quickly as the other channels. This keeps both relay outputs, at the cost of
+idle control and boost control.
+
+!!! danger "Removing D9 is a permanent board modification"
+    Desolder `D9` only if this board will never drive an idle air control valve again. Without it,
+    an IAC valve's PWM energy goes into the MOSFET's active clamp and heats `Q3`. Note the change on
+    the board so the next owner knows.
+
+| Sequential Channel | Board Output | Driver package | Function / Load Status |
+| :--- | :--- | :--- | :--- |
+| Injector 1 | `INJ1` | `IRLR2905` (dedicated) | Dedicated injector driver |
+| Injector 2 | `INJ2` | `IRLR2905` (dedicated) | Dedicated injector driver |
+| Injector 3 | `IAC` | `Q3` (`NCE6005AS`) | Repurposed to drive injector 3 — `D9` removed |
+| Injector 4 | `BOOST` | `Q4` (`NCE6005AS`) | Repurposed to drive injector 4 |
+| Fan relay | `FANRELAY_DRV` | `Q3` (`NCE6005AS`) | Remains a standard fan relay |
+| Fuel pump relay | `FPRELAY_DRV` | `Q4` (`NCE6005AS`) | Remains a standard fuel pump relay |
+
+This routing still drives one injector per `NCE6005AS` package. If you need boost control, use
+`FPRELAY_DRV` as injector 4 instead and switch the fuel pump relay independently, as described in
+[§4.3.2](#432-valid-sequential-combinations). Whichever channels you use, adjust the pin mapping in
+your firmware to match.
 
 ---
 

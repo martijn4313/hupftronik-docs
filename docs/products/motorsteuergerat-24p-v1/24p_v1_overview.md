@@ -25,12 +25,12 @@ timing, and auxiliary outputs through a single sealed 24-pin connector.
 | Flash | 1 MB |
 | RAM | 192 KB |
 | Firmware project | rusEFI or Speeduino (open-source, GPLv3) |
-| Connector | FCI 24-pin sealed automotive (3×8 grid) |
-| Power input | 12 V automotive nominal — KL30 (permanent) + KL15 (switched) |
+| Connector | FCI 24-pin sealed automotive (3×8 grid), schematic part `HCCPHPE24BKA90F` |
+| Power input | 12 V automotive nominal — KL15 (switched, main power) + KL30 (permanent, MCU backup domain only); USB powers the board on the bench |
 | SD card logging | Native SDIO — supports Class 10 cards |
 | CAN bus | 1× ISO 11898 channel |
-| USB | Full-speed, micro-USB connector (`USB1`) — console access and firmware flashing |
-| Status LEDs | Four, labeled `LED_3V3`, `LED_5V`, `LED_TR_1`, and `LED_TR_2` (see [§5](#5-board-layout)). What each one indicates is *to be confirmed* |
+| USB | Full-speed, micro-USB connector (`USB1`) — console access, firmware flashing, and bench power |
+| Status LEDs | Four (see [§5](#5-board-layout)): `LED_5V` and `LED_3V3` show the supply rails; `LED_TR_1`/`LED_TR_2` are driven by MCU pins `PC4`/`PC5`, so what they show depends on your firmware configuration |
 
 **Mechanical and environmental**
 
@@ -61,7 +61,7 @@ descriptions.*
 
 !!! success "Reverse polarity and surge protection"
     `VIN_KL30` and `VIN_KL15` are protected +12 V inputs. A series Schottky diode blocks reversed
-    polarity, and a TVS crowbar behind it clips short voltage surges before they reach the voltage
+    polarity, and a TVS diode behind it clips short voltage surges before they reach the voltage
     regulators.
 
 !!! warning "Long term overvoltage"
@@ -72,8 +72,8 @@ descriptions.*
 
 | Pin | Signal | Description |
 |---|---|---|
-| A1 | VIN_KL15 | Ignition-switched +12 V input |
-| B1 | VIN_KL30 | Permanent battery +12 V input |
+| A1 | VIN_KL15 | Ignition-switched +12 V — main power input |
+| B1 | VIN_KL30 | Permanent battery +12 V — MCU backup domain and IAC freewheel return |
 | C5 | +5V | Sensor reference voltage output |
 | B8, C1 | GND | Ground (×2) — the only ground pins; sensor grounds also return here |
 
@@ -176,14 +176,14 @@ below.*
 | # | Part | Silkscreen | Notes |
 |---|---|---|---|
 | 1 | Main 24-pin connector | `CN1` | Pinout in [§3](#3-io-overview). Shown here without the connector fitted. |
-| 2 | Push-button | `SW1` | The only push-button on the board — the boot switch used for [DFU flashing](setup/flashing.md#2-usb-dfu-bootloader). Its BOOT0 function is *to be confirmed* against the schematic. |
-| 3 | Micro-USB port | `USB1` | TunerStudio connection and DFU flashing. |
+| 2 | Boot switch | `SW1` | Pulls the MCU's `BOOT0` pin high while pressed — hold it at power-up for [DFU flashing](setup/flashing.md#2-usb-dfu-bootloader). There is no reset button. |
+| 3 | Micro-USB port | `USB1` | TunerStudio connection, DFU flashing, and bench power. |
 | 4 | microSD card slot | `CARD1` | SD logging — see [Hardware Reference §8.2](reference.md#82-sd-card-logging). |
 | 5 | Header H3 — RS232 | `H3` | `GROUND`, `RS232_TX`, `RS232_RX`, `5V OUT` — see [§4](#4-expansion-headers). |
 | 6 | Header H2 — SWD | `H2` | `GROUND`, `SWCLK`, `SWDIO`, `3V3 OUT` — for an ST-Link programmer. |
 | 7 | Header H1 — spare inputs | `H1` | `SPARE_IN5`, `SPARE_IN4`, `SPARE_IN3`, `GROUND`. |
-| 8 | Supply LEDs | `LED_3V3`, `LED_5V` | Function *to be confirmed*. |
-| 9 | Status LEDs | `LED_TR_1`, `LED_TR_2` | Function *to be confirmed*. |
+| 8 | Supply LEDs | `LED_3V3`, `LED_5V` | Light when the 3.3 V and 5 V rails are present. |
+| 9 | Status LEDs | `LED_TR_1`, `LED_TR_2` | Driven by MCU pins `PC4`/`PC5`; their meaning depends on your firmware configuration. |
 | 10 | Injector driver MOSFETs | `INJ CH1`, `INJ CH2` | `IRLR2905` drivers for `INJ1_DRV`/`INJ2_DRV` — see [Hardware Reference §4](reference.md#4-outputs-low-side-drivers). |
 | 11 | Microcontroller | `U17` | `STM32F405RGT6`. |
 
