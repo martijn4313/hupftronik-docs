@@ -1,4 +1,4 @@
-![Hüpftronik Welcome Banner](./assets/pictures/hupftronik_lowress.png)
+![Hüpftronik Welcome Banner](./assets/pictures/hupftronik_banner.webp)
 
 # Welcome
 

@@ -32,6 +32,7 @@ Pushes to `main` are built and published to GitHub Pages automatically by
 - `includes/` — reusable snippet files pulled into pages via `pymdownx.snippets`
   (`--8<-- "filename.md"`)
 - `mkdocs.yml` — site configuration and navigation tree
+- `artwork/` — full-resolution logo and mascot sources (not deployed); see its README for the derived web copies
 - `docs/stylesheets/extra.css` — theme customization and content-status badges
 
 ## Content conventions
