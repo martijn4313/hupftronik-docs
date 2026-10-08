@@ -249,3 +249,65 @@ img[src*="../assets/icons"] {
   width: auto;
   margin-bottom: 0.4rem;
 }
+
+/* --- Light scheme ---
+   The rules above are tuned for the dark (slate) scheme. These overrides keep text readable on the
+   light background: darker blue for headings, labels and code, and darker badge colors. */
+[data-md-color-scheme="default"] {
+  --md-accent-fg-color: #D84300;
+  --md-typeset-a-color: #0067B8;
+}
+
+[data-md-color-scheme="default"] .md-typeset h1,
+[data-md-color-scheme="default"] .md-typeset h2,
+[data-md-color-scheme="default"] .md-typeset h3,
+[data-md-color-scheme="default"] .md-typeset h4,
+[data-md-color-scheme="default"] code {
+  color: #0067B8;
+}
+
+[data-md-color-scheme="default"] pre code {
+  color: var(--md-code-fg-color);
+}
+
+[data-md-color-scheme="default"] .md-nav__title,
+[data-md-color-scheme="default"] .md-nav__item--section > .md-nav__link,
+[data-md-color-scheme="default"] .md-nav__item--nested > label.md-nav__link {
+  color: #0067B8 !important;
+}
+
+[data-md-color-scheme="default"] .md-nav__link--active {
+  color: #B33800 !important;
+  background: rgba(255, 85, 0, 0.12) !important;
+  box-shadow: none !important;
+}
+
+[data-md-color-scheme="default"] .content-status.status-reviewed {
+  color: #0067B8;
+}
+[data-md-color-scheme="default"] .content-status.status-reviewed::before {
+  background-color: #0067B8;
+}
+[data-md-color-scheme="default"] .content-status.status-ai-draft {
+  color: #8A5A00;
+  background: rgba(255, 190, 0, 0.15);
+}
+[data-md-color-scheme="default"] .content-status.status-ai-draft::before {
+  background-color: #8A5A00;
+}
+[data-md-color-scheme="default"] .content-status.status-in-review {
+  color: #A84E00;
+}
+[data-md-color-scheme="default"] .content-status.status-in-review::before {
+  background-color: #A84E00;
+}
+
+/* --- Announcement bar --- */
+.md-banner {
+  background: #FF5500;
+  color: #0F141C;
+}
+.md-banner a {
+  color: #0F141C;
+  text-decoration: underline;
+}

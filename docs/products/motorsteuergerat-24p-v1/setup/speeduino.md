@@ -15,7 +15,7 @@ the source, per that comparison.
 
 ## 1. Prerequisites
 
-- A flashed board (see [Flashing the PCB](flashing.md)).
+- A flashed board (see [Flashing the Board](flashing.md)).
 - TunerStudio installed and connected — see [Software Tools §2](../../../guides/tuning/software.md#2-connecting-to-the-board).
 - Your engine's decisions from [Planning your build](../../../guides/setup/planning.md) settled
   (injector count/impedance, throttle type, sensor selection).

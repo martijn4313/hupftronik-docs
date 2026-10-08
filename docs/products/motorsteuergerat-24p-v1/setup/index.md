@@ -64,7 +64,7 @@ Hüpftronik intentionally does not ship a prebuilt firmware image for this board
 **Quick Scan: Flashing Requirements**
 
 *   **Target MCU:** STM32F405RGT6
-*   **Interface:** USB DFU or SWD ($3.3\text{V}$ logic) — see [Flashing the PCB](flashing.md)
+*   **Interface:** USB DFU or SWD ($3.3\text{V}$ logic) — see [Flashing the Board](flashing.md)
 *   **Toolchain:** ARM GCC (rusEFI) or Arduino IDE / PlatformIO (Speeduino)
 
 **The Workflow**
@@ -77,7 +77,7 @@ Hüpftronik intentionally does not ship a prebuilt firmware image for this board
 4.  Connect the board: a USB cable for DFU flashing, or an SWD adapter on header H2.
 5.  Execute the flash command and verify the sequence completes without errors.
 
-See [Flashing the PCB](flashing.md) for the concrete DFU and SWD flashing steps once you have a
+See [Flashing the Board](flashing.md) for the concrete DFU and SWD flashing steps once you have a
 compiled `.bin` or `.hex` file.
 
 ---

@@ -56,7 +56,7 @@ If these checks pass, raise the current limit only as needed for the later test 
 
 ### 2.3. Check firmware and communication
 
-- Enter DFU mode and flash the board by following [Flashing the PCB](setup/flashing.md).
+- Enter DFU mode and flash the board by following [Flashing the Board](setup/flashing.md).
 - Power-cycle and confirm that the firmware starts normally.
 - Connect TunerStudio and check that live values update.
 - If you plan to use SD logging, create a short log and confirm that it can be read.

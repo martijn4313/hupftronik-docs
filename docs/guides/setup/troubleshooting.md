@@ -14,10 +14,10 @@ go to fix it.
 
 | Symptom | Likely cause | Fix |
 |---|---|---|
-| Board not detected over USB in DFU mode | Boot switch not held during power-up, or released too early | Repeat the DFU entry sequence in [Flashing the PCB §2](../../products/motorsteuergerat-24p-v1/setup/flashing.md#2-usb-dfu-bootloader), holding the switch through power-up |
-| STM32CubeProgrammer can't connect via SWD | Wrong SWD wiring, or board unpowered | Recheck SWCLK/SWDIO/GND/3V3 wiring against [Flashing the PCB §3](../../products/motorsteuergerat-24p-v1/setup/flashing.md#3-flashing-with-stm32cubeprogrammer) |
+| Board not detected over USB in DFU mode | Boot switch not held during power-up, or released too early | Repeat the DFU entry sequence in [Flashing the Board §2](../../products/motorsteuergerat-24p-v1/setup/flashing.md#2-usb-dfu-bootloader), holding the switch through power-up |
+| STM32CubeProgrammer can't connect via SWD | Wrong SWD wiring, or board unpowered | Recheck SWCLK/SWDIO/GND/3V3 wiring against [Flashing the Board §3](../../products/motorsteuergerat-24p-v1/setup/flashing.md#3-flashing-with-stm32cubeprogrammer) |
 | Programming completes but board doesn't run | Wrong firmware file for your hardware revision, or flash didn't verify | Re-flash with `-v` (verify) set, confirm you built for the correct hardware profile |
-| Board unresponsive after a full chip erase | Erase clears everything, including any working firmware | Re-flash a known-good firmware file immediately — see the warning in [Flashing the PCB §2](../../products/motorsteuergerat-24p-v1/setup/flashing.md#2-usb-dfu-bootloader) |
+| Board unresponsive after a full chip erase | Erase clears everything, including any working firmware | Re-flash a known-good firmware file immediately — see the warning in [Flashing the Board §2](../../products/motorsteuergerat-24p-v1/setup/flashing.md#2-usb-dfu-bootloader) |
 
 ---
 

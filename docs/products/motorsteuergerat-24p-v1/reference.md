@@ -488,7 +488,7 @@ analyzed on a PC with the same tools used for TunerStudio datalogs.
 
 The full-speed USB port serves three roles: the TunerStudio/console connection during setup and
 tuning, firmware console access, and DFU firmware flashing (see
-[Flashing the PCB](setup/flashing.md#2-usb-dfu-bootloader)).
+[Flashing the Board](setup/flashing.md#2-usb-dfu-bootloader)).
 
 ### 8.4. RS232 serial
 
