@@ -52,6 +52,13 @@ timing, and auxiliary outputs through a single sealed 24-pin connector.
 
 All 24 pins are on a single FCI connector, arranged in three rows (A, B, C) of eight columns.
 
+![Motorsteuergerät 24P V1 connector pinout: 3 × 8 grid color-coded by function](connector-pinout.svg)
+
+*Logical pin layout, color-coded by function. This is not a face view: which way the grid appears
+when you look at the connector (wire side or mating side) is* to be confirmed *— check the pin
+numbers moulded into the housing before you crimp. The tables below list the same pins with
+descriptions.*
+
 !!! success "Reverse polarity and surge protection"
     `VIN_KL30` and `VIN_KL15` are protected +12 V inputs. A series Schottky diode blocks reversed
     polarity, and a TVS crowbar behind it clips short voltage surges before they reach the voltage

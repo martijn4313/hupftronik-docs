@@ -1,0 +1,202 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1144 420" width="1144" height="420" font-family="Roboto, 'Segoe UI', Helvetica, Arial, sans-serif" role="img" aria-labelledby="title desc">
+<title id="title">Motorsteuergerät 24P V1 connector pinout</title>
+<desc id="desc">Logical 3 by 8 grid of the 24-pin FCI connector, rows A to C and columns 1 to 8, each pin labelled with its signal name and color-coded by function.</desc>
+<rect width="1144" height="420" rx="10" fill="#0F141C"/>
+<text x="44" y="32" fill="#EAEFF8" font-size="18" font-weight="700">Motorsteuergerät 24P V1 — 24-pin connector</text>
+<text x="44" y="50" fill="#8C98A6" font-size="12">Logical layout (rows A–C × columns 1–8) — not a face view</text>
+<text x="108.0" y="78" fill="#8C98A6" font-size="12" text-anchor="middle">1</text>
+<text x="244.0" y="78" fill="#8C98A6" font-size="12" text-anchor="middle">2</text>
+<text x="380.0" y="78" fill="#8C98A6" font-size="12" text-anchor="middle">3</text>
+<text x="516.0" y="78" fill="#8C98A6" font-size="12" text-anchor="middle">4</text>
+<text x="652.0" y="78" fill="#8C98A6" font-size="12" text-anchor="middle">5</text>
+<text x="788.0" y="78" fill="#8C98A6" font-size="12" text-anchor="middle">6</text>
+<text x="924.0" y="78" fill="#8C98A6" font-size="12" text-anchor="middle">7</text>
+<text x="1060.0" y="78" fill="#8C98A6" font-size="12" text-anchor="middle">8</text>
+<text x="28" y="127.0" fill="#8C98A6" font-size="16" font-weight="700" text-anchor="middle">A</text>
+<g><title>A1: VIN_KL15 — Ignition +12 V</title>
+<rect x="44" y="84" width="128" height="74" rx="6" fill="#1A212D" stroke="#FF4D4D" stroke-width="1.5"/>
+<rect x="44" y="84" width="6" height="74" rx="3" fill="#FF4D4D"/>
+<text x="58" y="104" fill="#FF4D4D" font-size="12" font-weight="700">A1</text>
+<text x="58" y="126" fill="#EAEFF8" font-size="13" font-weight="700" font-family="ui-monospace, Consolas, Menlo, monospace">VIN_KL15</text>
+<text x="58" y="145" fill="#8C98A6" font-size="11">Ignition +12 V</text>
+</g>
+<g><title>A2: LAMBDA_RAW — O₂ sensor</title>
+<rect x="180" y="84" width="128" height="74" rx="6" fill="#1A212D" stroke="#0099FF" stroke-width="1.5"/>
+<rect x="180" y="84" width="6" height="74" rx="3" fill="#0099FF"/>
+<text x="194" y="104" fill="#0099FF" font-size="12" font-weight="700">A2</text>
+<text x="194" y="126" fill="#EAEFF8" font-size="13" font-weight="700" font-family="ui-monospace, Consolas, Menlo, monospace">LAMBDA_RAW</text>
+<text x="194" y="145" fill="#8C98A6" font-size="11">O₂ sensor</text>
+</g>
+<g><title>A3: IAT_RAW — Intake air temp</title>
+<rect x="316" y="84" width="128" height="74" rx="6" fill="#1A212D" stroke="#0099FF" stroke-width="1.5"/>
+<rect x="316" y="84" width="6" height="74" rx="3" fill="#0099FF"/>
+<text x="330" y="104" fill="#0099FF" font-size="12" font-weight="700">A3</text>
+<text x="330" y="126" fill="#EAEFF8" font-size="13" font-weight="700" font-family="ui-monospace, Consolas, Menlo, monospace">IAT_RAW</text>
+<text x="330" y="145" fill="#8C98A6" font-size="11">Intake air temp</text>
+</g>
+<g><title>A4: CLT_RAW — Coolant temp</title>
+<rect x="452" y="84" width="128" height="74" rx="6" fill="#1A212D" stroke="#0099FF" stroke-width="1.5"/>
+<rect x="452" y="84" width="6" height="74" rx="3" fill="#0099FF"/>
+<text x="466" y="104" fill="#0099FF" font-size="12" font-weight="700">A4</text>
+<text x="466" y="126" fill="#EAEFF8" font-size="13" font-weight="700" font-family="ui-monospace, Consolas, Menlo, monospace">CLT_RAW</text>
+<text x="466" y="145" fill="#8C98A6" font-size="11">Coolant temp</text>
+</g>
+<g><title>A5: CAN_H — CAN high</title>
+<rect x="588" y="84" width="128" height="74" rx="6" fill="#1A212D" stroke="#3DDC84" stroke-width="1.5"/>
+<rect x="588" y="84" width="6" height="74" rx="3" fill="#3DDC84"/>
+<text x="602" y="104" fill="#3DDC84" font-size="12" font-weight="700">A5</text>
+<text x="602" y="126" fill="#EAEFF8" font-size="13" font-weight="700" font-family="ui-monospace, Consolas, Menlo, monospace">CAN_H</text>
+<text x="602" y="145" fill="#8C98A6" font-size="11">CAN high</text>
+</g>
+<g><title>A6: BOOST_DRV — Boost solenoid</title>
+<rect x="724" y="84" width="128" height="74" rx="6" fill="#1A212D" stroke="#FF8C1A" stroke-width="1.5"/>
+<rect x="724" y="84" width="6" height="74" rx="3" fill="#FF8C1A"/>
+<text x="738" y="104" fill="#FF8C1A" font-size="12" font-weight="700">A6</text>
+<text x="738" y="126" fill="#EAEFF8" font-size="13" font-weight="700" font-family="ui-monospace, Consolas, Menlo, monospace">BOOST_DRV</text>
+<text x="738" y="145" fill="#8C98A6" font-size="11">Boost solenoid</text>
+</g>
+<g><title>A7: IAC_DRV — Idle air valve</title>
+<rect x="860" y="84" width="128" height="74" rx="6" fill="#1A212D" stroke="#FF8C1A" stroke-width="1.5"/>
+<rect x="860" y="84" width="6" height="74" rx="3" fill="#FF8C1A"/>
+<text x="874" y="104" fill="#FF8C1A" font-size="12" font-weight="700">A7</text>
+<text x="874" y="126" fill="#EAEFF8" font-size="13" font-weight="700" font-family="ui-monospace, Consolas, Menlo, monospace">IAC_DRV</text>
+<text x="874" y="145" fill="#8C98A6" font-size="11">Idle air valve</text>
+</g>
+<g><title>A8: INJ2_DRV — Injector 2</title>
+<rect x="996" y="84" width="128" height="74" rx="6" fill="#1A212D" stroke="#FF8C1A" stroke-width="1.5"/>
+<rect x="996" y="84" width="6" height="74" rx="3" fill="#FF8C1A"/>
+<text x="1010" y="104" fill="#FF8C1A" font-size="12" font-weight="700">A8</text>
+<text x="1010" y="126" fill="#EAEFF8" font-size="13" font-weight="700" font-family="ui-monospace, Consolas, Menlo, monospace">INJ2_DRV</text>
+<text x="1010" y="145" fill="#8C98A6" font-size="11">Injector 2</text>
+</g>
+<text x="28" y="209.0" fill="#8C98A6" font-size="16" font-weight="700" text-anchor="middle">B</text>
+<g><title>B1: VIN_KL30 — Battery +12 V</title>
+<rect x="44" y="166" width="128" height="74" rx="6" fill="#1A212D" stroke="#FF4D4D" stroke-width="1.5"/>
+<rect x="44" y="166" width="6" height="74" rx="3" fill="#FF4D4D"/>
+<text x="58" y="186" fill="#FF4D4D" font-size="12" font-weight="700">B1</text>
+<text x="58" y="208" fill="#EAEFF8" font-size="13" font-weight="700" font-family="ui-monospace, Consolas, Menlo, monospace">VIN_KL30</text>
+<text x="58" y="227" fill="#8C98A6" font-size="11">Battery +12 V</text>
+</g>
+<g><title>B2: SPARE_IN2 — Spare input 2</title>
+<rect x="180" y="166" width="128" height="74" rx="6" fill="#1A212D" stroke="#0099FF" stroke-width="1.5"/>
+<rect x="180" y="166" width="6" height="74" rx="3" fill="#0099FF"/>
+<text x="194" y="186" fill="#0099FF" font-size="12" font-weight="700">B2</text>
+<text x="194" y="208" fill="#EAEFF8" font-size="13" font-weight="700" font-family="ui-monospace, Consolas, Menlo, monospace">SPARE_IN2</text>
+<text x="194" y="227" fill="#8C98A6" font-size="11">Spare input 2</text>
+</g>
+<g><title>B3: MAP_RAW — Manifold pressure</title>
+<rect x="316" y="166" width="128" height="74" rx="6" fill="#1A212D" stroke="#0099FF" stroke-width="1.5"/>
+<rect x="316" y="166" width="6" height="74" rx="3" fill="#0099FF"/>
+<text x="330" y="186" fill="#0099FF" font-size="12" font-weight="700">B3</text>
+<text x="330" y="208" fill="#EAEFF8" font-size="13" font-weight="700" font-family="ui-monospace, Consolas, Menlo, monospace">MAP_RAW</text>
+<text x="330" y="227" fill="#8C98A6" font-size="11">Manifold pressure</text>
+</g>
+<g><title>B4: VR_NEG — VR sensor (−)</title>
+<rect x="452" y="166" width="128" height="74" rx="6" fill="#1A212D" stroke="#B48CFF" stroke-width="1.5"/>
+<rect x="452" y="166" width="6" height="74" rx="3" fill="#B48CFF"/>
+<text x="466" y="186" fill="#B48CFF" font-size="12" font-weight="700">B4</text>
+<text x="466" y="208" fill="#EAEFF8" font-size="13" font-weight="700" font-family="ui-monospace, Consolas, Menlo, monospace">VR_NEG</text>
+<text x="466" y="227" fill="#8C98A6" font-size="11">VR sensor (−)</text>
+</g>
+<g><title>B5: CAN_L — CAN low</title>
+<rect x="588" y="166" width="128" height="74" rx="6" fill="#1A212D" stroke="#3DDC84" stroke-width="1.5"/>
+<rect x="588" y="166" width="6" height="74" rx="3" fill="#3DDC84"/>
+<text x="602" y="186" fill="#3DDC84" font-size="12" font-weight="700">B5</text>
+<text x="602" y="208" fill="#EAEFF8" font-size="13" font-weight="700" font-family="ui-monospace, Consolas, Menlo, monospace">CAN_L</text>
+<text x="602" y="227" fill="#8C98A6" font-size="11">CAN low</text>
+</g>
+<g><title>B6: FPRELAY_DRV — Fuel pump relay</title>
+<rect x="724" y="166" width="128" height="74" rx="6" fill="#1A212D" stroke="#FF8C1A" stroke-width="1.5"/>
+<rect x="724" y="166" width="6" height="74" rx="3" fill="#FF8C1A"/>
+<text x="738" y="186" fill="#FF8C1A" font-size="12" font-weight="700">B6</text>
+<text x="738" y="208" fill="#EAEFF8" font-size="13" font-weight="700" font-family="ui-monospace, Consolas, Menlo, monospace">FPRELAY_DRV</text>
+<text x="738" y="227" fill="#8C98A6" font-size="11">Fuel pump relay</text>
+</g>
+<g><title>B7: FANRELAY_DRV — Fan relay</title>
+<rect x="860" y="166" width="128" height="74" rx="6" fill="#1A212D" stroke="#FF8C1A" stroke-width="1.5"/>
+<rect x="860" y="166" width="6" height="74" rx="3" fill="#FF8C1A"/>
+<text x="874" y="186" fill="#FF8C1A" font-size="12" font-weight="700">B7</text>
+<text x="874" y="208" fill="#EAEFF8" font-size="13" font-weight="700" font-family="ui-monospace, Consolas, Menlo, monospace">FANRELAY_DRV</text>
+<text x="874" y="227" fill="#8C98A6" font-size="11">Fan relay</text>
+</g>
+<g><title>B8: GND — Ground</title>
+<rect x="996" y="166" width="128" height="74" rx="6" fill="#1A212D" stroke="#9AA4AE" stroke-width="1.5"/>
+<rect x="996" y="166" width="6" height="74" rx="3" fill="#9AA4AE"/>
+<text x="1010" y="186" fill="#9AA4AE" font-size="12" font-weight="700">B8</text>
+<text x="1010" y="208" fill="#EAEFF8" font-size="13" font-weight="700" font-family="ui-monospace, Consolas, Menlo, monospace">GND</text>
+<text x="1010" y="227" fill="#8C98A6" font-size="11">Ground</text>
+</g>
+<text x="28" y="291.0" fill="#8C98A6" font-size="16" font-weight="700" text-anchor="middle">C</text>
+<g><title>C1: GND — Ground</title>
+<rect x="44" y="248" width="128" height="74" rx="6" fill="#1A212D" stroke="#9AA4AE" stroke-width="1.5"/>
+<rect x="44" y="248" width="6" height="74" rx="3" fill="#9AA4AE"/>
+<text x="58" y="268" fill="#9AA4AE" font-size="12" font-weight="700">C1</text>
+<text x="58" y="290" fill="#EAEFF8" font-size="13" font-weight="700" font-family="ui-monospace, Consolas, Menlo, monospace">GND</text>
+<text x="58" y="309" fill="#8C98A6" font-size="11">Ground</text>
+</g>
+<g><title>C2: SPARE_IN1 — Spare input 1</title>
+<rect x="180" y="248" width="128" height="74" rx="6" fill="#1A212D" stroke="#0099FF" stroke-width="1.5"/>
+<rect x="180" y="248" width="6" height="74" rx="3" fill="#0099FF"/>
+<text x="194" y="268" fill="#0099FF" font-size="12" font-weight="700">C2</text>
+<text x="194" y="290" fill="#EAEFF8" font-size="13" font-weight="700" font-family="ui-monospace, Consolas, Menlo, monospace">SPARE_IN1</text>
+<text x="194" y="309" fill="#8C98A6" font-size="11">Spare input 1</text>
+</g>
+<g><title>C3: TPS_RAW — Throttle position</title>
+<rect x="316" y="248" width="128" height="74" rx="6" fill="#1A212D" stroke="#0099FF" stroke-width="1.5"/>
+<rect x="316" y="248" width="6" height="74" rx="3" fill="#0099FF"/>
+<text x="330" y="268" fill="#0099FF" font-size="12" font-weight="700">C3</text>
+<text x="330" y="290" fill="#EAEFF8" font-size="13" font-weight="700" font-family="ui-monospace, Consolas, Menlo, monospace">TPS_RAW</text>
+<text x="330" y="309" fill="#8C98A6" font-size="11">Throttle position</text>
+</g>
+<g><title>C4: VR_POS — VR sensor (+)</title>
+<rect x="452" y="248" width="128" height="74" rx="6" fill="#1A212D" stroke="#B48CFF" stroke-width="1.5"/>
+<rect x="452" y="248" width="6" height="74" rx="3" fill="#B48CFF"/>
+<text x="466" y="268" fill="#B48CFF" font-size="12" font-weight="700">C4</text>
+<text x="466" y="290" fill="#EAEFF8" font-size="13" font-weight="700" font-family="ui-monospace, Consolas, Menlo, monospace">VR_POS</text>
+<text x="466" y="309" fill="#8C98A6" font-size="11">VR sensor (+)</text>
+</g>
+<g><title>C5: +5V — Sensor supply</title>
+<rect x="588" y="248" width="128" height="74" rx="6" fill="#1A212D" stroke="#FFBE00" stroke-width="1.5"/>
+<rect x="588" y="248" width="6" height="74" rx="3" fill="#FFBE00"/>
+<text x="602" y="268" fill="#FFBE00" font-size="12" font-weight="700">C5</text>
+<text x="602" y="290" fill="#EAEFF8" font-size="13" font-weight="700" font-family="ui-monospace, Consolas, Menlo, monospace">+5V</text>
+<text x="602" y="309" fill="#8C98A6" font-size="11">Sensor supply</text>
+</g>
+<g><title>C6: IGN2_OUT — Ignition 2</title>
+<rect x="724" y="248" width="128" height="74" rx="6" fill="#1A212D" stroke="#FF5FB0" stroke-width="1.5"/>
+<rect x="724" y="248" width="6" height="74" rx="3" fill="#FF5FB0"/>
+<text x="738" y="268" fill="#FF5FB0" font-size="12" font-weight="700">C6</text>
+<text x="738" y="290" fill="#EAEFF8" font-size="13" font-weight="700" font-family="ui-monospace, Consolas, Menlo, monospace">IGN2_OUT</text>
+<text x="738" y="309" fill="#8C98A6" font-size="11">Ignition 2</text>
+</g>
+<g><title>C7: IGN1_OUT — Ignition 1</title>
+<rect x="860" y="248" width="128" height="74" rx="6" fill="#1A212D" stroke="#FF5FB0" stroke-width="1.5"/>
+<rect x="860" y="248" width="6" height="74" rx="3" fill="#FF5FB0"/>
+<text x="874" y="268" fill="#FF5FB0" font-size="12" font-weight="700">C7</text>
+<text x="874" y="290" fill="#EAEFF8" font-size="13" font-weight="700" font-family="ui-monospace, Consolas, Menlo, monospace">IGN1_OUT</text>
+<text x="874" y="309" fill="#8C98A6" font-size="11">Ignition 1</text>
+</g>
+<g><title>C8: INJ1_DRV — Injector 1</title>
+<rect x="996" y="248" width="128" height="74" rx="6" fill="#1A212D" stroke="#FF8C1A" stroke-width="1.5"/>
+<rect x="996" y="248" width="6" height="74" rx="3" fill="#FF8C1A"/>
+<text x="1010" y="268" fill="#FF8C1A" font-size="12" font-weight="700">C8</text>
+<text x="1010" y="290" fill="#EAEFF8" font-size="13" font-weight="700" font-family="ui-monospace, Consolas, Menlo, monospace">INJ1_DRV</text>
+<text x="1010" y="309" fill="#8C98A6" font-size="11">Injector 1</text>
+</g>
+<rect x="44" y="345" width="14" height="14" rx="3" fill="#FF4D4D"/>
+<text x="66" y="357" fill="#EAEFF8" font-size="13">+12 V power in</text>
+<rect x="294" y="345" width="14" height="14" rx="3" fill="#9AA4AE"/>
+<text x="316" y="357" fill="#EAEFF8" font-size="13">Ground</text>
+<rect x="544" y="345" width="14" height="14" rx="3" fill="#FFBE00"/>
+<text x="566" y="357" fill="#EAEFF8" font-size="13">+5 V sensor supply</text>
+<rect x="794" y="345" width="14" height="14" rx="3" fill="#0099FF"/>
+<text x="816" y="357" fill="#EAEFF8" font-size="13">Sensor / spare inputs</text>
+<rect x="44" y="371" width="14" height="14" rx="3" fill="#B48CFF"/>
+<text x="66" y="383" fill="#EAEFF8" font-size="13">VR trigger input</text>
+<rect x="294" y="371" width="14" height="14" rx="3" fill="#FF8C1A"/>
+<text x="316" y="383" fill="#EAEFF8" font-size="13">Low-side outputs</text>
+<rect x="544" y="371" width="14" height="14" rx="3" fill="#FF5FB0"/>
+<text x="566" y="383" fill="#EAEFF8" font-size="13">Ignition logic outputs</text>
+<rect x="794" y="371" width="14" height="14" rx="3" fill="#3DDC84"/>
+<text x="816" y="383" fill="#EAEFF8" font-size="13">CAN bus</text>
+</svg>
