@@ -29,7 +29,7 @@ timing, and auxiliary outputs through a single sealed 24-pin connector.
 | Power input | 12 V automotive nominal — KL30 (permanent) + KL15 (switched) |
 | SD card logging | Native SDIO — supports Class 10 cards |
 | CAN bus | 1× ISO 11898 channel |
-| USB | Full-speed, USB-C connector (`USB1`) — console access and firmware flashing |
+| USB | Full-speed, micro-USB connector (`USB1`) — console access and firmware flashing |
 | Status LEDs | Four, labeled `LED_3V3`, `LED_5V`, `LED_TR_1`, and `LED_TR_2` (see [§5](#5-board-layout)). What each one indicates is *to be confirmed* |
 
 **Mechanical and environmental**
@@ -177,7 +177,7 @@ below.*
 |---|---|---|---|
 | 1 | Main 24-pin connector | `CN1` | Pinout in [§3](#3-io-overview). Shown here without the connector fitted. |
 | 2 | Push-button | `SW1` | The only push-button on the board — the boot switch used for [DFU flashing](setup/flashing.md#2-usb-dfu-bootloader). Its BOOT0 function is *to be confirmed* against the schematic. |
-| 3 | USB-C port | `USB1` | TunerStudio connection and DFU flashing. |
+| 3 | Micro-USB port | `USB1` | TunerStudio connection and DFU flashing. |
 | 4 | microSD card slot | `CARD1` | SD logging — see [Hardware Reference §8.2](reference.md#82-sd-card-logging). |
 | 5 | Header H3 — RS232 | `H3` | `GROUND`, `RS232_TX`, `RS232_RX`, `5V OUT` — see [§4](#4-expansion-headers). |
 | 6 | Header H2 — SWD | `H2` | `GROUND`, `SWCLK`, `SWDIO`, `3V3 OUT` — for an ST-Link programmer. |
