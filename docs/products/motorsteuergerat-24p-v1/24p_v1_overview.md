@@ -153,6 +153,10 @@ pin header mates directly).
     are protected only by their input resistor divider. Keep wiring to these pins short and route it
     away from ignition and high-current leads.
 
+---
 
+## 5. Next steps
 
-
+To build with this board, start at [Setup and Commissioning](setup/index.md) — the roadmap for
+the numbered **Getting Started** pages. For circuit-level detail behind the specifications above,
+see the [Hardware Reference](reference.md).

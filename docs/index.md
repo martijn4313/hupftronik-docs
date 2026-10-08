@@ -20,10 +20,10 @@ On this site, you can find product overviews, hardware setup and wiring guides, 
 
 ## 2. Start here
 
-- [Plan your build](guides/setup/planning.md) — the recommended first stop for a new project
-- [Motorsteuergerät overview and wiring](products/motorsteuergerat-24p-v1/24p_v1_overview.md)
-- [Tuning basics](guides/tuning/basics.md)
-- [Troubleshooting tips](guides/setup/troubleshooting.md)
+- [Motorsteuergerät 24P V1 overview](products/motorsteuergerat-24p-v1/24p_v1_overview.md) — what the board is and what it can drive
+- [Setup and Commissioning](products/motorsteuergerat-24p-v1/setup/index.md) — the step-by-step path from planning your build to first start
+- [Tuning basics](guides/tuning/basics.md) — once the engine runs
+- [Troubleshooting](guides/setup/troubleshooting.md) — when something doesn't work as described
 
 ---
 

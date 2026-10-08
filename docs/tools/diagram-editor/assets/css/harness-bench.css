@@ -32,6 +32,8 @@ body{
   padding-right:12px;border-right:1px solid var(--panel-edge);
   user-select:none;
 }
+#toolbar .back-link{color:var(--ink-dim);text-decoration:none;font-size:11px;letter-spacing:.04em;margin-right:6px}
+#toolbar .back-link:hover{color:var(--amber)}
 #toolbar .brand small{display:block;letter-spacing:.08em;font-weight:400;color:var(--ink-dim);font-size:10px}
 button{
   font-family:var(--mono);font-size:12px;color:var(--ink);

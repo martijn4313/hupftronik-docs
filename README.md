@@ -42,6 +42,33 @@ Pushes to `main` are built and published to GitHub Pages automatically by
 - Design-rationale callouts use the standard `!!! info` admonition.
 - Facts not yet confirmed against real hardware are marked *to be confirmed* rather than guessed.
 
+## Adding wiring diagrams
+
+Prefer Mermaid exports from [Harness Bench](docs/tools/diagram-editor/) for diagrams on
+documentation pages: the source lives in the Markdown file and diffs cleanly. When an SVG is the
+better fit (complex layouts, print-quality output):
+
+1. Click **Export SVG** in Harness Bench and save the file into `docs/assets/diagrams/` (create the
+   folder if it does not exist). Exported SVGs are self-contained and need no external files.
+2. Reference it from the page with a standard image tag, using a path relative to that page:
+
+   ```markdown
+   ![Harness overview — Volvo B21 base build](../../assets/diagrams/volvo-b21-harness.svg)
+   ```
+
+3. Store the matching Harness Bench `.json` save file next to the SVG, so the diagram can be
+   reopened and edited later:
+
+   ```text
+   docs/assets/diagrams/
+     volvo-b21-harness.json   ← Harness Bench save file (source)
+     volvo-b21-harness.svg    ← exported for the docs page
+   ```
+
+A possible future addition is a read-only viewer that loads a Harness Bench `.json` file directly on
+a documentation page (pan, zoom, inspect wires). It is not implemented yet; the JSON format and the
+renderer already exist, so open an issue or pull request if you want to build it.
+
 ## Reporting problems
 
 Found a broken link, wrong spec, or a step that didn't work as written? Open an issue describing

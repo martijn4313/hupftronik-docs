@@ -1,4 +1,4 @@
-# Flashing the board
+# Flashing the Board
 --8<-- "status-reviewed.md"
 
 ---
@@ -98,8 +98,7 @@ In the STM32CubeProgrammer GUI, the same action is the **Full chip erase** butto
 
 ## 5. Next steps
 
-With firmware on the board, continue with [wiring and integration](../wiring.md), then return to
-[Setup and Commissioning §6](index.md#6-verification-and-testing) to bring the board up for the
-first time. If the board doesn't respond after flashing, see
+With firmware on the board, continue with step 4, the
+[Wiring and Hardware Guide](../wiring.md). If the board doesn't respond after flashing, see
 [Troubleshooting](../../../guides/setup/troubleshooting.md).
 

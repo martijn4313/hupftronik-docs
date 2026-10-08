@@ -3,9 +3,22 @@
 
 ---
 
-The sub-sections in this guide detail the process for bringing the Motorsteuergerät 24P V1 online.
+This page is the roadmap for bringing a Motorsteuergerät 24P V1 online, from a blank board to a
+first engine start. It explains each stage briefly; the numbered pages under **Getting Started** in
+the navigation hold the detailed steps. Work through them in order:
 
-This page provides a brief outline of the steps involved and links to more detailed information.
+1. [Plan Your Build](../../../guides/setup/planning.md) — decide injectors, sensors, throttle, and
+   auxiliary loads.
+2. [Practical Hardware Checks](../hardware-test-protocol.md) — inspect the board and power it up on
+   the bench.
+3. [Flashing the Board](flashing.md) — compile and install rusEFI or Speeduino.
+4. [Wiring and Hardware Guide](../wiring.md) — build the harness and connect the board.
+5. Firmware setup — [rusEFI](rusefi.md) or [Speeduino](speeduino.md): tell the firmware what is
+   wired where.
+6. [Calibration and Dynamic Testing](calibration.md) — calibrate, run the output tests, and start
+   the engine.
+
+If anything misbehaves along the way, see [Troubleshooting](../../../guides/setup/troubleshooting.md).
 
 ---
 

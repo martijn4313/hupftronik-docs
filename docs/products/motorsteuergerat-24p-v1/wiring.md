@@ -1,4 +1,4 @@
-# Wiring and hardware guide
+# Wiring and Hardware Guide
 --8<-- "status-reviewed.md"
 
 ---
@@ -184,3 +184,13 @@ flowchart LR
 *Standard relay wiring for the fuel pump and fan outputs: the ECU completes the coil circuit to
 ground; the load current never enters the ECU. See the
 [output summary table](reference.md#44-output-summary-table) for the driver current limits.*
+
+---
+
+## 6. Next steps
+
+With the harness built, power up and run the staged checks in
+[Setup and Commissioning §6](setup/index.md#6-verification-and-testing). Then configure the
+firmware — step 5, the [rusEFI](setup/rusefi.md) or [Speeduino](setup/speeduino.md) setup guide.
+If something doesn't read or switch as expected, see
+[Troubleshooting](../../guides/setup/troubleshooting.md).

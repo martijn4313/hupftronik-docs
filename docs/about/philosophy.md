@@ -1,4 +1,4 @@
-# Design philosophy
+# Our Philosophy
 
 Hüpftronik revolves around frugality. This is not about cheapness or cutting corners; it is about making every design choice count. We want products that are light and efficient in material, cost, and complexity, so that more people can build, repair, and use them without unnecessary barriers.
 

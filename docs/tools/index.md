@@ -42,18 +42,20 @@ computer and **Load JSON** to reopen it later. The JSON file is the source of tr
 
 ---
 
-## 4. Exporting diagrams for use in these docs
+## 4. Exporting diagrams
 
-Harness Bench provides three export routes, each suited to a different context in the documentation.
+Harness Bench provides two export routes: Mermaid for diagrams that live in Markdown, and SVG for
+a fixed image. (Contributors adding a diagram to this site: see the repository README.)
 
-### 4.1. Mermaid export (recommended for embedded diagrams)
+### 4.1. Mermaid export (recommended)
 
-Click **Export Mermaid** to generate a Mermaid flowchart that renders directly inside any
-documentation page. The site already has Mermaid rendering enabled, so the workflow is:
+Click **Export Mermaid** to generate a Mermaid flowchart. It renders in any Markdown viewer with
+Mermaid support — GitHub, MkDocs, Obsidian, and many wikis — so it suits build notes and forum
+posts. The workflow is:
 
 1. Design your diagram in Harness Bench.
 2. Click **Export Mermaid** and copy the output.
-3. Paste it into a fenced code block on the target page:
+3. Paste it into a `mermaid` fenced code block in your notes:
 
     ````markdown
     ```mermaid
@@ -67,49 +69,16 @@ documentation page. The site already has Mermaid rendering enabled, so the workf
 The exported code is ready to paste — no editing needed. The result renders as a vector diagram at
 any screen size and is fully copy-able text, which keeps diagrams diffable and maintainable in Git.
 
-!!! tip "Mermaid is preferred for documentation diagrams"
-    Prefer Mermaid exports over SVG embeds for any diagram that may need to be updated. Mermaid
-    source lives in the Markdown file, so changes are tracked by Git and visible in pull-request
-    diffs. Exported SVG is text, but it is machine-generated and does not diff in a readable way.
+!!! tip "Prefer Mermaid for diagrams you will keep editing"
+    Prefer Mermaid exports over SVG for any diagram that may need to be updated. Mermaid
+    source lives in the Markdown file, so changes stay readable in version control. Exported SVG is text, but it is machine-generated and does not diff in a readable way.
 
-### 4.2. SVG export (for complex diagrams or print-quality output)
+### 4.2. SVG export
 
 Click **Export SVG** to download a standalone `.svg` file that preserves the exact canvas
-appearance including colours, fonts, and layout.
-
-To embed an SVG in a documentation page:
-
-1. Save the exported file into `docs/assets/diagrams/` (create the folder if it does not exist).
-2. Reference it in Markdown using a standard image tag:
-
-    ```markdown
-    ![Harness overview — Volvo B21 base build](../../assets/diagrams/volvo-b21-harness.svg)
-    ```
-
-3. Optionally store the matching `.json` save file alongside the SVG so the diagram can be
-   re-opened and edited in Harness Bench later:
-
-    ```
-    docs/
-      assets/
-        diagrams/
-          volvo-b21-harness.json   ← Harness Bench save file (source)
-          volvo-b21-harness.svg    ← exported for the docs page
-    ```
-
-!!! note
-    SVG files exported from Harness Bench are self-contained and load without any external
-    dependencies, so they render reliably on every browser and in the generated static site.
-
-### 4.3. JSON embed (interactive viewer — future option)
-
-The Harness Bench JSON save format is a complete description of the diagram including all component
-positions, wire routes, colours, and labels. A future option is to embed a read-only viewer on a
-documentation page that loads a JSON file and displays the diagram interactively — allowing readers
-to pan, zoom, and inspect wire properties without leaving the docs.
-
-This approach is not yet implemented but the infrastructure (the JSON format and the renderer) is in
-place. If this is useful for your project, open an issue or a pull request.
+appearance, including colours, fonts, and layout — useful for printing or for sharing with someone
+who does not use Mermaid. Keep the matching `.json` save file next to it so the diagram can be
+reopened and edited later.
 
 ---
 

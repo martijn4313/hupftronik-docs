@@ -92,6 +92,6 @@ When you have worked through each category, you should be able to answer the fol
 - What sensors beyond the baseline?
 - Do any auxiliary loads push you over the onboard I/O limit?
 
-Once those are settled, return to [Setup and Commissioning](../../products/motorsteuergerat-24p-v1/setup/index.md#3-firmware-architecture-choosing-your-path) and continue from the firmware selection step.
+Once those are settled, choose your firmware ([Setup and Commissioning §3](../../products/motorsteuergerat-24p-v1/setup/index.md#3-firmware-architecture-choosing-your-path)), then continue with step 2, [Practical Hardware Checks](../../products/motorsteuergerat-24p-v1/hardware-test-protocol.md).
 
 

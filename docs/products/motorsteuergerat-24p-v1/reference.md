@@ -539,6 +539,14 @@ Speeduino) sets it, and the far end must match. The transceiver handles the stan
 
 ---
 
+## 9. Next steps
+
+For pin assignments, see the [IO Overview](24p_v1_overview.md#3-io-overview). To put the board to
+work, follow [Setup and Commissioning](setup/index.md). The appendix below holds the full
+derivations behind sections 1–8.
+
+---
+
 <!-- heading-numbering: appendix -->
 
 ## Technical Appendix

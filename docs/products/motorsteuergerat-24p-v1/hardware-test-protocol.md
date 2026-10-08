@@ -3,7 +3,10 @@
 
 ---
 
-This page is a practical checklist for bringing up a Motorsteuergerät 24P V1 board. It is not a
+This page is a practical checklist for bringing up a Motorsteuergerät 24P V1 board on the bench —
+step 2 of [Setup and Commissioning](setup/index.md), after you have
+[planned your build](../../guides/setup/planning.md). Section 2.3 sends you to step 3,
+[Flashing the Board](setup/flashing.md), and back. It is not a
 formal qualification or certification process. Use the checks that match your equipment and
 experience, and share anything unusual with the project.
 
@@ -108,3 +111,11 @@ Test equipment or loads used:
 Include measured values, photos, or scope captures when they help explain a result. Report failures
 and documentation corrections through [Open-Source & Community](../../about/community.md), even if
 you could not complete every check.
+
+---
+
+## 5. Next steps
+
+If you have not flashed the board yet, do it now — step 3, [Flashing the Board](setup/flashing.md).
+Then build the harness — step 4, [Wiring and Hardware Guide](wiring.md). If a check fails, see
+[Troubleshooting](../../guides/setup/troubleshooting.md).

@@ -5,8 +5,8 @@
 
 This guide walks through first-time rusEFI configuration on a freshly-flashed Motorsteuergerät 24P
 V1 — telling the firmware which pin does what, so the generic rusEFI image becomes a config specific
-to your board and engine. Do this once, right after
-[flashing](flashing.md) and before you crank the engine. It assumes you've already read
+to your board and engine. Do this once the board is
+[flashed](flashing.md) and [wired](../wiring.md), before you crank the engine. It assumes you've already read
 [Setup and Commissioning §3](index.md#3-firmware-architecture-choosing-your-path) and chosen rusEFI
 deliberately.
 
@@ -97,6 +97,7 @@ Do not attempt to start the engine on an unconfigured or default map.
 
 ## 7. Next steps
 
-Continue to [Tuning Basics](../../../guides/tuning/basics.md) for the tuning process itself. If the
+Continue with step 6, [Calibration and Dynamic Testing](calibration.md), before the first start;
+then [Tuning Basics](../../../guides/tuning/basics.md) for the tuning process itself. If the
 engine won't sync, start, or run cleanly, see
 [Troubleshooting](../../../guides/setup/troubleshooting.md).
