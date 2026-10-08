@@ -242,3 +242,10 @@ img[src*="../assets/icons"] {
   }
 }
 
+/* --- Homepage cards --- */
+.md-typeset .grid.cards .card-icon {
+  display: block;
+  height: 64px;
+  width: auto;
+  margin-bottom: 0.4rem;
+}

@@ -30,7 +30,7 @@ timing, and auxiliary outputs through a single sealed 24-pin connector.
 | SD card logging | Native SDIO — supports Class 10 cards |
 | CAN bus | 1× ISO 11898 channel |
 | USB | Full-speed — console access and firmware flashing |
-| Status LEDs | *To be confirmed* — count, colours, and the meaning of each blink pattern will be documented here |
+| Status LEDs | *To be confirmed* — count, colors, and the meaning of each blink pattern will be documented here |
 
 **Mechanical and environmental**
 
