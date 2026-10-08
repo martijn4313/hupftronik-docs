@@ -32,15 +32,14 @@ Pushes to `main` are built and published to GitHub Pages automatically by
 - `includes/` — reusable snippet files pulled into pages via `pymdownx.snippets`
   (`--8<-- "filename.md"`)
 - `mkdocs.yml` — site configuration and navigation tree
+- `overrides/` — Material theme overrides (the alpha-testing announcement bar)
+- `artwork/` — full-resolution logo and mascot sources (not deployed); see its README for the derived web copies
 - `docs/stylesheets/extra.css` — theme customization and content-status badges
 
 ## Content conventions
 
-- Most pages carry a **content-status badge** under the title (`Reviewed` or `AI-drafted — verify
-  before use`) — see *About → Open-Source & Community* on the site for what these mean. Set the
-  badge honestly on new pages.
-- Design-rationale callouts use the standard `!!! info` admonition.
-- Facts not yet confirmed against real hardware are marked *to be confirmed* rather than guessed.
+Writing rules, page structure, callout conventions, and the rules for AI assistants are in
+[`AGENTS.md`](AGENTS.md). Read it before your first edit.
 
 ## Adding wiring diagrams
 

@@ -14,10 +14,10 @@ go to fix it.
 
 | Symptom | Likely cause | Fix |
 |---|---|---|
-| Board not detected over USB in DFU mode | Boot switch not held during power-up, or released too early | Repeat the DFU entry sequence in [Flashing the PCB §2](../../products/motorsteuergerat-24p-v1/setup/flashing.md#2-usb-dfu-bootloader), holding the switch through power-up |
-| STM32CubeProgrammer can't connect via SWD | Wrong SWD wiring, or board unpowered | Recheck SWCLK/SWDIO/GND/3V3 wiring against [Flashing the PCB §3](../../products/motorsteuergerat-24p-v1/setup/flashing.md#3-flashing-with-stm32cubeprogrammer) |
+| Board not detected over USB in DFU mode | Boot switch not held during power-up, or released too early | Repeat the DFU entry sequence in [Flashing the Board §2](../../products/motorsteuergerat-24p-v1/setup/flashing.md#2-usb-dfu-bootloader), holding the switch through power-up |
+| STM32CubeProgrammer can't connect via SWD | Wrong SWD wiring, or board unpowered | Recheck SWCLK/SWDIO/GND/3V3 wiring against [Flashing the Board §3](../../products/motorsteuergerat-24p-v1/setup/flashing.md#3-flashing-with-stm32cubeprogrammer) |
 | Programming completes but board doesn't run | Wrong firmware file for your hardware revision, or flash didn't verify | Re-flash with `-v` (verify) set, confirm you built for the correct hardware profile |
-| Board unresponsive after a full chip erase | Erase clears everything, including any working firmware | Re-flash a known-good firmware file immediately — see the warning in [Flashing the PCB §2](../../products/motorsteuergerat-24p-v1/setup/flashing.md#2-usb-dfu-bootloader) |
+| Board unresponsive after a full chip erase | Erase clears everything, including any working firmware | Re-flash a known-good firmware file immediately — see the warning in [Flashing the Board §2](../../products/motorsteuergerat-24p-v1/setup/flashing.md#2-usb-dfu-bootloader) |
 
 ---
 
@@ -25,7 +25,7 @@ go to fix it.
 
 | Symptom | Likely cause | Fix |
 |---|---|---|
-| No status LED activity | No power reaching `VIN_KL30`/`VIN_KL15`, or reversed polarity | Verify voltage at the connector with a multimeter before assuming a board fault — see the power warning in the [product overview](../../products/motorsteuergerat-24p-v1/24p_v1_overview.md#3-io-overview) |
+| `LED_5V` / `LED_3V3` stay dark | No power at `VIN_KL15` (`VIN_KL30` alone does not power the board), or reversed polarity | Verify voltage at the connector with a multimeter before assuming a board fault — see the power warning in the [product overview](../../products/motorsteuergerat-24p-v1/24p_v1_overview.md#3-io-overview) |
 | TunerStudio won't connect / no serial data | Wrong COM port, wrong INI file for your firmware, or USB driver not installed | Confirm the port and INI match your firmware per [Software Tools §2](../tuning/software.md#2-connecting-to-the-board) |
 | Sensor gauges show implausible values (e.g. -40°C coolant) | Sensor disconnected, wrong pull-up configuration, or wiring fault | Check continuity to the relevant pin in the [IO Overview](../../products/motorsteuergerat-24p-v1/24p_v1_overview.md#3-io-overview) |
 | Fault LED lit / configuration error reported | Firmware configuration doesn't match your hardware (wrong pin assignments, wrong trigger type) | Recheck firmware configuration against your board's actual wiring before proceeding |

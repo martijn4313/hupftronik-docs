@@ -64,7 +64,7 @@ Hüpftronik intentionally does not ship a prebuilt firmware image for this board
 **Quick Scan: Flashing Requirements**
 
 *   **Target MCU:** STM32F405RGT6
-*   **Interface:** USB DFU or SWD ($3.3\text{V}$ logic) — see [Flashing the PCB](flashing.md)
+*   **Interface:** USB DFU or SWD ($3.3\text{V}$ logic) — see [Flashing the Board](flashing.md)
 *   **Toolchain:** ARM GCC (rusEFI) or Arduino IDE / PlatformIO (Speeduino)
 
 **The Workflow**
@@ -77,7 +77,7 @@ Hüpftronik intentionally does not ship a prebuilt firmware image for this board
 4.  Connect the board: a USB cable for DFU flashing, or an SWD adapter on header H2.
 5.  Execute the flash command and verify the sequence completes without errors.
 
-See [Flashing the PCB](flashing.md) for the concrete DFU and SWD flashing steps once you have a
+See [Flashing the Board](flashing.md) for the concrete DFU and SWD flashing steps once you have a
 compiled `.bin` or `.hex` file.
 
 ---
@@ -90,7 +90,7 @@ compiled `.bin` or `.hex` file.
 **Quick Scan**
 
 *   **System Power:** $12\text{V}$ to $14.4\text{V}$ DC nominal
-*   **Logic Power:** $5\text{V}$ DC and $3.3\text{V}$ DC (Internal LDOs)
+*   **Logic Power:** $5\text{V}$ DC (switching regulator) and $3.3\text{V}$ DC (LDO), both from `VIN_KL15`
 *   **Grounding:** Strict star-ground topology (sensor grounds run on their own wire to the ECU `GND` pins — see [Wiring guide §1.1](../wiring.md#11-grounding-topology))
 
 **Technical Detail**
@@ -110,9 +110,9 @@ Why do we enforce strict ground separation and offer no reverse-polarity hand-ho
 
 Once powered, perform a staged verification. Do not rush this process.
 
-1.  **Heartbeat:** Observe the status LEDs to confirm the MCU successfully executes code (LED meanings are *to be confirmed* — see the [Specifications](../24p_v1_overview.md#2-specifications)).
+1.  **Power and heartbeat:** `LED_5V` and `LED_3V3` show that both supply rails are up. `LED_TR_1` and `LED_TR_2` are driven by the MCU (pins `PC4`/`PC5`), so they show activity only if your firmware configuration assigns them — see the [board layout](../24p_v1_overview.md#5-board-layout).
 2.  **Communication:** Connect to your tuning dashboard (e.g., TunerStudio) to verify active serial/USB communication.
-3.  **Diagnostics:** Check for fault LEDs or software-reported configuration errors in the dashboard.
+3.  **Diagnostics:** Check for software-reported configuration errors in the dashboard.
 4.  **I/O Validation:** Verify that sensor inputs read within expected physical ranges (e.g., Coolant and Intake Air temperatures match ambient) and trigger outputs correctly in test mode.
 
 Do not proceed to live engine testing until the board communicates reliably and you verify every physical connection.

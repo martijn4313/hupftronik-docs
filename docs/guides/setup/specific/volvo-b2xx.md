@@ -7,7 +7,7 @@
 
 <br>
 
-![Volvo Turbo Hare](../../../assets/icons/volvo_turbo_hare.png)
+![Volvo Turbo Hare](../../../assets/icons/volvo_turbo_hare.webp)
 
 ---
 

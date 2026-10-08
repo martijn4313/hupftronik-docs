@@ -38,8 +38,8 @@ See the [IO Overview](24p_v1_overview.md#3-io-overview) for pin assignments and 
 - Confirm the board revision and connector orientation.
 - With a multimeter, check that `VIN_KL30`, `VIN_KL15`, `+5V`, and `+3V3` are not shorted to
   ground.
-- If fitted, check CAN termination: about 120 Ω across `CAN_H` and `CAN_L` indicates one
-  terminator.
+- Check the onboard CAN terminator (`R54`): about 120 Ω across `CAN_H` and `CAN_L` on a bare
+  board.
 
 Do not power the board if a supply rail appears shorted or anything looks damaged.
 
@@ -49,14 +49,15 @@ Do not power the board if a supply rail appears shorted or anything looks damage
 2. Connect `VIN_KL30` and ground, then add `VIN_KL15`.
 3. Stop immediately if the supply remains in current limit, a component heats quickly, or there is
    smoke or an unusual smell.
-4. Check for normal status LED activity.
+4. Check that `LED_5V` and `LED_3V3` light. `VIN_KL30` alone does not light them — the board
+   runs from `VIN_KL15`.
 5. Measure approximately 5 V at `+5V` (C5) and 3.3 V at H2 pin 1.
 
 If these checks pass, raise the current limit only as needed for the later test load.
 
 ### 2.3. Check firmware and communication
 
-- Enter DFU mode and flash the board by following [Flashing the PCB](setup/flashing.md).
+- Enter DFU mode and flash the board by following [Flashing the Board](setup/flashing.md).
 - Power-cycle and confirm that the firmware starts normally.
 - Connect TunerStudio and check that live values update.
 - If you plan to use SD logging, create a short log and confirm that it can be read.

@@ -26,10 +26,11 @@ running a dedicated wire for every signal.
 CAN is wired as a single linear bus, not a star — every device connects to the same two wires along
 its length, not through a central hub. The two physical ends of that line each need a $120\,\Omega$
 termination resistor across `CAN_H`/`CAN_L`; without both, reflections on the bus corrupt data,
-especially at higher bus speeds or longer wire runs. If the 24P V1 sits at one end of the bus, verify
-termination is present at that end — see
-[Hardware Reference §8.1](../../products/motorsteuergerat-24p-v1/reference.md#81-can-bus) for the
-board's own termination status and how to verify a bus with a multimeter. For third-party devices,
+especially at higher bus speeds or longer wire runs. The 24P V1 has a fixed onboard
+$120\,\Omega$ terminator, so place it at one physical end of the bus and fit the second terminator
+at the other end — see
+[Hardware Reference §8.1](../../products/motorsteuergerat-24p-v1/reference.md#81-can-bus) for how to
+verify a bus with a multimeter. For third-party devices,
 check their documentation, since not every CAN node includes a built-in terminator.
 
 !!! warning "Missing or duplicate termination causes intermittent, hard-to-diagnose faults"

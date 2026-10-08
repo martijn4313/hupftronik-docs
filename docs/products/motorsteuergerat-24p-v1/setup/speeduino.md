@@ -15,7 +15,7 @@ the source, per that comparison.
 
 ## 1. Prerequisites
 
-- A flashed board (see [Flashing the PCB](flashing.md)).
+- A flashed board (see [Flashing the Board](flashing.md)).
 - TunerStudio installed and connected — see [Software Tools §2](../../../guides/tuning/software.md#2-connecting-to-the-board).
 - Your engine's decisions from [Planning your build](../../../guides/setup/planning.md) settled
   (injector count/impedance, throttle type, sensor selection).
@@ -30,16 +30,29 @@ Speeduino's board configuration maps every logical function (injector 1, ignitio
 to a physical MCU pin, same as rusEFI's approach. On the Motorsteuergerät 24P V1 these map directly
 to the connector pins in the [IO Overview](../24p_v1_overview.md#3-io-overview):
 
-| Function | Board signal |
-|---|---|
-| Injector 1 / 2 | `INJ1_DRV` / `INJ2_DRV` |
-| Ignition 1 / 2 | `IGN1_OUT` / `IGN2_OUT` |
-| Crank/cam trigger | `VR_POS` / `VR_NEG` |
-| MAP / TPS / CLT / IAT | `MAP_RAW` / `TPS_RAW` / `CLT_RAW` / `IAT_RAW` |
-| O₂ sensor | `LAMBDA_RAW` |
-| Idle air control | `IAC_DRV` |
-| Boost solenoid | `BOOST_DRV` |
-| Fuel pump / fan relay | `FPRELAY_DRV` / `FANRELAY_DRV` |
+| Function | Board signal | Connector pin | MCU pin |
+|---|---|---|---|
+| Injector 1 / 2 | `INJ1_DRV` / `INJ2_DRV` | C8 / A8 | `PC3` / `PC2` |
+| Ignition 1 / 2 | `IGN1_OUT` / `IGN2_OUT` | C7 / C6 | `PC1` / `PC0` |
+| Crank/cam trigger (VR, conditioned by `MAX9924`) | `VR_POS` / `VR_NEG` | C4 / B4 | `PB10` |
+| MAP | `MAP_RAW` | B3 | `PA0` |
+| CLT | `CLT_RAW` | A4 | `PA1` |
+| TPS | `TPS_RAW` | C3 | `PA2` |
+| IAT | `IAT_RAW` | A3 | `PA3` |
+| O₂ sensor | `LAMBDA_RAW` | A2 | `PA7` |
+| Battery voltage (from `VIN_KL15`) | `BAT_SENS` | A1 | `PA4` |
+| Spare inputs 1 / 2 (analog or digital) | `SPARE_IN1` / `SPARE_IN2` | C2 / B2 | `PA5` / `PA6` |
+| Spare inputs 3 / 4 / 5 (digital only) | `SPARE_IN3` / `SPARE_IN4` / `SPARE_IN5` | H1 pins 2 / 3 / 4 | `PA8` / `PA9` / `PA10` |
+| Idle air control | `IAC_DRV` | A7 | `PC6` |
+| Boost solenoid | `BOOST_DRV` | A6 | `PB14` |
+| Fuel pump relay | `FPRELAY_DRV` | B6 | `PB15` |
+| Fan relay | `FANRELAY_DRV` | B7 | `PC7` |
+| CAN (TX / RX) | `CAN_H` / `CAN_L` | A5 / B5 | `PB9` / `PB8` |
+| RS232 on H3 (TX / RX) | `USART1` | H3 pins 3 / 2 | `PB6` / `PB7` |
+| Status LEDs | `LED_TR_1` / `LED_TR_2` | — | `PC4` / `PC5` |
+| SD card (SDIO) | — | — | `PC8`–`PC12`, `PD2` |
+
+MCU pins are taken from the board schematic (V1.0).
 
 Whether an upstream Speeduino board profile for the 24P V1 exists is *to be confirmed*;
 this page will name it once it does. If a board-specific profile for the 24P V1 exists in the firmware

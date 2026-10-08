@@ -25,12 +25,12 @@ timing, and auxiliary outputs through a single sealed 24-pin connector.
 | Flash | 1 MB |
 | RAM | 192 KB |
 | Firmware project | rusEFI or Speeduino (open-source, GPLv3) |
-| Connector | FCI 24-pin sealed automotive (3×8 grid) |
-| Power input | 12 V automotive nominal — KL30 (permanent) + KL15 (switched) |
+| Connector | FCI 24-pin sealed automotive (3×8 grid), schematic part `HCCPHPE24BKA90F` |
+| Power input | 12 V automotive nominal — KL15 (switched, main power) + KL30 (permanent, MCU backup domain only); USB powers the board on the bench |
 | SD card logging | Native SDIO — supports Class 10 cards |
 | CAN bus | 1× ISO 11898 channel |
-| USB | Full-speed — console access and firmware flashing |
-| Status LEDs | *To be confirmed* — count, colours, and the meaning of each blink pattern will be documented here |
+| USB | Full-speed, micro-USB connector (`USB1`) — console access, firmware flashing, and bench power |
+| Status LEDs | Four (see [§5](#5-board-layout)): `LED_5V` and `LED_3V3` show the supply rails; `LED_TR_1`/`LED_TR_2` are driven by MCU pins `PC4`/`PC5`, so what they show depends on your firmware configuration |
 
 **Mechanical and environmental**
 
@@ -52,9 +52,16 @@ timing, and auxiliary outputs through a single sealed 24-pin connector.
 
 All 24 pins are on a single FCI connector, arranged in three rows (A, B, C) of eight columns.
 
+![Motorsteuergerät 24P V1 connector pinout: 3 × 8 grid color-coded by function](connector-pinout.svg)
+
+*Logical pin layout, color-coded by function. This is not a face view: which way the grid appears
+when you look at the connector (wire side or mating side) is* to be confirmed *— check the pin
+numbers moulded into the housing before you crimp. The tables below list the same pins with
+descriptions.*
+
 !!! success "Reverse polarity and surge protection"
     `VIN_KL30` and `VIN_KL15` are protected +12 V inputs. A series Schottky diode blocks reversed
-    polarity, and a TVS crowbar behind it clips short voltage surges before they reach the voltage
+    polarity, and a TVS diode behind it clips short voltage surges before they reach the voltage
     regulators.
 
 !!! warning "Long term overvoltage"
@@ -65,8 +72,8 @@ All 24 pins are on a single FCI connector, arranged in three rows (A, B, C) of e
 
 | Pin | Signal | Description |
 |---|---|---|
-| A1 | VIN_KL15 | Ignition-switched +12 V input |
-| B1 | VIN_KL30 | Permanent battery +12 V input |
+| A1 | VIN_KL15 | Ignition-switched +12 V — main power input |
+| B1 | VIN_KL30 | Permanent battery +12 V — MCU backup domain and IAC freewheel return |
 | C5 | +5V | Sensor reference voltage output |
 | B8, C1 | GND | Ground (×2) — the only ground pins; sensor grounds also return here |
 
@@ -128,10 +135,10 @@ The PCB includes three simple 4-pin headers for board-level expansion and servic
 
 | Header | Pin | Signal | Description |
 |---|---|---|---|
-| H1 | 1 | SPARE_IN5_RAW | Spare digital-only input 5 |
-|  | 2 | SPARE_IN4_RAW | Spare digital-only input 4 |
-|  | 3 | SPARE_IN3_RAW | Spare digital-only input 3 |
-|  | 4 | GND | Ground reference |
+| H1 | 1 | GND | Ground reference |
+|  | 2 | SPARE_IN3_RAW | Spare digital-only input 3 |
+|  | 3 | SPARE_IN4_RAW | Spare digital-only input 4 |
+|  | 4 | SPARE_IN5_RAW | Spare digital-only input 5 |
 | H2 | 1 | +3V3 | 3.3 V power for SWD adapter |
 |  | 2 | SWDIO | SWD data line |
 |  | 3 | SWCLK | SWD clock line |
@@ -143,9 +150,13 @@ The PCB includes three simple 4-pin headers for board-level expansion and servic
 
 These headers make it easy to attach external debugging, logging or custom input wiring without modifying the main 24-pin automotive connector.
 
+On the board, H3, H2, and H1 sit in one row of twelve 2.54 mm pins (see [§5](#5-board-layout)). Pin 1
+of each header is the square pad, and every pin is labeled on the silkscreen — check those labels
+before you connect anything.
+
 `SPARE_IN3`–`SPARE_IN5` on H1 accept 0–5 V **digital** signals only. Unlike `SPARE_IN1`/`SPARE_IN2`
-on the main connector, they cannot be used as analog inputs. You'll need to add your own connector to H1 to wire them up (a standard 2.54 mm
-pin header mates directly).
+on the main connector, they cannot be used as analog inputs. To wire them up, you supply the mating
+2.54 mm connector.
 
 !!! warning "H1 spare inputs have no dedicated ESD protection"
     Unlike the main connector's analog inputs (protected by a TVS diode — see the
@@ -155,7 +166,30 @@ pin header mates directly).
 
 ---
 
-## 5. Next steps
+## 5. Board layout
+
+![Motorsteuergerät 24P V1 board in its aluminum enclosure, with numbered markers on the main components](board-layout.webp)
+
+*Motorsteuergerät 24P V1 in its enclosure, main connector at the bottom. Numbers match the table
+below.*
+
+| # | Part | Silkscreen | Notes |
+|---|---|---|---|
+| 1 | Main 24-pin connector | `CN1` | Pinout in [§3](#3-io-overview). Shown here without the connector fitted. |
+| 2 | Boot switch | `SW1` | Pulls the MCU's `BOOT0` pin high while pressed — hold it at power-up for [DFU flashing](setup/flashing.md#2-usb-dfu-bootloader). There is no reset button. |
+| 3 | Micro-USB port | `USB1` | TunerStudio connection, DFU flashing, and bench power. |
+| 4 | microSD card slot | `CARD1` | SD logging — see [Hardware Reference §8.2](reference.md#82-sd-card-logging). |
+| 5 | Header H3 — RS232 | `H3` | `GROUND`, `RS232_TX`, `RS232_RX`, `5V OUT` — see [§4](#4-expansion-headers). |
+| 6 | Header H2 — SWD | `H2` | `GROUND`, `SWCLK`, `SWDIO`, `3V3 OUT` — for an ST-Link programmer. |
+| 7 | Header H1 — spare inputs | `H1` | `SPARE_IN5`, `SPARE_IN4`, `SPARE_IN3`, `GROUND`. |
+| 8 | Supply LEDs | `LED_3V3`, `LED_5V` | Light when the 3.3 V and 5 V rails are present. |
+| 9 | Status LEDs | `LED_TR_1`, `LED_TR_2` | Driven by MCU pins `PC4`/`PC5`; their meaning depends on your firmware configuration. |
+| 10 | Injector driver MOSFETs | `INJ CH1`, `INJ CH2` | `IRLR2905` drivers for `INJ1_DRV`/`INJ2_DRV` — see [Hardware Reference §4](reference.md#4-outputs-low-side-drivers). |
+| 11 | Microcontroller | `U17` | `STM32F405RGT6`. |
+
+---
+
+## 6. Next steps
 
 To build with this board, start at [Setup and Commissioning](setup/index.md) — the roadmap for
 the numbered **Getting Started** pages. For circuit-level detail behind the specifications above,
