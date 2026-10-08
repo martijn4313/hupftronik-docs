@@ -1,6 +1,8 @@
 # Renault F4R
 --8<-- "status-ai-draft.md"
 
+--8<-- "under-construction-notice.md"
+
 ---
 
 The Renault F4R (2.0L 16v inline-four, used across the Mégane, Scénic, Laguna, and the Clio Sport

@@ -1,6 +1,8 @@
 # Volkswagen 1.8T
 --8<-- "status-ai-draft.md"
 
+--8<-- "under-construction-notice.md"
+
 ---
 
 The VW/Audi 1.8T (EA827-based, 20-valve turbo four-cylinder, common engine codes AEB/APU/AWP/AWU

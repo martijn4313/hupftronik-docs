@@ -1,6 +1,8 @@
 # Mini A-Series
 --8<-- "status-ai-draft.md"
 
+--8<-- "under-construction-notice.md"
+
 ---
 
 The BMC/Rover A-Series (848cc–1275cc pushrod inline-four, fitted to the classic Mini from 1959

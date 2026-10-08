@@ -1,6 +1,8 @@
 # Peugeot TU Series
 --8<-- "status-ai-draft.md"
 
+--8<-- "under-construction-notice.md"
+
 ---
 
 The Peugeot/Citroën TU series (TU1/TU3/TU5, 1.1–1.6L inline-fours found across the 106, 206, 306,
