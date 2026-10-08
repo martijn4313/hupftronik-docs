@@ -36,11 +36,8 @@ Pushes to `main` are built and published to GitHub Pages automatically by
 
 ## Content conventions
 
-- Most pages carry a **content-status badge** under the title (`Reviewed` or `AI-drafted — verify
-  before use`) — see *About → Open-Source & Community* on the site for what these mean. Set the
-  badge honestly on new pages.
-- Design-rationale callouts use the standard `!!! info` admonition.
-- Facts not yet confirmed against real hardware are marked *to be confirmed* rather than guessed.
+Writing rules, page structure, callout conventions, and the rules for AI assistants are in
+[`AGENTS.md`](AGENTS.md). Read it before your first edit.
 
 ## Adding wiring diagrams
 
