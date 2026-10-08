@@ -103,9 +103,9 @@ You can swap to a later 60-2 flywheel and modify the bellhousing, but the early 
 #### 3.2.4. Distributor contacts
 Although not optimal, you can use the distributor contact points as a trigger source. 
 
-> This primarily applies to setups like older B18/B20 pushrod engines or carbureted engines with a good working mechanical distributor. You must build a board that takes the flyback pulse and conditions it for the ECU. 
-> 
-> For engines running L-Jetronic with Renix (Volvo 360 series), we advise using the 36-2-2 flywheel these engines already possess. To keep a stock appearance on a Volvo 360, retain the HT distributor but replace the intelligent Renix coil with a "dumb" coil from a Volvo 4xx series, triggered directly by the Motorsteuergerät.
+This primarily applies to setups like older B18/B20 pushrod engines or carbureted engines with a good working mechanical distributor. Once the ECU controls timing, the points no longer switch the coil: disconnect the coil from the points and fire it from the ECU through an igniter (see [§8](#8-ignition)). The points then act as a plain switch to ground, read through the small conditioning circuit described below — never connect the points' coil-side flyback pulse to the ECU.
+
+For engines running L-Jetronic with Renix (Volvo 360 series), we advise using the 36-2-2 flywheel these engines already possess. To keep a stock appearance on a Volvo 360, retain the HT distributor but replace the intelligent Renix coil with a "dumb" coil from a Volvo 4xx series, triggered directly by the Motorsteuergerät.
 
 !!! warning "Locking the distributor is irreversible"
     Welding or pinning the advance weights permanently removes mechanical advance. Do this with the
@@ -164,9 +164,9 @@ The ECU calculates engine phase solely based on the primary crank trigger (60-2)
 The stock B2xx throttle body lacks an analog TPS, relying only on an idle contact switch. Bolt a Volvo 850 TPS (a three-wire Bosch potentiometer) to the throttle body using a fabricated adapter bracket. 
 
 Wire it directly to the 24P V1:
-*   **Ground:** Sensor ground
-*   **+5V reference:** 5V sensor reference
-*   **Signal:** Analog input (any free channel)
+*   **Ground:** sensor-ground wire to ECU `GND` (B8/C1 — see [Wiring guide §1.1](../../../products/motorsteuergerat-24p-v1/wiring.md#11-grounding-topology))
+*   **+5V reference:** `+5V` sensor supply (pin C5)
+*   **Signal:** `TPS_RAW` (pin C3)
 
 Calibrate in TunerStudio using the *TPS calibration* tool. Do not use generic constants; calibrate against your actual sensor limits.
 
@@ -195,10 +195,10 @@ Leave the stock AMM disconnected. It serves no purpose in this installation. The
 
 **Combined T-MAP Sensor**
 A T-MAP sensor packages both MAP and IAT elements into a single body. The Bosch `0 281 006 076` (supersedes `0 281 002 437`) provides a $3.0\,\text{bar}$ absolute range, sufficient for $2.0\,\text{bar}$ of boost. Thread it into an M12 bung in the intake manifold.
-*   **Pin 1 (GND):** Sensor ground
-*   **Pin 2 (NTC):** IAT analog input
-*   **Pin 3 (VCC):** 5V sensor reference
-*   **Pin 4 (MAP):** MAP analog input
+*   **Pin 1 (GND):** sensor-ground wire to ECU `GND` (B8/C1)
+*   **Pin 2 (NTC):** `IAT_RAW` (pin A3)
+*   **Pin 3 (VCC):** `+5V` sensor supply (pin C5)
+*   **Pin 4 (MAP):** `MAP_RAW` (pin B3)
 
 **Discrete Sensors**
 If a T-MAP is unavailable, use an Audi `06B905379D` push-in IAT sensor paired with a standalone Bosch MAP sensor sized for your build pressure. Configure the IAT in TunerStudio using the standard Bosch NTC curve.

@@ -5,8 +5,8 @@
 
 This guide walks through first-time Speeduino configuration on a freshly-flashed Motorsteuergerät
 24P V1 — telling the firmware which pin does what, so the generic Speeduino image becomes a config
-specific to your board and engine. Do this once, right after
-[flashing](flashing.md) and before you crank the engine. It assumes you've already read
+specific to your board and engine. Do this once the board is
+[flashed](flashing.md) and [wired](../wiring.md), before you crank the engine. It assumes you've already read
 [Setup and Commissioning §3](index.md#3-firmware-architecture-choosing-your-path) and chosen
 Speeduino deliberately — for its simpler superloop execution model and lower barrier to modifying
 the source, per that comparison.
@@ -41,7 +41,8 @@ to the connector pins in the [IO Overview](../24p_v1_overview.md#3-io-overview):
 | Boost solenoid | `BOOST_DRV` |
 | Fuel pump / fan relay | `FPRELAY_DRV` / `FANRELAY_DRV` |
 
-If a board-specific Speeduino configuration profile for the 24P V1 exists in the firmware
+Whether an upstream Speeduino board profile for the 24P V1 exists is *to be confirmed*;
+this page will name it once it does. If a board-specific profile for the 24P V1 exists in the firmware
 repository, select it in TunerStudio's setup wizard and this mapping is already done for you —
 confirm it against the table above rather than re-entering it by hand.
 
@@ -95,6 +96,7 @@ Do not attempt to start the engine on an unconfigured or default map.
 
 ## 7. Next steps
 
-Continue to [Tuning Basics](../../../guides/tuning/basics.md) for the tuning process itself. If the
+Continue with step 6, [Calibration and Dynamic Testing](calibration.md), before the first start;
+then [Tuning Basics](../../../guides/tuning/basics.md) for the tuning process itself. If the
 engine won't sync, start, or run cleanly, see
 [Troubleshooting](../../../guides/setup/troubleshooting.md).

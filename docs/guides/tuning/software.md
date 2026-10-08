@@ -60,8 +60,8 @@ reading; a bad trigger signal makes every other gauge unreliable.
 
 1. Connect and confirm sensor gauges read correctly at rest (ignition on, engine off).
 2. Confirm trigger sync before cranking — see the triggerscope/trigger monitor above.
-3. Start the engine and load a base map appropriate for your setup (see
-   [Tuning Basics §3](basics.md#3-building-a-base-map)).
+3. Load a base map appropriate for your setup (see
+   [Tuning Basics §3](basics.md#3-building-a-base-map)), then start the engine.
 4. Datalog a drive, then refine tables per [Tuning Basics §4](basics.md#4-fueling-cell-by-cell-refinement).
 
 ---

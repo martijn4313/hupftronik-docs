@@ -21,7 +21,9 @@ as *values* you re-enter, not as a file you import.
 different firmware families with incompatible table formats and pin assignments — there is no direct
 import path. Your existing VE and ignition tables are still the single most valuable reference you
 have (see [§3](#3-map-and-tuning-parameter-conversion)), but you'll re-enter them as a starting point
-in the new firmware, not load the file directly.
+in the new firmware, not load the file directly. TunerStudio's table editor can export a single
+table to a file and import it into another project, which can save retyping where the axis sizes
+match — check every imported value afterwards.
 
 **Needs rewiring:** every connector. MegaSquirt's connector and pin assignments do not match the 24P
 V1's 24-pin connector — see [§2](#2-wiring-differences) before assuming any existing harness wire
@@ -43,13 +45,13 @@ fixed low-side drivers. Do not reuse an existing MegaSquirt harness pin-for-pin 
    [Wiring and hardware guide](../../products/motorsteuergerat-24p-v1/wiring.md) for connector and
    crimp practice.
 3. Recheck driver polarity for every output before applying power — a MegaSquirt high-side output
-   wired into a 24P V1 low-side input (or vice versa) will not work correctly and can damage the
+   wired into a 24P V1 low-side output (or vice versa) will not work correctly and can damage the
    driver.
 
 !!! danger "Verify driver type before reusing any output wiring"
     Confirm whether your existing MegaSquirt setup drove each output high-side or low-side before
     connecting it to the 24P V1's low-side drivers. Wiring a high-side-expecting load (or a load
-    already fused to switched power) directly into a low-side input can short the driver.
+    already fused to switched power) directly into a low-side output can short the driver.
 
 ---
 
@@ -85,7 +87,7 @@ commissioning, not a firmware update:
 
 | Symptom | Likely cause |
 |---|---|
-| Injector or relay driver fails immediately at first power-up | Old MegaSquirt output wiring assumed high-side switching; reused directly into a low-side input |
+| Injector or relay driver fails immediately at first power-up | Old MegaSquirt output wiring assumed high-side switching; reused directly into a low-side output |
 | Trigger sync fails despite a known-good trigger wheel | Trigger offset or type carried over from MegaSquirt config rather than reconfigured for this firmware |
 | Engine runs noticeably differently than on MegaSquirt despite "identical" tables | Injector dead-time or trigger decoding differences between platforms — re-tune rather than assume a 1:1 transfer |
 

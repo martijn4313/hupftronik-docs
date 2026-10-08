@@ -1,12 +1,19 @@
 # Renault F4R
 --8<-- "status-ai-draft.md"
 
+--8<-- "under-construction-notice.md"
+
 ---
 
 The Renault F4R (2.0L 16v inline-four, used across the Mégane, Scénic, Laguna, and the Clio Sport
 variants) is a common standalone-ECU swap in the hot-hatch scene, largely because the Clio
 182/197/200 versions are already tuned aggressively from the factory and respond well to further
 work. This page assumes you're moving from the factory ECU to the Motorsteuergerät 24P V1.
+
+!!! warning "Check for an electronic throttle"
+    Some later F4R variants may use an electronic throttle body (*to be confirmed* per variant). The
+    24P V1 cannot drive an electronic throttle (see [Planning your build §2](../planning.md#2-intake)).
+    If yours has one, plan to fit a cable-operated throttle body.
 
 !!! note "Variant matters"
     F4R covers naturally-aspirated and high-output variants (the Clio Sport engines in particular)

@@ -23,7 +23,7 @@ Everything not mentioned here follows the [Volvo B2xx Redblock guide](../volvo-b
 | Power | Roughly $250$–$350\,\text{hp}$ at $1$–$1.5\,\text{bar}$ of boost |
 | Bottom end | Stock B230F, $\sim 9.8:1$ compression, healthy and compression-tested; a 13 mm-rod engine (~1990+) is strongly preferred — see [B230 bottom-end versions](../volvo-b2xx.md#21-b230-bottom-end-versions) |
 | Fuel | **98 RON minimum**, or "the devil's fuel," E85 |
-| Turbo | Holset — HE351CW (cheap, lazy below $3000\,\text{RPM}$ on a 2.3) |
+| Turbo | Holset — HE351CW (cheap, mid-range spool; alternatives in [§2](#2-turbo-hardware)) |
 | Character | Turbo-lag is fun |
 
 !!! warning "9.8:1 plus boost on pump fuel is the defining risk of this build"
@@ -100,7 +100,7 @@ Start from [Volvo B2xx §9](../volvo-b2xx.md#9-rusefi-configuration). Deltas:
 | Target AFR under boost | $\lambda \approx 0.76$–$0.78$ ($\sim 11.2{:}1$–$11.5{:}1$) at full boost on pump gas. While excessive fuel costs power, erring on the rich side provides crucial cooling margins on a 9.8:1 compression build. |
 | Ignition under boost | Retard from the NA map as boost rises — a starting shape is roughly $1^\circ$ less advance per $0.1\,\text{bar}$ of boost, tuned from the safe side |
 | Overboost protection | Hard fuel cut $0.15\,\text{bar}$ above target boost — configure this **before** the first boosted drive |
-| Rev limit | **Base B230F valvetrains require upgrades.** The weak stock NA valve springs are highly prone to valve float under boost. Fresh B230FT springs are the minimum OEM upgrade. For $7200\,\text{RPM}$ use, stiff aftermarket springs (e.g., from Folkraceshop) are absolutely mandatory to handle both the boost pressure on the intake valves and the increased RPM. |
+| Rev limit | About $6200\,\text{RPM}$ (the stock-valvetrain limit used in the other B230 examples) with fresh B230FT springs; $7200\,\text{RPM}$ only with stiff aftermarket springs. **Base B230F valvetrains require upgrades.** The weak stock NA valve springs are highly prone to valve float under boost. Fresh B230FT springs are the minimum OEM upgrade. For $7200\,\text{RPM}$ use, stiff aftermarket springs (e.g., from Folkraceshop) are absolutely mandatory to handle both the boost pressure on the intake valves and the increased RPM. |
 
 ---
 

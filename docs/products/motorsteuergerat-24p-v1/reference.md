@@ -139,7 +139,7 @@ input. Use it as a worked example and as the calibration table for your own buil
 same sensor.
 
 **Sensor.** Bosch `0 281 006 051` T-MAP sensor: pin 2 is the NTC element, pin 1 is its ground
-reference. The ECU's `IAT_RAW` input connects to pin 2; pin 1 returns to the ECU sensor ground.
+reference. The ECU's `IAT_RAW` input connects to pin 2; pin 1 returns to the ECU's `GND` pins (B8/C1) on the sensor-ground wire.
 
 !!! warning "Do not use a generic Bosch preset in rusEFI"
     Generic Bosch NTC calibration curves assume a single pull-up resistor to +5 V, with no
@@ -331,8 +331,8 @@ All low-side channels are rated for automotive voltage levels. PCB heat dissipat
 | `INJ1` & `INJ2` | Fuel Injectors | `IRLR2905` (D-PAK) | `42 A` | **Heatsink-Dependent** <br> Recommended **`< 5 A`** peak |
 | `IAC` | Idle Air Control (PWM) | `NCE6005AS` (SOIC-8) | `5 A` | **Heatsink-Dependent** <br> **`< 2.0 A`** peak |
 | `BOOST` | Boost Solenoid | `NCE6005AS` (SOIC-8) | `5 A` | **Heatsink-Dependent** <br> **`< 2.0 A`** peak |
-| `FAN_RELAY` | Cooling Fan Relay | `NCE6005AS` (SOIC-8) | `5 A` | **Heatsink-Dependent** <br> **`< 2.0 A`** peak |
-| `FP_RELAY` | Fuel Pump Relay | `NCE6005AS` (SOIC-8) | `5 A` | **Heatsink-Dependent** <br> **`< 2.0 A`** peak |
+| `FANRELAY_DRV` | Cooling Fan Relay | `NCE6005AS` (SOIC-8) | `5 A` | **Heatsink-Dependent** <br> **`< 2.0 A`** peak |
+| `FPRELAY_DRV` | Fuel Pump Relay | `NCE6005AS` (SOIC-8) | `5 A` | **Heatsink-Dependent** <br> **`< 2.0 A`** peak |
 
 <small>\* *The IRLR2905's silicon capability is high, but PCB thermal performance restricts actual continuous current. See the Technical Appendix (§A.1–A.2) for multi-injector bank limits.*</small>
 
@@ -536,6 +536,14 @@ a small accessory from it.
 **Baud rate** is a firmware setting, not a property of the hardware: the firmware you run (rusEFI or
 Speeduino) sets it, and the far end must match. The transceiver handles the standard rates up to
 115 200 baud with margin.
+
+---
+
+## 9. Next steps
+
+For pin assignments, see the [IO Overview](24p_v1_overview.md#3-io-overview). To put the board to
+work, follow [Setup and Commissioning](setup/index.md). The appendix below holds the full
+derivations behind sections 1–8.
 
 ---
 

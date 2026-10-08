@@ -120,7 +120,7 @@ be at least **1.25×** the requirement. Applied to the pumps from the
 Nominal ratings above are at $3\,\text{bar}$ and healthy charging voltage; treat the table as
 guidance, not datasheet fact, and trust your own measurement over all of it. Remember that rising
 rail pressure under boost (with a manifold-referenced regulator) cuts pump flow further — if your
-build runs $1\,\text{bar}$ of boost, the pump works at $4.0\,\text{bar}$ absolute at full load, so
+build runs $1\,\text{bar}$ of boost, the pump works against $4.0\,\text{bar}$ of rail pressure (gauge) at full load, so
 qualify it at that pressure too.
 
 ---

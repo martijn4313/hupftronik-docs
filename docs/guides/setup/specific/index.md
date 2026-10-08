@@ -9,13 +9,22 @@ the [product documentation](../../../products/motorsteuergerat-24p-v1/setup/inde
 | Engine | Character of the swap |
 |---|---|
 | [Volvo B2xx Redblock](volvo-b2xx.md) | The most detailed guide on this site — factory 60-2 trigger on later variants, well-supported wasted-spark conversion |
-| [Volkswagen 1.8T](vw-1.8t.md) | Factory 60-2 trigger and coil-on-plug hardware; straightforward turbo swap |
-| [Renault F4R](renault-f4r.md) | Factory 60-2 trigger plus Hall cam sensor; popular hot-hatch engine |
-| [Peugeot TU Series](peugeot-tu.md) | Wide variation across the production run — identifying your exact variant is most of the work |
-| [Mini A-Series](mini-a-series.md) | Full EFI retrofit on a carbureted engine — the largest fabrication scope in this list |
 
 Running a Volvo B230? The [B230 example builds](b230-examples/index.md) layer three concrete
 recipes — OEM cam swap, raised compression, and the classic Holset "+T" — on top of the B2xx guide.
+
+### Under construction
+
+These guides are early outlines. They show the main decisions for each engine but have not been
+worked through in the same depth as the Volvo guide. Use them for orientation only, and confirm
+every detail against your engine's factory documentation.
+
+| Engine | Character of the swap |
+|---|---|
+| [Volkswagen 1.8T](vw-1.8t.md) | Factory 60-2 trigger and coil-on-plug hardware; turbo swap |
+| [Renault F4R](renault-f4r.md) | Factory 60-2 trigger plus Hall cam sensor; popular hot-hatch engine |
+| [Peugeot TU Series](peugeot-tu.md) | Wide variation across the production run — identifying your exact variant is most of the work |
+| [Mini A-Series](mini-a-series.md) | Full EFI retrofit on a carbureted engine — the largest fabrication scope in this list |
 
 !!! note "Check each page's content-status badge"
     Guides differ in how much scrutiny they've had — see

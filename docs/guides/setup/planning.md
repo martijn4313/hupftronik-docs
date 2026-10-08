@@ -44,7 +44,7 @@ The intake system covers everything between the air and the intake ports. Plan t
 
 **Intercooler.** If fitted, the charge air temperature sensor should be placed post-intercooler to give the ECU an accurate reading of what actually enters the manifold.
 
-**Throttle.** This is a significant decision point. A mechanical cable throttle is simpler: the ECU reads position via a TPS and does not command the throttle body directly. An electronic throttle body (ETB) adds a second TPS (pedal-side), a motor driver, and a closed-loop control loop in the firmware. rusEFI and Speeduino both support ETB control in firmware, but the 24P V1's six onboard driver outputs (see the [IO Overview](../../products/motorsteuergerat-24p-v1/24p_v1_overview.md#3-io-overview)) are single-ended low-side switches, not a bidirectional H-bridge — driving an ETB motor needs an external ETB-capable motor driver module wired to two of those outputs, not a direct connection. Confirm your firmware's ETB wiring requirements before committing to this path, and plan which two onboard outputs you can spare for it. If the onboard outputs are already committed to other actuators, offloading ETB control to a [Schildknappe](../../products/schildknappe/index.md) node will be an option once that product ships — until then, an ETB build must fit the onboard outputs.
+**Throttle.** This is a significant decision point. A mechanical cable throttle is simpler: the ECU reads position via a TPS and does not command the throttle body directly. An electronic throttle body (ETB) adds a second TPS (pedal-side), a motor driver, and a closed-loop control loop in the firmware. rusEFI and Speeduino both support ETB control in firmware, but the 24P V1's six onboard driver outputs (see the [IO Overview](../../products/motorsteuergerat-24p-v1/24p_v1_overview.md#3-io-overview)) are single-ended low-side switches, not a bidirectional H-bridge — driving an ETB motor needs an external H-bridge motor driver. Such modules usually expect logic-level control signals (PWM and direction), and how one would connect to this board has not yet been documented or tested. Treat ETB as **unsupported on the 24P V1 for now**: if your engine came with an electronic throttle, plan to convert it to a cable throttle body. If the onboard outputs are already committed to other actuators, offloading ETB control to a [Schildknappe](../../products/schildknappe/index.md) node will be an option once that product ships — until then, an ETB build must fit the onboard outputs.
 
 ---
 
@@ -92,6 +92,6 @@ When you have worked through each category, you should be able to answer the fol
 - What sensors beyond the baseline?
 - Do any auxiliary loads push you over the onboard I/O limit?
 
-Once those are settled, return to the Setup and Commissioning guide of the ECU and continue from the firmware selection step.
+Once those are settled, choose your firmware ([Setup and Commissioning §3](../../products/motorsteuergerat-24p-v1/setup/index.md#3-firmware-architecture-choosing-your-path)), then continue with step 2, [Practical Hardware Checks](../../products/motorsteuergerat-24p-v1/hardware-test-protocol.md).
 
 

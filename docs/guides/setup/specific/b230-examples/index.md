@@ -16,8 +16,8 @@ what its build *changes* relative to that baseline.
 | [B230F+T with a Holset turbo](b230ft-holset.md) | The classic budget "+T" — NA bottom end, truck turbo, low boost | A winter project |
 
 !!! note "These are drafts"
-    All three examples are AI-drafted from general redblock community knowledge and have not yet
-    been verified against a running engine. Treat every part number, clearance, and settings value
+    The OEM-cam and raised-compression examples are AI-drafted from general redblock community
+    knowledge; the Holset example is in review. None has yet been verified against a running engine. Treat every part number, clearance, and settings value
     as a starting hypothesis to confirm — and if you run one of these builds, feedback and
     corrections are the most valuable contribution you can make (see
     [Open-Source & Community](../../../../about/community.md)).

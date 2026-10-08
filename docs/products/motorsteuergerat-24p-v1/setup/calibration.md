@@ -59,21 +59,22 @@ Before cranking, with the key on and the engine cold and heat-soaked to ambient:
 
 ## 4. Output tests before first start
 
-Both firmwares provide output test modes that fire each channel on command. With the fuel pump fuse
-pulled (so cranking can't flood the engine):
+Both firmwares provide output test modes that fire each channel on command.
 
-1. **Fuel pump relay** — command it and listen for the relay click; then restore the fuse and
-   confirm the pump primes for a few seconds at key-on.
+!!! danger "Do output tests with the fuel system disabled"
+    Repeated injector test pulses on a primed rail wash the cylinder walls with fuel. Pull the fuel
+    pump fuse before you start, and keep it out until step 4. Before a real start attempt, crank
+    with the throttle open to clear any accumulated fuel.
+
+With the fuel pump fuse pulled:
+
+1. **Fuel pump relay** — command it and listen for the relay click. The pump itself stays off.
 2. **Injectors** — pulse each channel and confirm the correct injector(s) click, matching your
    channel assignment from the [wiring guide](../wiring.md#4-configurations).
 3. **Ignition** — with plugs grounded to the block or a spark tester (never floating), pulse each
    channel and confirm spark on the correct cylinder pair. Keep clear of the coils and leads.
-4. **Fan and auxiliary outputs** — command each and confirm the right relay or actuator responds.
-
-!!! danger "Do output tests with the fuel system disabled"
-    Repeated injector test pulses on a primed rail wash the cylinder walls with fuel. Pull the fuel
-    pump fuse (or run the pump dry) during injector and ignition tests, and crank with the throttle
-    open to clear any accumulated fuel before a real start attempt.
+4. **Fuel pump prime** — refit the fuse and confirm the pump primes for a few seconds at key-on.
+5. **Fan and auxiliary outputs** — command each and confirm the right relay or actuator responds.
 
 ---
 

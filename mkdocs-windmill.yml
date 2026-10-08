@@ -46,50 +46,54 @@ nav:
   - Home: index.md
   - Products:
     - Motorsteuergerät 24P V1:
-      - Overview & Specs: products/motorsteuergerat-24p-v1/24p_v1_overview.md
-      - Hardware & Wiring: products/motorsteuergerat-24p-v1/wiring.md
-      - Design Reference: products/motorsteuergerat-24p-v1/reference.md
-      - Practical Hardware Checks: products/motorsteuergerat-24p-v1/hardware-test-protocol.md
-      - Community Design Validation: products/motorsteuergerat-24p-v1/design-verification-protocol.md
-      - Setup guide:
-        - Setup Overview: products/motorsteuergerat-24p-v1/setup/index.md
-        - Flashing the PCB: products/motorsteuergerat-24p-v1/setup/flashing.md
-        - rusEFI Guide: products/motorsteuergerat-24p-v1/setup/rusefi.md
-        - Speeduino Guide: products/motorsteuergerat-24p-v1/setup/speeduino.md
-        - Calibration & Dynamic Testing: products/motorsteuergerat-24p-v1/setup/calibration.md
+      - Overview: products/motorsteuergerat-24p-v1/24p_v1_overview.md
+      - Getting Started:
+        - Setup and Commissioning: products/motorsteuergerat-24p-v1/setup/index.md
+        - 1. Plan Your Build: guides/setup/planning.md
+        - 2. Practical Hardware Checks: products/motorsteuergerat-24p-v1/hardware-test-protocol.md
+        - 3. Flashing the Board: products/motorsteuergerat-24p-v1/setup/flashing.md
+        - 4. Wiring and Hardware Guide: products/motorsteuergerat-24p-v1/wiring.md
+        - 5. Firmware Setup:
+          - rusEFI Setup Guide: products/motorsteuergerat-24p-v1/setup/rusefi.md
+          - Speeduino Setup Guide: products/motorsteuergerat-24p-v1/setup/speeduino.md
+        - 6. Calibration and Dynamic Testing: products/motorsteuergerat-24p-v1/setup/calibration.md
+      - Reference:
+        - Hardware Reference: products/motorsteuergerat-24p-v1/reference.md
+        - Troubleshooting: guides/setup/troubleshooting.md
+      - For Contributors:
+        - Community Design Validation: products/motorsteuergerat-24p-v1/design-verification-protocol.md
     - Schildknappe (CAN Node):
       - Overview (in development): products/schildknappe/index.md
 
   - Guides:
-     - Planning your build: guides/setup/planning.md
      - Tuning Basics: guides/tuning/basics.md
      - Software Tools (TunerStudio): guides/tuning/software.md
      - CAN Bus Basics: guides/setup/canbus-basics.md
-     - Troubleshooting: guides/setup/troubleshooting.md
 
      - Workshop & Bench Testing:
         - Injector Flow Rate Testing: guides/workshop/injector-flow-testing.md
-        - Fuel Pump Pressure & Flow Testing: guides/workshop/fuel-pump-testing.md
+        - Fuel Pump Pressure and Flow Testing: guides/workshop/fuel-pump-testing.md
 
-     - Vehicle specific setup guides:
+     - Vehicle-Specific Setup Guides:
         - Overview: guides/setup/specific/index.md
         - Volvo B2xx Redblock: guides/setup/specific/volvo-b2xx.md
         - B230 Example Builds:
            - Overview: guides/setup/specific/b230-examples/index.md
-           - B230F + OEM Camshaft: guides/setup/specific/b230-examples/b230f-oem-cam.md
-           - B230F Higher Compression + Mild Cam: guides/setup/specific/b230-examples/b230f-higher-compression.md
-           - B230F+T with Holset: guides/setup/specific/b230-examples/b230ft-holset.md
-        - Peugeot TU Series: guides/setup/specific/peugeot-tu.md
-        - Renault F4R: guides/setup/specific/renault-f4r.md
-        - Mini A-Series: guides/setup/specific/mini-a-series.md
-        - Volkswagen 1.8T: guides/setup/specific/vw-1.8t.md
+           - Basic B230F with an Alternative OEM Camshaft: guides/setup/specific/b230-examples/b230f-oem-cam.md
+           - B230F with Raised Compression and a Mild Aftermarket Cam: guides/setup/specific/b230-examples/b230f-higher-compression.md
+           - B230F+T with a Holset Turbo: guides/setup/specific/b230-examples/b230ft-holset.md
+        - Under construction:
+           - Peugeot TU Series: guides/setup/specific/peugeot-tu.md
+           - Renault F4R: guides/setup/specific/renault-f4r.md
+           - Mini A-Series: guides/setup/specific/mini-a-series.md
+           - Volkswagen 1.8T: guides/setup/specific/vw-1.8t.md
 
      - Conversion Guides:
-        - MegaSquirt to Motorsteuergerät 24P V1: guides/conversions/ms-to-24p.md
+        - MegaSquirt to Motorsteuergerät 24P V1 Migration Guide: guides/conversions/ms-to-24p.md
 
   - Tools:
     - Overview: tools/index.md
-    - Wiring Diagram Designer: tools/diagram-editor/index.html
+    - Harness Bench (Wiring Diagram Designer): tools/diagram-editor/index.html
     - B230 Compression Ratio Calculator: tools/b230_compression_calc.html
 
   - About:
