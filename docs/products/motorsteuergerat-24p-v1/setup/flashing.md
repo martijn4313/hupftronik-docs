@@ -22,27 +22,24 @@ There are two flashing options:
 
 ## 2. USB DFU bootloader
 
-1. Hold the boot switch while powering the board — starting up with the switch held is what puts
-   the MCU in DFU mode.
-2. Connect the board to your computer over USB.
+!!! note "Before you flash"
+    - Power the board from its normal supply (`VIN_KL30` and `VIN_KL15`). Whether USB alone can
+      power the board is *to be confirmed* — do not rely on it.
+    - Verify the firmware file matches the STM32F405 and your intended firmware (rusEFI or
+      Speeduino) — flashing the wrong image can leave the board unresponsive until re-flashed.
+    - The position of the boot switch on the PCB is *to be confirmed*; a photo will be added here.
+
+1. Hold the boot switch, then switch on the board's power. The MCU checks the switch only at
+   power-up, so you can release it once the board is powered.
+2. Connect the board to your computer over USB. It should appear as an STM32 DFU device.
 3. Upload the firmware file to address `0x08000000` using either STM32CubeProgrammer or `dfu-util`:
 
    ```bash
    dfu-util -a 0 -s 0x08000000:leave -D firmware.bin
    ```
 
-4. Release the boot switch and reset the board after programming completes.
-
-!!! note "Before you flash"
-    - Make sure the board is powered before attempting to flash.
-    - Verify the firmware file matches the STM32F405 and your intended firmware (rusEFI or
-      Speeduino) — flashing the wrong image can leave the board unresponsive until re-flashed.
-
-!!! warning "Full chip erase is destructive"
-    If the device is locked or not responding to a normal flash, a full chip erase clears the entire
-    flash — including the existing firmware and any bootloader configuration — before you write the
-    new image. Only use it as a last resort, and confirm you have a working firmware file ready to
-    flash immediately afterward.
+4. After programming completes, power-cycle the board with the boot switch released so it starts
+   the new firmware.
 
 ---
 
@@ -56,11 +53,14 @@ Requirements:
 - STM32CubeProgrammer installed
 - Firmware file (`.bin` or `.hex`)
 
-1. Connect the ST-Link to the board using SWD:
-   - SWCLK
-   - SWDIO
-   - GND
-   - 3.3V (if not powered separately)
+1. Connect the ST-Link to SWD header **H2** (see the
+   [expansion header pinout](../24p_v1_overview.md#4-expansion-headers)):
+   - H2 pin 3 `SWCLK` → ST-Link SWCLK
+   - H2 pin 2 `SWDIO` → ST-Link SWDIO
+   - H2 pin 4 `GND` → ST-Link GND
+   - H2 pin 1 `+3V3` → ST-Link target-voltage sense (VTref / VAPP)
+
+   Power the board from its normal supply while flashing.
 2. Open STM32CubeProgrammer.
 3. Select **ST-LINK** as the connection type.
 4. Click **Connect**.
@@ -78,6 +78,21 @@ Example using STM32CubeProgrammer CLI:
 ```bash
 STM32_Programmer_CLI -c port=SWD -d firmware.bin 0x08000000 -v
 ```
+
+### 4.1. Full chip erase (last resort)
+
+!!! warning "Full chip erase is destructive"
+    A full chip erase clears the entire flash, including the existing firmware. Use it only if the
+    device is locked or will not accept a normal flash, and have a working firmware file ready to
+    flash immediately afterward.
+
+Over SWD, erase the chip, then flash as above:
+
+```bash
+STM32_Programmer_CLI -c port=SWD -e all
+```
+
+In the STM32CubeProgrammer GUI, the same action is the **Full chip erase** button.
 
 ---
 

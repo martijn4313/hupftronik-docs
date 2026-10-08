@@ -42,7 +42,8 @@ silkscreen/connector labels, not choosing arbitrary pins:
 | Boost solenoid | `BOOST_DRV` |
 | Fuel pump / fan relay | `FPRELAY_DRV` / `FANRELAY_DRV` |
 
-If a board-specific rusEFI configuration profile for the 24P V1 exists in the firmware repository,
+Whether an upstream rusEFI board profile for the 24P V1 exists is *to be confirmed*;
+this page will name it once it does. If a board-specific profile for the 24P V1 exists in the firmware repository,
 select it and this mapping is already done for you — confirm it against the table above rather than
 re-entering it by hand.
 

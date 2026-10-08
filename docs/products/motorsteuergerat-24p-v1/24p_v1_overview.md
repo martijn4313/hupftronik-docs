@@ -30,6 +30,7 @@ timing, and auxiliary outputs through a single sealed 24-pin connector.
 | SD card logging | Native SDIO — supports Class 10 cards |
 | CAN bus | 1× ISO 11898 channel |
 | USB | Full-speed — console access and firmware flashing |
+| Status LEDs | *To be confirmed* — count, colours, and the meaning of each blink pattern will be documented here |
 
 **Mechanical and environmental**
 
@@ -67,7 +68,11 @@ All 24 pins are on a single FCI connector, arranged in three rows (A, B, C) of e
 | A1 | VIN_KL15 | Ignition-switched +12 V input |
 | B1 | VIN_KL30 | Permanent battery +12 V input |
 | C5 | +5V | Sensor reference voltage output |
-| B8, C1 | GND | Power ground (×2) |
+| B8, C1 | GND | Ground (×2) — the only ground pins; sensor grounds also return here |
+
+There is no separate sensor-ground pin. Sensor ground wires return to the ECU's `GND` pins
+(B8/C1) through the harness, on their own wire, never shared with a load return — see
+[Wiring guide §1.1](wiring.md#11-grounding-topology).
 
 **Engine position**
 
@@ -138,8 +143,8 @@ The PCB includes three simple 4-pin headers for board-level expansion and servic
 
 These headers make it easy to attach external debugging, logging or custom input wiring without modifying the main 24-pin automotive connector.
 
-`SPARE_IN3`–`SPARE_IN5` on H1 accept 0–5 V digital only triggers, the same as `SPARE_IN1`/`SPARE_IN2` on
-the main connector. You'll need to add your own connector to H1 to wire them up (a standard 2.54 mm
+`SPARE_IN3`–`SPARE_IN5` on H1 accept 0–5 V **digital** signals only. Unlike `SPARE_IN1`/`SPARE_IN2`
+on the main connector, they cannot be used as analog inputs. You'll need to add your own connector to H1 to wire them up (a standard 2.54 mm
 pin header mates directly).
 
 !!! warning "H1 spare inputs have no dedicated ESD protection"

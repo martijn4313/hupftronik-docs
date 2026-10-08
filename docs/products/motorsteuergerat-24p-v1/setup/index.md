@@ -11,7 +11,7 @@ This page provides a brief outline of the steps involved and links to more detai
 
 ## 1. Overview
 
-The Motorsteuergerät 24P V1 serves as a hardware platform designed to host open-source ECU firmware. It ships entirely blank. You intentionally choose the software ecosystem that matches your specific engineering goals and engine requirements. Currently, the board fully supports **rusEFI** and **Speeduino**.
+The Motorsteuergerät 24P V1 serves as a hardware platform designed to host open-source ECU firmware. It ships entirely blank. You intentionally choose the software ecosystem that matches your specific engineering goals and engine requirements. Currently, the board supports **rusEFI** and **Speeduino**.
 
 ---
 
@@ -46,7 +46,7 @@ Two firmwares, two philosophies. For most users, this is enough to decide:
 
 ## 4. Compilation and Flashing
 
-The project intentionally omits prebuilt binaries from the main upstream repositories. You compile the image from source. This ensures you run the exact version that matches your hardware revision and prevents "black box" deployments where you do not understand what runs on your hardware.
+Hüpftronik intentionally does not ship a prebuilt firmware image for this board. You compile the image from source. This ensures you run the exact version that matches your hardware revision and prevents "black box" deployments where you do not understand what runs on your hardware.
 
 **Quick Scan: Flashing Requirements**
 
@@ -61,7 +61,7 @@ The project intentionally omits prebuilt binaries from the main upstream reposit
     the firmware repository's board list for the current profile name — it's tracked there, not
     duplicated here, so this page doesn't go stale when the profile is renamed upstream.
 3.  Compile the binary image.
-4.  Connect your SWD or USB adapter to the board's flashing header.
+4.  Connect the board: a USB cable for DFU flashing, or an SWD adapter on header H2.
 5.  Execute the flash command and verify the sequence completes without errors.
 
 See [Flashing the PCB](flashing.md) for the concrete DFU and SWD flashing steps once you have a
@@ -72,13 +72,13 @@ compiled `.bin` or `.hex` file.
 ## 5. Wiring and Integration
 
 !!! info "Optimize for Intended Use, Not Potential Abuse"
-    We optimize the board for signal integrity, not user-proofing. Systemic threats—such as EMI, thermal loads, and ground loops—are mitigated by the hardware design. However, incorrect wiring is a user error and remains an **acceptable failure mode**. If you reverse polarity or dead-short a driver output, the component will fail. Wire deliberately and verify every pin with a multimeter before first power-up.
+    We optimize the board for signal integrity, not user-proofing. Systemic threats—such as EMI, thermal loads, and ground loops—are mitigated by the hardware design. However, incorrect wiring is a user error and remains an **acceptable failure mode**. The +12 V power inputs are reverse-polarity protected; the sensor and driver pins are not. If you put +12 V on a sensor pin or dead-short a driver output, the component will fail. Wire deliberately and verify every pin with a multimeter before first power-up.
 
 **Quick Scan**
 
 *   **System Power:** $12\text{V}$ to $14.4\text{V}$ DC nominal
 *   **Logic Power:** $5\text{V}$ DC and $3.3\text{V}$ DC (Internal LDOs)
-*   **Grounding:** Strict Star Ground topology (Sensor ground is isolated from power ground)
+*   **Grounding:** Strict star-ground topology (sensor grounds run on their own wire to the ECU `GND` pins — see [Wiring guide §1.1](../wiring.md#11-grounding-topology))
 
 **Technical Detail**
 
@@ -97,7 +97,7 @@ Why do we enforce strict ground separation and offer no reverse-polarity hand-ho
 
 Once powered, perform a staged verification. Do not rush this process.
 
-1.  **Heartbeat:** Observe the status LEDs to confirm the MCU successfully executes code.
+1.  **Heartbeat:** Observe the status LEDs to confirm the MCU successfully executes code (LED meanings are *to be confirmed* — see the [Specifications](../24p_v1_overview.md#2-specifications)).
 2.  **Communication:** Connect to your tuning dashboard (e.g., TunerStudio) to verify active serial/USB communication.
 3.  **Diagnostics:** Check for fault LEDs or software-reported configuration errors in the dashboard.
 4.  **I/O Validation:** Verify that sensor inputs read within expected physical ranges (e.g., Coolant and Intake Air temperatures match ambient) and trigger outputs correctly in test mode.

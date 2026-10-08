@@ -70,7 +70,7 @@ any screen size and is fully copy-able text, which keeps diagrams diffable and m
 !!! tip "Mermaid is preferred for documentation diagrams"
     Prefer Mermaid exports over SVG embeds for any diagram that may need to be updated. Mermaid
     source lives in the Markdown file, so changes are tracked by Git and visible in pull-request
-    diffs. SVG files are binary blobs from Git's perspective.
+    diffs. Exported SVG is text, but it is machine-generated and does not diff in a readable way.
 
 ### 4.2. SVG export (for complex diagrams or print-quality output)
 

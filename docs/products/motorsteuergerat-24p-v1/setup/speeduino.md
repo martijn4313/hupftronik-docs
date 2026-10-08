@@ -41,7 +41,8 @@ to the connector pins in the [IO Overview](../24p_v1_overview.md#3-io-overview):
 | Boost solenoid | `BOOST_DRV` |
 | Fuel pump / fan relay | `FPRELAY_DRV` / `FANRELAY_DRV` |
 
-If a board-specific Speeduino configuration profile for the 24P V1 exists in the firmware
+Whether an upstream Speeduino board profile for the 24P V1 exists is *to be confirmed*;
+this page will name it once it does. If a board-specific profile for the 24P V1 exists in the firmware
 repository, select it in TunerStudio's setup wizard and this mapping is already done for you —
 confirm it against the table above rather than re-entering it by hand.
 

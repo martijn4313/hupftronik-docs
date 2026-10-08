@@ -49,11 +49,21 @@ go to fix it.
 | Engine runs rich or lean at idle only | Closed-loop trims fighting a wrong base table, or a vacuum/boost leak | See [Tuning Basics §6](../tuning/basics.md#6-before-you-call-it-tuned) — large unstable trims mean the base table is wrong, not the sensor |
 | Engine hesitates or stumbles on throttle tip-in | Missing or miscalibrated TPS-based acceleration enrichment | Recalibrate TPS against actual sensor limits, don't use generic constants — see your engine's setup guide |
 | Injector driver or relay output runs hot | Output driven beyond its board design limit (see the [Hardware Reference output table](../../products/motorsteuergerat-24p-v1/reference.md#44-output-summary-table)) | Reduce continuous load on that channel, or add the thermal pad described in [Hardware Reference §2](../../products/motorsteuergerat-24p-v1/reference.md#2-keeping-it-cool-thermal-management) |
-| Cooling fan or fuel pump relay doesn't switch | Relay coil wired directly to the low-side driver instead of through an external relay | The ECU output triggers an external relay coil — it does not switch pump/fan current directly; recheck the relay wiring |
+| Cooling fan or fuel pump doesn't run | Pump or fan wired directly to the low-side driver instead of through an external relay, or relay coil has no +12 V feed | The ECU output switches only the relay coil (terminal 85); the pump/fan current goes through the relay contacts — recheck against [Wiring guide §5](../../products/motorsteuergerat-24p-v1/wiring.md#5-relay-outputs) |
 
 ---
 
-## 5. Next steps
+## 5. CAN bus problems
+
+| Symptom | Likely cause | Fix |
+|---|---|---|
+| No CAN data at the dash or logger | Bit rate mismatch, or `CAN_H`/`CAN_L` swapped | Match the bit rate on every device; check A5 = `CAN_H`, B5 = `CAN_L` — see [CAN Bus Basics §3](canbus-basics.md#3-baud-rate-and-node-ids) |
+| CAN works on the bench, fails or drops out in the car | Missing or extra termination, or long stubs | Measure about 60 Ω across `CAN_H`/`CAN_L` with everything off — see [CAN Bus Basics §2](canbus-basics.md#2-bus-topology-and-termination) |
+| Data arrives but values are wrong | Receiver expects a different CAN ID map or byte layout | Match the device's expected message format to what your firmware broadcasts |
+
+---
+
+## 6. Next steps
 
 If your symptom isn't listed here, go back to the setup step you're on —
 [Setup and Commissioning](../../products/motorsteuergerat-24p-v1/setup/index.md) walks through

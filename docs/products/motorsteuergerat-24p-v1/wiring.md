@@ -11,7 +11,7 @@ A few practical rules help a lot:
 
 - Reuse the original injector harness where possible and only add the ECU connector and the new power feeds.
 - Use wire with insulation rated for the engine bay and choose a conductor size that keeps voltage drop low under cranking.
-- Keep the injector return path and sensor ground consistent, because a poor ground often causes intermittent faults.
+- Keep injector returns and sensor grounds on separate wires, because a shared or poor ground often causes intermittent faults.
 - Label the loom clearly and leave enough service slack near the engine and fuse box for future repairs.
 
 ### 1.1. Grounding topology
@@ -21,12 +21,16 @@ strapped connection to the battery negative) that every ground return leads back
 are the exception — they return through the harness to the ECU, never to the chassis, so that no
 load current flows through the wire your sensor readings are measured against.
 
+The board has no dedicated sensor-ground pin: join the sensor ground wires near the ECU connector
+and land them on one of the `GND` pins (B8 or C1). Run that wire for sensor returns only — no
+injector, relay, or other load return may share it.
+
 ```mermaid
 flowchart TD
     BATN["Battery negative terminal"] --- STAR(("Star ground point<br/>(engine block / chassis stud)"))
     STAR --- ECU["ECU power ground<br/>(pins B8, C1)"]
     STAR --- LOAD["High-current load returns<br/>(fuel pump, fan, coils)"]
-    SENS["Sensors<br/>(TPS, MAP, CLT, IAT)"] -->|"sensor ground returns to the ECU<br/>through the harness — never to chassis"| ECU
+    SENS["Sensors<br/>(TPS, MAP, CLT, IAT)"] -->|"sensor ground returns to ECU GND (B8/C1)<br/>on its own wire — never to chassis"| ECU
 ```
 
 ---
@@ -108,23 +112,23 @@ To run a 4-cylinder engine in fully sequential mode, you need four independent i
 When mapping the final two injector channels, three strict rules apply:
 
 1. The Thermal Rule: you can only drive one injector per `NCE6005AS` package.
-2. The `Q3` (IAC) Restriction: package `Q3` houses the `FAN_RELAY` and `IAC` channels. Because the `IAC` channel has a dedicated freewheeling diode, it cannot be used for an injector without causing slow closing and unstable fueling.
+2. The `Q3` (IAC) Restriction: package `Q3` houses the `FANRELAY_DRV` and `IAC` channels. Because the `IAC` channel has a dedicated freewheeling diode, it cannot be used for an injector without causing slow closing and unstable fueling.
 3. The IAC Downgrade: while `IAC` cannot drive an injector, it can be repurposed to drive a standard low-current relay such as a fan or fuel pump.
 
 #### 4.3.2. Valid Sequential Combinations
 
-Because the `IAC` channel is disqualified, the `FAN_RELAY` channel on chip `Q3` must become your 3rd injector. You then have the freedom to choose either `BOOST` or `FP_RELAY` from chip `Q4` as your 4th injector, leaving the remaining channels for relays.
+Because the `IAC` channel is disqualified, the `FANRELAY_DRV` channel on chip `Q3` must become your 3rd injector. You then have the freedom to choose either `BOOST` or `FPRELAY_DRV` from chip `Q4` as your 4th injector, leaving the remaining channels for relays.
 
 A safe and practical routing is:
 
-| Sequential Channel | Board Output | Chip Used | Function / Load Status |
+| Sequential Channel | Board Output | Driver package | Function / Load Status |
 | :--- | :--- | :--- | :--- |
-| Injector 1 | `INJ1` | `IRLR2905` | Dedicated injector driver |
-| Injector 2 | `INJ2` | `IRLR2905` | Dedicated injector driver |
-| Injector 3 | `FAN_RELAY` | `Q3` | Repurposed to drive injector 3 |
-| Injector 4 | `BOOST` | `Q4` | Repurposed to drive injector 4 |
-| Fan relay | `IAC` | `Q3` | Drives a relay such as a cooling fan |
-| Fuel pump relay | `FP_RELAY` | `Q4` | Remains a standard fuel pump relay |
+| Injector 1 | `INJ1` | `IRLR2905` (dedicated) | Dedicated injector driver |
+| Injector 2 | `INJ2` | `IRLR2905` (dedicated) | Dedicated injector driver |
+| Injector 3 | `FANRELAY_DRV` | `Q3` (`NCE6005AS`) | Repurposed to drive injector 3 |
+| Injector 4 | `BOOST` | `Q4` (`NCE6005AS`) | Repurposed to drive injector 4 |
+| Fan relay | `IAC` | `Q3` (`NCE6005AS`) | Drives a relay such as a cooling fan |
+| Fuel pump relay | `FPRELAY_DRV` | `Q4` (`NCE6005AS`) | Remains a standard fuel pump relay |
 
 !!! success "Configuration Summary"
     This routing spreads the thermal load across all available driver packages while avoiding the `IAC` freewheeling diode path for injector operation.
@@ -132,7 +136,7 @@ A safe and practical routing is:
 !!! warning "This routing gives up onboard boost control"
     Using `BOOST` as injector 4 means the board has no output left to drive a boost solenoid — full
     4-cylinder sequential injection and onboard closed-loop boost control are mutually exclusive on
-    this board. If your build is turbocharged and needs boost control, use `FP_RELAY` as injector 4
+    this board. If your build is turbocharged and needs boost control, use `FPRELAY_DRV` as injector 4
     instead and keep `BOOST` free; you'll then need to drive the fuel pump relay from a source other
     than the ECU (for example, an oil-pressure or ECU-power-triggered relay wired independently).
 
@@ -140,14 +144,18 @@ A safe and practical routing is:
 
 If the `IAC` output is needed for an idle control valve, the routing options are more constrained. In this case, `Q3` must share its package between the IAC valve and an injector, while `Q4` handles the 4th injector and a relay.
 
-| Sequential Channel | Board Output | Chip Used | Function / Load Status |
+| Sequential Channel | Board Output | Driver package | Function / Load Status |
 | :--- | :--- | :--- | :--- |
-| Injector 1 | `INJ1` | `IRLR2905` | Dedicated injector driver |
-| Injector 2 | `INJ2` | `IRLR2905` | Dedicated injector driver |
-| Injector 3 | `FAN_RELAY` | `Q3` | Repurposed to drive injector 3 |
-| Injector 4 | `BOOST` | `Q4` | Repurposed to drive injector 4 |
-| Idle control | `IAC` | `Q3` | Drives the IAC valve |
-| Relay | `FP_RELAY` | `Q4` | Drives a relay |
+| Injector 1 | `INJ1` | `IRLR2905` (dedicated) | Dedicated injector driver |
+| Injector 2 | `INJ2` | `IRLR2905` (dedicated) | Dedicated injector driver |
+| Injector 3 | `FANRELAY_DRV` | `Q3` (`NCE6005AS`) | Repurposed to drive injector 3 |
+| Injector 4 | `BOOST` | `Q4` (`NCE6005AS`) | Repurposed to drive injector 4 |
+| Idle control | `IAC` | `Q3` (`NCE6005AS`) | Drives the IAC valve |
+| Fuel pump relay | `FPRELAY_DRV` | `Q4` (`NCE6005AS`) | Remains a standard fuel pump relay |
+
+This layout uses every low-side output. Nothing is left for the radiator fan relay or a boost
+solenoid: switch the fan from an independent thermostatic switch or relay, and run boost on the
+wastegate spring alone.
 
 This configuration is workable, but it places a continuous PWM load on `Q3` alongside an injector. That raises package temperature, so the output should be treated carefully and only used with healthy, appropriate loads.
 

@@ -48,7 +48,8 @@ whether your specific engine has one before planning around it.
 
 Later TU5 variants typically run speed-density from a MAP and IAT sensor rather than a MAF — follow
 [Planning your build §2](../planning.md#2-intake) the same as any other speed-density build. If your
-engine has a factory MAF, disconnect it; the 24P V1 does not use it.
+engine has a factory MAF, disconnect it — this guide assumes speed-density. rusEFI can fuel from a
+MAF (see [Volvo B2xx §6.4](volvo-b2xx.md#64-running-the-stock-amm-optional)), but that is not covered here.
 
 ---
 

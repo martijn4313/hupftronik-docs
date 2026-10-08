@@ -11,6 +11,11 @@ best-documented turbo four-cylinders in the standalone ECU community — factory
 ignition and a clean 60-2 trigger setup make it a straightforward sequential-injection swap. This
 page assumes you're moving from the factory Motronic ECU to the Motorsteuergerät 24P V1.
 
+!!! warning "Many 1.8T engines are drive-by-wire"
+    Later engine codes (for example AWP and AWU) use an electronic throttle body. The 24P V1 cannot
+    drive an electronic throttle (see [Planning your build §2](../planning.md#2-intake)). On these
+    engines, plan to fit a cable-operated throttle body before starting the conversion.
+
 !!! note "Engine code matters"
     "1.8T" covers many engine codes across a decade of production with real differences in trigger
     wheel, cam sensor, and injector sizing. Confirm your specific engine code's trigger tooth count
@@ -37,9 +42,9 @@ cam sensor is worth retaining: it enables fully sequential injection (see the
 [sequential injection routing](../../../products/motorsteuergerat-24p-v1/wiring.md#43-4-channel-sequential-injection-routing)
 for the required output repurposing). Wire the cam sensor's signal to a spare digital input
 (`SPARE_IN1`/`SPARE_IN2` on the main connector) and assign it as the cam input in your firmware
-configuration. A Hall sensor needs a switched
-+5V or +12V supply (check your sensor's datasheet — Hall sensors, unlike VR sensors, are powered and
-polarity-sensitive) in addition to signal and ground.
+configuration. A Hall sensor needs a supply in addition to signal and ground — check your sensor's datasheet.
+A 5 V sensor can run from the ECU's `+5V` sensor supply (pin C5). A 12 V sensor needs a fused,
+ignition-switched +12 V feed from the harness; the ECU has no +12 V output.
 
 --8<-- "hall-sensor-polarity-warning.md"
 
@@ -79,9 +84,16 @@ logic relative to a simple wasted-spark igniter.
 ## 4. Boost control
 
 The factory N75-family boost control solenoid switches manifold vacuum to the wastegate actuator and
-wires directly to `BOOST_DRV` the same way any other solenoid does — see
-[Wiring and hardware guide §4](../../../products/motorsteuergerat-24p-v1/wiring.md#4-configurations)
+wires directly to `BOOST_DRV` the same way any other solenoid does — see the
+[output summary table](../../../products/motorsteuergerat-24p-v1/reference.md#44-output-summary-table)
 for driver output limits before wiring it in.
+
+!!! warning "Sequential injection and boost control compete for the same output"
+    The default sequential routing uses `BOOST_DRV` as injector 4. To keep electronic boost control
+    with sequential injection, use `FPRELAY_DRV` as injector 4 instead and switch the fuel pump
+    relay from an independent source — see the warning in
+    [Wiring guide §4.3.2](../../../products/motorsteuergerat-24p-v1/wiring.md#432-valid-sequential-combinations).
+    Otherwise, run batch injection and keep `BOOST_DRV` for the N75.
 
 ---
 
@@ -92,7 +104,7 @@ Key values to verify before the first start:
 | Parameter | Value |
 |---|---|
 | Cylinder count | 4 |
-| Injection mode | Sequential (if cam sensor retained — needs [output repurposing](../../../products/motorsteuergerat-24p-v1/wiring.md#43-4-channel-sequential-injection-routing)) or batch |
+| Injection mode | Sequential (if cam sensor retained — needs [output repurposing](../../../products/motorsteuergerat-24p-v1/wiring.md#43-4-channel-sequential-injection-routing), with `FPRELAY_DRV` as injector 4 to keep boost control — see [§4](#4-boost-control)) or batch |
 | Ignition mode | Wasted spark — coils paired 1+4 / 2+3 on `IGN1`/`IGN2` |
 | Trigger type | `60/2` + cam sync |
 | Trigger offset | Set via timing light or a known-good reference after first start |
