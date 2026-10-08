@@ -12,8 +12,8 @@ theme:
     scheme: slate
     primary: black
     accent: deep orange
-  logo: assets/pictures/hupftronik_logo.png
-  favicon: assets/pictures/hupftronik_logo.png
+  logo: assets/pictures/hupftronik_logo_header.png
+  favicon: assets/icons/favicon.png
   features:
     - navigation.tabs
     - navigation.sections
