@@ -53,7 +53,7 @@ silkscreen/connector labels, not choosing arbitrary pins:
 | Status LEDs | `LED_TR_1` / `LED_TR_2` | — | `PC4` / `PC5` |
 | SD card (SDIO) | — | — | `PC8`–`PC12`, `PD2` |
 
-MCU pins are taken from the board schematic (V1.0).
+MCU pins are taken from the [board schematic, V1.0 (PDF)](../24p-v1-schematic.pdf).
 
 Whether an upstream rusEFI board profile for the 24P V1 exists is *to be confirmed*;
 this page will name it once it does. If a board-specific profile for the 24P V1 exists in the firmware repository,

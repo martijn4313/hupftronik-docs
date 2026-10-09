@@ -23,7 +23,9 @@ on anything here for a vehicle you drive.
 
     **Until a license is published, the interim position is:** the documentation text and images on
     this site are © Hüpftronik, all rights reserved — you may read and link to them freely, but not
-    republish or redistribute them. The PCB design files are unpublished. The intent is to release
+    republish or redistribute them. The schematic is published as a
+    [PDF for reference](../products/motorsteuergerat-24p-v1/24p-v1-schematic.pdf) under the same
+    interim terms; the PCB design source files are unpublished. The intent is to release
     both under recognized open licenses (an open-hardware license for the design files, an open
     documentation license for this site); "all rights reserved" is the interim default, not the
     destination.

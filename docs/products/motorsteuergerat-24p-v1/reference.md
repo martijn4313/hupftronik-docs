@@ -11,9 +11,10 @@ blocks hold the derivations and scope captures, and the [Technical Appendix](#te
 holds the full math.
 
 !!! note "Design files"
-    The board is currently in alpha testing (see the [product overview](24p_v1_overview.md)) and the
-    schematic/PCB source files are not yet published. This page will link to the GitHub repository
-    once the design is public.
+    The schematic is available as a PDF:
+    [Motorsteuergerät 24P V1 schematic, V1.0](24p-v1-schematic.pdf). The PCB source files are not yet
+    published; this page will link to them once they are. The board is in alpha testing (see the
+    [product overview](24p_v1_overview.md)).
 
 ---
 

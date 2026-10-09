@@ -110,7 +110,7 @@ Why do we enforce strict ground separation and offer no reverse-polarity hand-ho
 
 Once powered, perform a staged verification. Do not rush this process.
 
-1.  **Power and heartbeat:** `LED_5V` and `LED_3V3` show that both supply rails are up. `LED_TR_1` and `LED_TR_2` are driven by the MCU (pins `PC4`/`PC5`), so they show activity only if your firmware configuration assigns them — see the [board layout](../24p_v1_overview.md#5-board-layout).
+1.  **Power and heartbeat:** `LED_5V` and `LED_3V3` show that both supply rails are up. `LED_TR_1` and `LED_TR_2` are driven by the MCU (pins `PC4`/`PC5`), so they show activity only if your firmware configuration assigns them — see the [board layout](../24p_v1_overview.md#11-board-layout).
 2.  **Communication:** Connect to your tuning dashboard (e.g., TunerStudio) to verify active serial/USB communication.
 3.  **Diagnostics:** Check for software-reported configuration errors in the dashboard.
 4.  **I/O Validation:** Verify that sensor inputs read within expected physical ranges (e.g., Coolant and Intake Air temperatures match ambient) and trigger outputs correctly in test mode.

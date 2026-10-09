@@ -34,7 +34,8 @@ See the [IO Overview](24p_v1_overview.md#3-io-overview) for pin assignments and 
 
 ### 2.1. Inspect the unpowered board
 
-- Check for bent pins, solder bridges, cracked parts, and conductive debris.
+- Check for bent pins, solder bridges, cracked parts, and conductive debris. The
+  [board layout](24p_v1_overview.md#11-board-layout) shows where each part sits.
 - Confirm the board revision and connector orientation.
 - With a multimeter, check that `VIN_KL30`, `VIN_KL15`, `+5V`, and `+3V3` are not shorted to
   ground.
